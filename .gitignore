@@ -1,0 +1,9 @@
+# common virtual env folders
+.venv
+venv
+
+# Django database
+db.sqlite3
+
+# Python cache
+__pycache__
