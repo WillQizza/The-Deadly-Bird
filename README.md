@@ -31,3 +31,8 @@ Contributors:
     Abram Hindle
     Braedy Kuzma
     Nhan Nguyen 
+    William Qi
+    Justin Meimar
+    Ritwik Rastogi
+    Irene Sun
+    Chase Johnson
