@@ -1,6 +1,8 @@
 # common virtual env folders
 .venv
 venv
+.env
+env
 
 # Django database
 db.sqlite3
