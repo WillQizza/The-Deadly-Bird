@@ -1,11 +1,24 @@
 CMPUT404-project-socialdistribution
 ===================================
 
-CMPUT404-project-socialdistribution
+Build
+============
+Run the backend:
+```shell
+git clone git@github.com:uofa-cmput404/w24-project-the-deadly-bird.git
+cd w24-project-the-deadly-bird/backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python manage.py runserver 
+```
 
-See [the web page](https://uofa-cmput404.github.io/general/project.html) for a description of the project.
-
-Make a distributed social network!
+Run the frontend:
+```shell
+cd frontend
+npm i
+npm run start
+```
 
 Contributing
 ============
