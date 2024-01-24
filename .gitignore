@@ -1,0 +1,16 @@
+# common virtual env folders
+.venv
+venv
+.env
+env
+
+# Django database
+db.sqlite3
+
+# Python cache
+__pycache__
+
+# Static files
+static
+build
+dist
