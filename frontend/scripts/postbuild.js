@@ -23,7 +23,7 @@ function clearStaticFolder() {
         const clearedEntryPath = path.join(BACKEND_STATIC_FOLDER, entry);
 
         // Delete recursively + forcefully
-        fs.rmSync(clearedEntryPath, { force: true, recursive: true });
+        fs.rmSync(clearedEntryPath, { recursive: true });
         log(`[REMOVING] Removed ${clearedEntryPath}`);
     }
 
