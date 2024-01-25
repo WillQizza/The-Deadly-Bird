@@ -11,6 +11,7 @@ db.sqlite3
 __pycache__
 
 # Static files
-static
 build
 dist
+backend/react/templates/index.html
+backend/**/static
