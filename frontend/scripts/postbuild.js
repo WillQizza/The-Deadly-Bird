@@ -8,7 +8,12 @@ const FRONTEND_INDEX_FILE = path.join(FRONTEND_BUILD_FOLDER, "index.html");
 
 // Backend urls
 const BACKEND_STATIC_FOLDER = path.join(__dirname, "..", "..", "backend", "react", "static");
-const BACKEND_TEMPLATE_INDEX_FILE = path.join(__dirname, "..", "..", "backend", "react", "templates", "index.html");
+if (!fs.existsSync(BACKEND_STATIC_FOLDER)) fs.mkdirSync(BACKEND_STATIC_FOLDER);
+
+const BACKEND_TEMPLATE_FOLDER = path.join(__dirname, "..", "..", "backend", "react", "templates");
+if (!fs.existsSync(BACKEND_TEMPLATE_FOLDER)) fs.mkdirSync(BACKEND_TEMPLATE_FOLDER);
+
+const BACKEND_TEMPLATE_INDEX_FILE = path.join(BACKEND_TEMPLATE_FOLDER, "index.html");
 
 function log(message) {
     console.log(`[POSTBUILD] ${message}`);
