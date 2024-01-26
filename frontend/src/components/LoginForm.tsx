@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import Container from 'react-bootstrap/Container';
 
 const LoginForm: React.FC = () => {
     
@@ -14,7 +13,7 @@ const LoginForm: React.FC = () => {
     };
 
     return (
-        <Container>
+        <div className="loginFormContainer">
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicEmail">
                     <Form.Label>Username</Form.Label>
@@ -26,7 +25,9 @@ const LoginForm: React.FC = () => {
                     />
                 </Form.Group>
 
-                <Form.Group controlId="formBasicPassword">
+                <Form.Group controlId="formBasicPassword"
+                    style={{marginTop: '10px'}}
+                >
                     <Form.Label>Password</Form.Label>
                     <Form.Control
                         type="password"
@@ -36,11 +37,19 @@ const LoginForm: React.FC = () => {
                     />
                 </Form.Group>
 
-                <Button variant="primary" type="submit">
+                <Button variant="primary" type="submit"
+                    style={{marginTop: '20px'}}
+                >
                     Login
                 </Button>
+
+                <Button variant="primary" type="submit"
+                    style={{marginTop: '10px'}}
+                >
+                    Sign Up
+                </Button>
             </Form>
-        </Container>
+        </div>
     );
 };
 
