@@ -1,0 +1,47 @@
+.loginPageContainer {
+    display: flex;
+    flex-grow: 1;
+    /* min-height: 100vh;  # this causes footer to be pushed below screen*/
+    background-color: var(--grey);
+    color: white;
+}
+
+
+.imageColumn {
+    width: 35%;
+    background-color: var(--teal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
+.imageColorColumn {
+    width: 5%;
+    background-color: var(--dark-teal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.loginColumn {
+    width: 65%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.imageColumn img {
+    max-width: 200%;
+    height: auto;
+}
+
+.loginTitle {
+    font-family: 'Roboto Flex', sans-serif;
+    font-size: 90px;
+    text-align: center;
+    color: var(--yellow);
+    margin-bottom: 20px;
+}

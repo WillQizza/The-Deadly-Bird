@@ -7,7 +7,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Globals */
+:root {
+  --dark-grey: #1E1E1E;
+  --grey: #2C3333;
+  --dark-teal: #2E4F4F;
+  --teal: #0E8388;
+  --light-teal: #CBE4DE;
+  --yellow: #F6DD39;
 }

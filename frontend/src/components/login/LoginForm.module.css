@@ -1,0 +1,44 @@
+.loginFormContainer {
+    min-width: 300px;
+    width: 40%;
+    max-width: 500px;
+    padding: 25px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.loginFormContainer .formGroup {
+    margin-bottom: 15px;
+}
+
+.loginFormContainer .formLabel {
+    font-weight: bold;
+    color: var(--dark-grey);
+}
+
+.loginFormContainer .formControl {
+    border: 2px solid var(--light-teal);
+    border-radius: 5px;
+    padding: 10px 15px;
+}
+
+.loginFormContainer .formControl:focus {
+    border-color: var(--teal);
+    box-shadow: none;
+}
+
+.loginFormContainer .btnPrimary {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: var(--teal);
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.loginFormContainer .btnPrimary:hover {
+    background-color: var(--dark-teal);
+}
