@@ -1,38 +1,47 @@
-.App {
-  text-align: center;
+/* Globals */
+:root {
+    --dark-grey: #1E1E1E;
+    --grey: #2C3333;
+    --dark-teal: #2E4F4F;
+    --teal: #0E8388;
+    --light-teal: #CBE4DE;
+    --yellow: #F6DD39;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+/* LoginPage */
+.LoginPageContainer {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--grey);
+    color: white;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.imageColumn {
+    width: 35%;
+    background-color: var(--teal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+.imageColorColumn {
+    width: 5%;
+    background-color: var(--dark-teal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
 }
 
-.App-link {
-  color: #61dafb;
+.loginColumn {
+    width: 65%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.imageColumn img {
+    max-width: 200%;
+    height: auto;
 }
