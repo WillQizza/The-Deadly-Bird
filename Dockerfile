@@ -10,27 +10,36 @@
 #   PORT:       8000            Auto Assigned 
 #   DEBUG:      True            False
 
-FROM node:20
+FROM ubuntu:latest
 
-# Install python and pip
-RUN apt-get update && apt-get install -y python3 python3-pip
+EXPOSE 8000
+ENV PORT 8000
 
-# Install python dependencies
+RUN apt-get update && apt-get install -y curl software-properties-common
+
+# Get Node 20 and Yarn
+RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
+RUN apt-get install -y nodejs
+
+# Install Python and pip
+RUN apt-get install -y python3 python3-pip
+
+# Set the working directory for Python dependencies
 WORKDIR /usr/src/app/backend
 COPY backend/requirements.txt .
 RUN pip3 install -r requirements.txt
 
-# Install node dependencies
+# Set the working directory for Node.js dependencies
 WORKDIR /usr/src/app/frontend
 COPY frontend/*.json .
-RUN yarn install 
+RUN npm install
 
-# Copy source files
+# Copy the source files to the working directory
 WORKDIR /usr/src/app
 COPY . .
 
-# Collect static files
+# Set the working directory for running Django commands
 WORKDIR /usr/src/app/backend
 RUN python3 manage.py collectstatic --noinput
 
-CMD ["gunicorn", "deadlybird.wsgi:application", "--bind", "0.0.0.0:$PORT"]
+CMD gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT
