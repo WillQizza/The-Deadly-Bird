@@ -27,6 +27,16 @@ docker run -p 8000:8000 deadly-bird
 
 ```
 
+Deployment
+============
+To deploy the application via heroku:
+```shell
+heroku apps:create thedeadlybird    # This should only be run once to create the app
+heroku container:login
+heroku container:push web -a thedeadlybird
+heroku container:release web -a thedeadlybird
+```
+
 Contributing
 ============
 
