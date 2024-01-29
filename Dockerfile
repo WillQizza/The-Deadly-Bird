@@ -12,7 +12,6 @@
 
 FROM ubuntu:latest
 
-EXPOSE 8000
 ENV PORT 8000
 
 RUN apt-get update && apt-get install -y curl software-properties-common
