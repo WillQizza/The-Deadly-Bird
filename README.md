@@ -24,6 +24,7 @@ Or run everything at once with docker:
 ```shell
 docker build -t deadly-bird .      
 docker run -p 8000:8000 deadly-bird
+
 ```
 
 Contributing
