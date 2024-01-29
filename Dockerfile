@@ -38,6 +38,10 @@ RUN npm install
 WORKDIR /usr/src/app
 COPY . .
 
+# Copy frontend files to backend deployment
+WORKDIR /usr/src/app/frontend
+RUN npm run build
+
 # Set the working directory for running Django commands
 WORKDIR /usr/src/app/backend
 RUN python3 manage.py collectstatic --noinput
