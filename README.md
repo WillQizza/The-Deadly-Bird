@@ -3,28 +3,10 @@ CMPUT404-project-socialdistribution
 
 Build
 ============
-Run the backend:
-```shell
-git clone git@github.com:uofa-cmput404/w24-project-the-deadly-bird.git
-cd w24-project-the-deadly-bird/backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python manage.py runserver 
-```
-
-Run the frontend:
-```shell
-cd frontend
-npm i
-npm run start
-```
-
-Or run everything at once with docker:
+Run the app locally for development:
 ```shell
 docker build -t deadly-bird .      
 docker run -p 8000:8000 deadly-bird
-
 ```
 
 Deployment
