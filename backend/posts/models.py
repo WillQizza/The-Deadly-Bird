@@ -1,5 +1,6 @@
 from django.db import models
 from identity.models import Author
+from nodes.models import Node
 
 # Create your models here.
 class Post(models.Model):
@@ -17,8 +18,8 @@ class Post(models.Model):
   ]
   id = models.AutoField(primary_key=True)
   title = models.CharField(max_length=255, blank=False, null=False)
-  source = models.CharField(max_length=255, blank=False, null=False)
-  origin = models.CharField(max_length=255, blank=False, null=False)
+  source = models.ForeignKey(Node, blank=True, null=True, on_delete=models.CASCADE)
+  origin = models.CharField(max_length=255, blank=True, null=True)
   description = models.CharField(max_length=255, blank=False, null=False)
   content_type = models.IntegerField(choices=CONTENT_TYPE, blank=False, null=False)
   content = models.TextField(blank=False, null=False)
