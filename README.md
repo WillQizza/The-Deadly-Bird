@@ -9,6 +9,17 @@ docker build -t deadly-bird .
 docker run -p 8000:8000 deadly-bird
 ```
 
+While unrecommended, if you need to run this application without Docker:
+```shell
+cd frontend
+npm install
+npm run build
+cd ../backend
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver
+```
+
 Deployment
 ============
 To deploy the application via heroku:
