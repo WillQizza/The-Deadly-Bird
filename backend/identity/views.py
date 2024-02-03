@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from .models import Author
 from .serializers import AuthorSerializer
 
-# Create your views here.
 @api_view(["GET", "POST"])
 def author(request: HttpRequest, author_id: int):
   if request.method == "GET":

@@ -4,28 +4,27 @@ from nodes.models import Node
 
 # Create your models here.
 class Post(models.Model):
-  CONTENT_TYPE = [
-    (0, "text/markdown"),
-    (1, "text/plain"),
-    (2, "application/base64"),
-    (3, "image/png;base64"),
-    (4, "image/jpeg;base64")
-  ]
-  VISIBILITY = [
-    (0, "PUBLIC"),
-    (1, "FRIENDS"),
-    (2, "UNLISTED")
-  ]
+  class ContentType(models.TextChoices):
+    MARKDOWN = "text/markdown"
+    PLAIN = "text/plain"
+    APPLICATION_BASE64 = "application/base64"
+    PNG_BASE64 = "image/png;base64"
+    JPEG_BASE64 = "image/jpeg;base64"
+  class Visibility(models.TextChoices):
+    PUBLIC = "PUBLIC"
+    FRIENDS = "FRIENDS"
+    UNLISTED = "UNLISTED"
+
   id = models.AutoField(primary_key=True)
   title = models.CharField(max_length=255, blank=False, null=False)
   source = models.ForeignKey(Node, blank=True, null=True, on_delete=models.CASCADE)
   origin = models.CharField(max_length=255, blank=True, null=True)
   description = models.CharField(max_length=255, blank=False, null=False)
-  content_type = models.IntegerField(choices=CONTENT_TYPE, blank=False, null=False)
+  content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
   content = models.TextField(blank=False, null=False)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
-  visibility = models.IntegerField(choices=VISIBILITY, blank=False, null=False)
+  visibility = models.CharField(choices=Visibility.choices, max_length=8, blank=False, null=False)
 
 class PostCategoryMeta(models.Model):
   id = models.AutoField(primary_key=True)
@@ -33,16 +32,16 @@ class PostCategoryMeta(models.Model):
   category = models.CharField(max_length=255, blank=False, null=False)
 
 class Comment(models.Model):
-  CONTENT_TYPE = [
-    (0, "text/markdown"),
-    (1, "text/plain"),
-    (2, "application/base64"),
-    (3, "image/png;base64"),
-    (4, "image/jpeg;base64")
-  ]
+  class ContentType(models.TextChoices):
+    MARKDOWN = "text/markdown"
+    PLAIN = "text/plain"
+    APPLICATION_BASE64 = "application/base64"
+    PNG_BASE64 = "image/png;base64"
+    JPEG_BASE64 = "image/jpeg;base64"
+    
   id = models.AutoField(primary_key=True)
   post = models.ForeignKey(Post, blank=False, null=False, on_delete=models.CASCADE)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
-  content_type = models.IntegerField(choices=CONTENT_TYPE, blank=False, null=False)
+  content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
   content = models.TextField(blank=False, null=False)
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
