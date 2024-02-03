@@ -19,5 +19,11 @@ from django.urls import path, re_path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    re_path(r'.*', include("react.urls"))   # Note: ALL API urls should be above this path so that they are searched first
+    path('api/', include('feed.urls')),
+    path('api/', include('following.urls')),
+    path('api/', include('identity.urls')),
+    path('api/', include('likes.urls')),
+    path('api/', include('nodes.urls')),
+    path('api/', include('posts.urls')),
+    re_path(r'.*', include('react.urls'))   # Note: ALL API urls should be above this path so that they are searched first
 ]
