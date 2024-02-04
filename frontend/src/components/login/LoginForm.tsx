@@ -1,19 +1,40 @@
 import React, { useState } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-
+import { baseURL } from '../../constants';
 import styles from "./LoginForm.module.css";
 
 const LoginForm: React.FC = () => {
     
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+ 
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        // TODO: copy the implementation of Register Form 
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        console.log('Logging in with:', username, password);
+        if (username && password) {
+            
+            const formData = new URLSearchParams({
+                username: username,
+                password: password
+            }).toString()
+            
+            const response = await fetch(`${baseURL}/api/login/`, {
+                method:"POST",
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                console.log("log in");
+            } else if (response.status == 400 || response.status == 404) {
+                // TODO: set error messages for user
+                console.log(response.json());
+            }
+        }
     };
-
     return (
         <div className={styles.loginFormContainer}>
             <Form onSubmit={handleSubmit}>

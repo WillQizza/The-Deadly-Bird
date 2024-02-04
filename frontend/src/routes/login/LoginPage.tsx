@@ -6,10 +6,10 @@ import RegisterForm from '../../components/login/RegisterForm';
 import styles from "./LoginPage.module.css";
 import Footer from '../../components/layout/Footer';
 
+import { publicDir } from '../../constants';
+
 const LoginPage: React.FC = () => {
     
-    const publicDir = process.env.PUBLIC_URL;
-
     const [showLogin, setShowLogin] = useState<boolean>(true);
     const [authMessage, setAuthMessage] = useState<string>("Sign Up");
 
