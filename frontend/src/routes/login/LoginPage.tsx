@@ -1,5 +1,7 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
+
 import LoginForm from '../../components/login/LoginForm';
+import RegisterForm from '../../components/login/RegisterForm';
 
 import styles from "./LoginPage.module.css";
 import Footer from '../../components/layout/Footer';
@@ -7,6 +9,17 @@ import Footer from '../../components/layout/Footer';
 const LoginPage: React.FC = () => {
     
     const publicDir = process.env.PUBLIC_URL;
+
+    const [showLogin, setShowLogin] = useState<boolean>(true);
+    const [authMessage, setAuthMessage] = useState<string>("Sign Up");
+
+    useEffect(() => {
+        if (showLogin) {
+            setAuthMessage("Sign Up");
+        } else {
+            setAuthMessage("Log in");
+        }
+    }, [showLogin]);
 
     return ( 
         <Fragment>
@@ -19,7 +32,13 @@ const LoginPage: React.FC = () => {
                     <div className={styles.loginTitle}>
                         The Deadly Bird
                     </div>
-                    <LoginForm />
+                    { showLogin 
+                        ? <LoginForm/> 
+                        : <RegisterForm showLogin={showLogin} setShowLogin={setShowLogin}/>
+                    }
+                    <div onClick={() => setShowLogin(!showLogin)}>
+                        { authMessage }
+                    </div> 
                 </div>
             </div>
             <Footer />

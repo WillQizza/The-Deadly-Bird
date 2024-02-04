@@ -27,11 +27,16 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
   'thedeadlybird-123769211974.herokuapp.com',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:8000',
   'localhost',
-  '0.0.0.0',
-  '127.0.0.1'
+  '127.0.0.1',
 ]
 
+
+# TODO: figure out why allowed hosts is not sufficient
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 
@@ -52,6 +57,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

@@ -49,12 +49,7 @@ const LoginForm: React.FC = () => {
                     Login
                 </Button>
 
-                <Button variant="primary" type="submit"
-                    style={{marginTop: '10px'}}
-                    className={styles.btnPrimary}
-                >
-                    Sign Up
-                </Button>
+
             </Form>
         </div>
     );
