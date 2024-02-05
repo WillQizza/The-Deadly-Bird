@@ -3,6 +3,7 @@ from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from following.util import is_friends
 from .serializers import PostSerializer
 from .models import Post
 
@@ -21,11 +22,21 @@ def posts(request: HttpRequest, author_id: int):
     paginator = PageNumberPagination()
     paginator.page_size_query_param = "size"
 
-    # TODO: When authentication is implemented, update this to include other visibilities if user can see
+    can_see_friends = False
+    if "id" in request.session:
+      can_see_friends = (author_id == int(request.session["id"])) or \
+                          is_friends(author_id, int(request.session["id"]))
+      
     # Retrieve and serialize posts that should be shown
-    posts = Post.objects.all() \
-              .filter(author=author_id, visibility=Post.Visibility.PUBLIC) \
-              .order_by("-published_date")
+    if can_see_friends:
+      posts = Post.objects.all() \
+                .filter(author=author_id) \
+                .exclude(visibility=Post.Visibility.UNLISTED) \
+                .order_by("-published_date")
+    else:
+      posts = Post.objects.all() \
+                .filter(author=author_id, visibility=Post.Visibility.PUBLIC) \
+                .order_by("-published_date")
     posts_on_page = paginator.paginate_queryset(posts, request)
     serialized_posts = PostSerializer(posts_on_page, many=True)
 
