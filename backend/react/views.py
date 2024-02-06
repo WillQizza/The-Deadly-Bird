@@ -3,11 +3,13 @@ from django.http import HttpRequest
 
 from identity.models import Author
 
+# Route prefixes that require authorization
 _PROTECTED_ROUTE_PREFIXES = [
     "/profile",
     "/home"
 ]
 
+# Route to redirect to if unauthorized
 _UNAUTHORIZED_REDIRECT_PATH = "/"
 
 def index(request: HttpRequest):
