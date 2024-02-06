@@ -26,11 +26,6 @@ class Post(models.Model):
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
   visibility = models.CharField(choices=Visibility.choices, max_length=8, blank=False, null=False)
 
-class PostCategoryMeta(models.Model):
-  id = models.AutoField(primary_key=True)
-  post = models.ForeignKey(Post, blank=False, null=False, on_delete=models.CASCADE)
-  category = models.CharField(max_length=255, blank=False, null=False)
-
 class Comment(models.Model):
   class ContentType(models.TextChoices):
     MARKDOWN = "text/markdown"

@@ -1,23 +1,18 @@
 from rest_framework import serializers
 from identity.serializers import AuthorSerializer
-from .models import Post, PostCategoryMeta, Comment
+from .models import Post, Comment
 
 class PostSerializer(serializers.ModelSerializer):
   type = serializers.ReadOnlyField(default="post")
   contentType = serializers.CharField(source="content_type")
   author = serializers.SerializerMethodField()
-  categories = serializers.SerializerMethodField()
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
   published = serializers.DateTimeField(source="published_date")
 
   def get_author(self, object: Post):
-    return AuthorSerializer(object.author).data
-
-  def get_categories(self, object: Post):
-    categories = list(map(lambda c: c.category, list(PostCategoryMeta.objects.all().filter(post=object))))
-    return categories
+    return AuthorSerializer(object.author).dat
 
   def get_count(self, object: Post):
     return Comment.objects.filter(post=object).count()
@@ -39,4 +34,4 @@ class PostSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Post
-    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'categories', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
+    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
