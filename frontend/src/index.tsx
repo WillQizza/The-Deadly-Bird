@@ -18,8 +18,7 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/" Component={LoginPage} />
-      <Route path="/" Component={LoginPage} />
-      <Route path="/" Component={LoginPage} />
+      <Route path="/home" Component={HomePage} />
     </Routes>
   </BrowserRouter>
 );

@@ -20,9 +20,15 @@ def author(request: HttpRequest, author_id: int):
 
 @api_view(["POST"])
 def login(request: HttpRequest):
-  if (not "username" in request.POST) or (not "password" in request.POST):
+  if (not "username" in request.POST):
     return Response({
-      "authenticated": False
+      "authenticated": False,
+      "message": "Username is required."
+    }, status=400)
+  if (not "password" in request.POST):
+    return Response({
+      "authenticated": False,
+      "message": "Password is required."
     }, status=400)
   username = request.POST["username"]
   password = request.POST["password"]
@@ -31,13 +37,15 @@ def login(request: HttpRequest):
     user = User.objects.get(username__iexact=username)
   except User.DoesNotExist:
     return Response({
-      "authenticated": False
+      "authenticated": False,
+      "message": "Invalid username or password. Please try again."
     }, status=401)
 
   password_matches = user.check_password(password)
   if not password_matches:
     return Response({
-      "authenticated": False
+      "authenticated": False,
+      "message": "Invalid username or password. Please try again."
     }, status=401)
 
   author = Author.objects.get(user=user)

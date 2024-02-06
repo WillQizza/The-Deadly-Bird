@@ -3,16 +3,19 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import { baseURL } from '../../constants';
 import styles from "./LoginForm.module.css";
+import { useNavigate } from 'react-router-dom';
 
 const LoginForm: React.FC = () => {
     
     const [username, setUsername] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [loginMessage, setLoginMessage] = useState<string>('');
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const navigate = useNavigate();
  
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        // TODO: copy the implementation of Register Form 
-
-        if (username && password) {
+        event.preventDefault();
+        if (validateForm()) {
             
             const formData = new URLSearchParams({
                 username: username,
@@ -28,15 +31,41 @@ const LoginForm: React.FC = () => {
             });
             
             if (response.ok) {
-                console.log("log in");
-            } else if (response.status == 400 || response.status == 404) {
-                // TODO: set error messages for user
-                console.log(response.json());
+                const navigateTo = (path: string) => {
+                    navigate(path);
+                };
+                navigateTo('/home');
+            } else if (response.status == 400 || response.status == 401) {
+                const data = await response.json();
+                setLoginMessage(data.message);
+                console.log(loginMessage);
             }
         }
     };
+
+    const validateForm = () => {
+        let isValid = true;
+        const newErrors: { [key: string]: string } = {};
+
+        if (!username) {
+            isValid = false;
+            newErrors.username = "Username is required";
+        } if (!password) {
+            isValid = false;
+            newErrors.password = "Password is required";
+        }
+
+        setErrors(newErrors);
+        return isValid;
+    };
+
     return (
         <div className={styles.loginFormContainer}>
+            {loginMessage && (
+                <div className="alert alert-warning" role="alert">
+                    {loginMessage}
+                </div>
+            )}
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicEmail" className={styles.formGroup}>
                     <Form.Label className={styles.formLabel}>Username</Form.Label>
@@ -45,8 +74,12 @@ const LoginForm: React.FC = () => {
                         placeholder="Enter username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        isInvalid={!!errors.username}
                         className={styles.formControl}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.username}
+                    </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group controlId="formBasicPassword"
@@ -59,8 +92,12 @@ const LoginForm: React.FC = () => {
                         placeholder="Password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        isInvalid={!!errors.password}
                         className={styles.formControl}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.password}
+                    </Form.Control.Feedback>
                 </Form.Group>
 
                 <Button variant="primary" type="submit"
