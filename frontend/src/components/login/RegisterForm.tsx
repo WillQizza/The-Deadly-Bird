@@ -37,9 +37,9 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
             });
             
             setErrors({});
-            if (response.status == 201) {
+            if (response.status === 201) {
                 props.setShowLogin(true);
-            } else if (response.status == 409 || response.status == 400) {
+            } else if (response.status === 409 || response.status === 400) {
                 const data = await response.json();
                 setRegisterMessage(data.message);
                 console.log(registerMessage);   

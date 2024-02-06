@@ -35,7 +35,7 @@ const LoginForm: React.FC = () => {
                     navigate(path);
                 };
                 navigateTo('/home');
-            } else if (response.status == 400 || response.status == 401) {
+            } else if (response.status === 400 || response.status === 401) {
                 const data = await response.json();
                 setLoginMessage(data.message);
                 console.log(loginMessage);
