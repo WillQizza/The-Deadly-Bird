@@ -16,10 +16,13 @@
 
 #navigation {
     width: 16%;
+    height: 100%;
     background-color: var(--teal);
+    position: fixed;
 }
 
 /* The container for the content */
 #content {
     width: calc(100% - 16%);
+    margin-left: 16%;   /* Leave room for the navigation bar */
 }

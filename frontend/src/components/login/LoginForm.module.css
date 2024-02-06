@@ -40,5 +40,5 @@
 }
 
 .loginFormContainer .btnPrimary:hover {
-    background-color: var(--dark-teal);
+    background-color: var(--darker-teal);
 }
