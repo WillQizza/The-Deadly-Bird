@@ -14,6 +14,10 @@
     gap: 10px;
 }
 
+.buttonLink {
+    text-decoration: none;
+}
+
 .button {
     height: 64px;
     background-color: var(--dark-teal);
