@@ -15,3 +15,5 @@ build
 dist
 backend/react/templates/index.html
 backend/**/static
+
+backend/cmds.md
