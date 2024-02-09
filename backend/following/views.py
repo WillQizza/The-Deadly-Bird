@@ -8,7 +8,7 @@ from .models import Following, FollowingRequest
 from .serializers import FollowingSerializer
 from identity.models import Author
 from django.views.decorators.csrf import csrf_exempt
-from deadlybird.pagination import CustomPagination
+from deadlybird.pagination import Pagination
 
 @api_view(["GET"])
 def followers(request, author_id:int):
@@ -17,14 +17,13 @@ def followers(request, author_id:int):
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID's followers    
     """
-
     queryset = Following.objects.filter(target_author_id=author_id)\
         .select_related('author')\
         .order_by('id')
 
-    paginator = CustomPagination()
-
+    paginator = Pagination()
     page = paginator.paginate_queryset(queryset, request)
+    
     if page is not None:
         authors = [following.author for following in page]
         serializer = FollowingSerializer(authors)
@@ -32,8 +31,7 @@ def followers(request, author_id:int):
     else:
         authors = [following.author for following in queryset]
         serializer = FollowingSerializer(authors)
-        return Response(serializer.data) 
- 
+        return Response(serializer.data)  
 
 
 @api_view(['DELETE', 'PUT', 'GET'])
