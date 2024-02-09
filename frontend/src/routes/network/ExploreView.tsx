@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { getAuthors, Author } from "../../api/authors";
-import styles from "./NetworkExploreView.module.css";
+import styles from "./ExploreView.module.css";
 
-const NetworkExploreView: React.FC = () => {
+const ExploreView: React.FC = () => {
     
     const [exploreAuthors, setExploreAuthors] = useState<Author[]>([]);
     /*TODO add buttons for pagination and pass into */
@@ -40,4 +40,4 @@ const NetworkExploreView: React.FC = () => {
     );
 };
 
-export default NetworkExploreView;
+export default ExploreView;

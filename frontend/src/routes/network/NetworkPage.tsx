@@ -2,13 +2,13 @@ import React from 'react';
 
 import styles from "./NetworkPage.module.css";
 import Page from '../../components/layout/Page';
-import NetworkExploreView from '../../components/layout/NetworkExploreView';
+import ExploreView from './ExploreView';
 
 const NetworkPage: React.FC = () => {
     
     return ( 
         <Page>
-            <NetworkExploreView />
+            <ExploreView />
         </Page>
     );
 };
