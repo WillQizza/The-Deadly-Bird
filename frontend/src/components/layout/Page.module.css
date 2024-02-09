@@ -16,6 +16,7 @@
 
 #navigation {
     width: 16%;
+    min-width: 200px;
     height: 100%;
     background-color: var(--teal);
     position: fixed;

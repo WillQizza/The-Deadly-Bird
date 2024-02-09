@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 
 import LoginPage from './routes/login/LoginPage';
 import HomePage from './routes/home/HomePage';
+import NetworkPage from './routes/network/NetworkPage';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -20,6 +21,7 @@ root.render(
     <Routes>
       <Route path="/" Component={LoginPage} />
       <Route path="/home" Component={HomePage} />
+      <Route path="/network" Component={NetworkPage} />
       <Route path="/profile/:id" Component={ProfilePage} />
     </Routes>
   </BrowserRouter>
