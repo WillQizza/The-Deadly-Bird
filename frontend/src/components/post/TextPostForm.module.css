@@ -11,6 +11,7 @@
 .radioSelectOption {
     font-weight: bold;
     border-radius: 0.25rem;
+    background-color: transparent;
 }
 
 .formLabel {

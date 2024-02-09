@@ -1,6 +1,5 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 import styles from './PostCreationPage.module.css';
-import Footer from '../../components/layout/Footer';
 import { Tab, Tabs } from 'react-bootstrap';
 import TextPostForm from '../../components/post/TextPostForm';
 import ImagePostForm from '../../components/post/ImagePostForm';
