@@ -22,6 +22,10 @@ export type APIResponse = {
     results: AuthorsAPIResponse 
 };
 
+/**
+ * @description function to access the /authors view API.
+ * 
+ */
 export const getAuthors = async (page: number, size: number) : Promise<APIResponse> => {
     
     const response = await fetch(baseURL+`/api/authors/?page=${page}&size=${size}`);

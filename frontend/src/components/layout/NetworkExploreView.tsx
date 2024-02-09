@@ -20,17 +20,22 @@ const NetworkExploreView: React.FC = () => {
     }, []);
 
     return ( 
-        <div id={styles.NetworkDiscoverViewContainer}>
-            {exploreAuthors.map((author) => (
-                <div key={author.id} className="authorItem">
-                    <img src={author.profileImage} alt={author.displayName} style={{width: 50, height: 50, borderRadius: '50%'}} />
-                    <div>
-                        <h2>{author.displayName}</h2>
-                        <p>{author.host}</p>
-                        <a href={author.url}>Profile</a> | <a href={author.github}>GitHub</a>
+        <div>
+            <div id={styles.NetworkExploreHeader}>
+                Explore the Deadly-Bird Network
+            </div>
+            <div id={styles.NetworkContentContainer}>
+                {exploreAuthors.map((author) => (
+                    <div key={author.id} id={styles.AuthorCard}>
+                        <img src={author.profileImage} alt={author.displayName} style={{width: 50, height: 50, borderRadius: '50%'}} />
+                        <div>
+                            <h2>{author.displayName}</h2>
+                            <p>{author.host}</p>
+                            <a href={author.url}>Profile</a> | <a href={author.github}>GitHub</a>
+                        </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
         </div>
     );
 };

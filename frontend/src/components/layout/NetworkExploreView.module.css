@@ -1,3 +1,20 @@
-#NetworkDiscoverViewContainer {
-    color: white
+#NetworkContentContainer {
+    color: white;
+    margin: auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+#NetworkExploreHeader {
+    color: white;
+    font-size: 40px;
+    margin: auto;
+}
+
+#AuthorCard {
+    padding: 50px;
+    border-radius: 10px;
+    border: 1px solid yellow;
+    background-color: teal;
+    margin: 10px;
 }
