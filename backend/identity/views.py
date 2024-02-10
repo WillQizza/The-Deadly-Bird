@@ -4,7 +4,25 @@ from django.http import HttpRequest
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Author
-from .serializers import AuthorSerializer
+from .serializers import AuthorSerializer, AuthorListSerializer
+from deadlybird.pagination import Pagination
+
+@api_view(["GET"])
+def authors(request):
+  """
+  get all authors view as to handle https://uofa-cmput404.github.io/general/project.html#authors
+  """
+  authors = Author.objects.filter()
+
+  paginator = Pagination()
+  page = paginator.paginate_queryset(authors, request)
+  
+  if page is not None:
+    serializer = AuthorListSerializer(page)
+    return paginator.get_paginated_response(serializer.data)
+ 
+  serializer = AuthorListSerializer(authors)
+  return Response(serializer.data)  
 
 @api_view(["GET", "POST"])
 def author(request: HttpRequest, author_id: int):
