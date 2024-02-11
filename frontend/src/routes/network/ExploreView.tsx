@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { getAuthors, Author } from "../../api/authors";
+import { Author } from "../../api/types";
+import { getAuthors } from "../../api/authors";
 import styles from "./ExploreView.module.css";
 
 const ExploreView: React.FC = () => {
