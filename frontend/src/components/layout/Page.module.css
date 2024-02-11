@@ -7,23 +7,21 @@
     min-height: 100%;
 }
 
-/* Another container to ensure that the actual content takes up as much space as it can rather than stopping midway if there isn't enough content to fill the screen */
-#contentRoot { 
-    flex-grow: 1;
+
+#contentRoot {
     display: flex;
-    background-color: var(--grey);
+    flex-direction: row;
+    min-height: 100vh;
 }
 
 #navigation {
-    width: 16%;
+    flex: 0 0 auto;
+    width: 14%;
     min-width: 200px;
-    height: 100%;
     background-color: var(--teal);
-    position: fixed;
 }
 
-/* The container for the content */
 #content {
-    width: calc(100% - 16%);
-    margin-left: 16%;   /* Leave room for the navigation bar */
+    flex: 1;
+    padding: 20px;
 }

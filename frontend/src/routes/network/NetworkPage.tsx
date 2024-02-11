@@ -8,7 +8,10 @@ const NetworkPage: React.FC = () => {
     
     return ( 
         <Page>
-            <ExploreView />
+            <div id={styles.NetworkPageHeader}>
+                Explore the Deadly Bird Network
+            </div>
+            <ExploreView/>
         </Page>
     );
 };
