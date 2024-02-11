@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-import { baseURL, publicDir } from "../../constants";
+import { publicDir } from "../../constants";
 
 import Page from '../../components/layout/Page';
 
 import styles from './ProfilePage.module.css';
-import { apiRequest } from '../../utils/request';
 import { useParams } from 'react-router-dom';
+import { getAuthor } from '../../api/authors';
 
 const ProfilePage: React.FC = () => {
     // GET request on user to request actual API?...
@@ -22,22 +22,23 @@ const ProfilePage: React.FC = () => {
 
     useEffect(() => {
         const userId = params["id"];
-        apiRequest(`${baseURL}/api/authors/${userId}/`)
-            .then(async r => {
-                if (r.status !== 200) {
-                    console.error(`Failed to load user profile: ${userId} (status: ${r.status})`);
+        getAuthor(parseInt(userId as string))
+            .then(async author => {
+                if (!author) {
+                    console.error(`Failed to load user profile: ${userId}`);
                     return;
                 }
 
-                const data = await r.json();
-                setUsername(data["displayName"]);
-                setGithubUsername(data["github"]);
-                setPostCount(data["posts"]);
-                setFollowerCount(data["followers"]);
-                setFollowingCount(data["following"]);
+                setUsername(author.displayName);
+                setPostCount(author.posts);
+                setFollowerCount(author.followers);
+                setFollowingCount(author.following);
 
-                if (data["profileImage"] !== null) {
-                    setAvatarURL(data["profileImage"]);
+                if (author.github) {
+                    setGithubUsername(author.github);
+                }
+                if (author.profileImage) {
+                    setAvatarURL(author.profileImage);
                 }
             });
     }, [params]);
