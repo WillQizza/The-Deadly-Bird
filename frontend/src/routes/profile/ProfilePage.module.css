@@ -12,6 +12,7 @@
 #header {
   display: flex;
   height: 20%;
+  max-height: 160px;
   background-color: var(--teal);
   border: 5px solid var(--dark-teal);
   cursor: default;
