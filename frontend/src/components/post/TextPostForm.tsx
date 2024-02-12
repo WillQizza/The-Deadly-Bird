@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Alert, Button, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
-import styles from './TextPostForm.module.css';
+import styles from './PostForm.module.css';
 import { baseURL } from '../../constants';
 import { useNavigate } from 'react-router-dom';
+import { getUserId } from '../../utils/auth';
 
 const TextPostForm: React.FC = () => {
     const [title, setTitle] = useState<string>('');
@@ -26,7 +27,7 @@ const TextPostForm: React.FC = () => {
                 visibility: visibility
             }).toString();
 
-            const response = await fetch(`${baseURL}/api/authors/<int:author_id>/posts`, {
+            const response = await fetch(`${baseURL}/api/authors/${getUserId()}}/posts`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
@@ -41,7 +42,7 @@ const TextPostForm: React.FC = () => {
                 setResponseMessage(data.message);
             }
         }
-    }
+    };
 
     /** function for validating form elements */
     const validateForm = () => {
@@ -69,13 +70,14 @@ const TextPostForm: React.FC = () => {
         <>
             {/** Alert for Request Errors */}
             {!!responseMessage ? (
-                <Alert variant='danger' dismissible>
+                <Alert variant='danger' data-bs-theme='dark' dismissible>
                     <Alert.Heading>An Error Occured When Sending Your Request To The Server</Alert.Heading>
-                    <p>{responseMessage}</p>
+                    <hr />
+                    <p>{responseMessage || 'An error occured'}</p>
                 </Alert>
             ) : null}
             {/** Form */}
-            <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit} data-bs-theme='dark'>
                 <div className={`${styles.selectToolbar} ${styles.formGroup}`}>
                     {/** Visibility Select */}
                     <ToggleButtonGroup

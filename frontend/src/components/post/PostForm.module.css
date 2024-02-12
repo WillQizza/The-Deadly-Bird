@@ -43,3 +43,24 @@
     background-color: var(--teal);
     border-color: var(--teal);
 }
+
+.imgUploadContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.imgPreviewContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0.0625rem solid white;
+    border-radius: 0.25rem;
+    cursor: pointer;
+}
+
+.imgUploadContainer .imgPreviewContainer img {
+    max-width: 500px;
+    max-height: 500px;
+    object-fit: contain;
+}
