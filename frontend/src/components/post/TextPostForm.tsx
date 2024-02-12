@@ -4,6 +4,7 @@ import styles from './PostForm.module.css';
 import { baseURL } from '../../constants';
 import { useNavigate } from 'react-router-dom';
 import { getUserId } from '../../utils/auth';
+import { apiRequest } from '../../utils/request';
 
 const TextPostForm: React.FC = () => {
     const [title, setTitle] = useState<string>('');
@@ -27,7 +28,7 @@ const TextPostForm: React.FC = () => {
                 visibility: visibility
             }).toString();
 
-            const response = await fetch(`${baseURL}/api/authors/${getUserId()}}/posts`, {
+            const response = await apiRequest(`${baseURL}/api/authors/${getUserId()}/posts/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'

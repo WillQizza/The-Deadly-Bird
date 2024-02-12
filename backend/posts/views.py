@@ -1,11 +1,12 @@
 from django.http import HttpRequest
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from following.util import is_friends
 from .serializers import PostSerializer
-from .models import Post
+from .models import Post, Author
 
 @api_view(["GET", "POST"])
 def posts(request: HttpRequest, author_id: int):
@@ -55,6 +56,7 @@ def posts(request: HttpRequest, author_id: int):
       }, status=400)
     
     # Create the post
+    author = get_object_or_404(Author, id=author_id)
     title = request.POST["title"]
     description = request.POST["description"]
     content_type = request.POST["contentType"]
@@ -66,7 +68,7 @@ def posts(request: HttpRequest, author_id: int):
       description=description,
       content_type=content_type,
       content=content,
-      author=author_id,
+      author=author,
       visibility=visibility
     )
     
