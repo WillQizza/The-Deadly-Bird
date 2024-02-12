@@ -1,0 +1,28 @@
+* {
+    box-sizing: border-box;
+}
+
+.postCreationContentContainer {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: var(--grey);
+    color: white;
+    padding: 3rem;
+}
+
+.pageTitle {
+    display: flex;
+    width: 100%;
+    color: var(--yellow);
+}
+
+.pageTabs button {
+    color: var(--light-teal);
+    font-weight: bold;
+}
+
+.pageTabs button:hover {
+    color: var(--teal);
+}

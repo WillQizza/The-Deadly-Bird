@@ -11,6 +11,7 @@ import NetworkPage from './routes/network/NetworkPage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ProfilePage from './routes/profile/ProfilePage';
+import PostCreationPage from './routes/post/PostCreationPage';
 import { getUserId } from './utils/auth';
 
 const root = ReactDOM.createRoot(
@@ -25,6 +26,7 @@ root.render(
       <Route path="/network" Component={NetworkPage} />
       <Route path="/profile" element={<Navigate to={`/profile/${getUserId()}`} />} />
       <Route path="/profile/:id" Component={ProfilePage} />
+      <Route path="/post" Component={PostCreationPage} />
     </Routes>
   </BrowserRouter>
 );
