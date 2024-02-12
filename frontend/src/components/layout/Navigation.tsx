@@ -18,8 +18,8 @@ const Navigation = ({ items }: { items: NavItem[] }) => {
 
         <div id={styles.buttons}>
             {items.map((item, index) => (
-                <a className={styles.buttonLink} href={item.path}>
-                    <div className={styles.button} key={index}>
+                <a className={styles.buttonLink} href={item.path} key={index}>
+                    <div className={styles.button}>
                         <div className={styles.icon}>
                             <img src={`${publicDir}/static/nav/${item.icon}.png`} alt="Icon" />
                         </div>

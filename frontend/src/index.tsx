@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import reportWebVitals from './reportWebVitals';
 
@@ -12,6 +12,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ProfilePage from './routes/profile/ProfilePage';
 import PostCreationPage from './routes/post/PostCreationPage';
+import { getUserId } from './utils/auth';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -23,6 +24,7 @@ root.render(
       <Route path="/" Component={LoginPage} />
       <Route path="/home" Component={HomePage} />
       <Route path="/network" Component={NetworkPage} />
+      <Route path="/profile" element={<Navigate to={`/profile/${getUserId()}`} />} />
       <Route path="/profile/:id" Component={ProfilePage} />
       <Route path="/post" Component={PostCreationPage} />
     </Routes>

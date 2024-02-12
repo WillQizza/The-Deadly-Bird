@@ -4,48 +4,113 @@
   padding-left: 30px;
   padding-right: 30px;
   height: 100%;
+
+  display: flex;
+  flex-direction: column;
 }
 
 #header {
   display: flex;
-  flex-direction: column;
-  height: 30%;
+  height: 20%;
+  background-color: var(--teal);
+  border: 5px solid var(--dark-teal);
+  cursor: default;
 }
 
-#information {
-  background-color: var(--light-teal);
-  height: 80%;
-  min-height: calc(164px + 5px + 64px);  /* #avatarContainer + #stats margin top + #stats height */
-
-  display: flex;
-}
-
-#information > #avatarContainer {
+#header > #avatarContainer {
   height: 100%;
-  width: 184px;
-  min-height: 164px;
+  aspect-ratio: 1.2 / 1;
+
+  padding-left: 10px;
+  padding-right: 10px;
 
   display: flex;
   justify-content: center;
   flex-direction: column;
-  padding-left: 10px;
-  padding-right: 10px;
 }
 
-#information > #avatarContainer > img {
-  height: 164px;
-  width: 164px;
+#header > #avatarContainer > img {
+  height: 100%;
+  width: 100%;
   border-radius: 50%;
-  border: 5px solid var(--teal);
+  border: 10px solid var(--dark-teal);
+  box-shadow: 0px 2px 0px var(--darker-teal);
 }
 
-#stats {
-  background-color: var(--light-teal);
-  height: calc(20% - 5px);
-  min-height: 64px;
-  margin-top: 5px;
+#header > #identityContainer {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin-left: 20px;
 }
 
-#username {
+#header > #identityContainer > #username {
   font-size: 3em;
+  color: #fff;
+
+  margin: 0;
+  padding: 0;
+}
+
+#header > #identityContainer > #bio {
+  color: #D3D3D3;
+  font-size: 1em;
+
+  margin: 0;
+  padding: 0;
+
+  margin-left: 0.5em;
+}
+
+#statsAndFollow {
+  flex-grow: 1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+#statsAndFollow .item {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: column;
+}
+
+#statsAndFollow .item .itemAmount {
+  font-size: 1.5em;
+}
+
+#statsAndFollow #followButton {
+  background: #36CAD3;
+  border-radius: 5px;
+  padding-top: 2.5px;
+  padding-bottom: 2.5px;
+  padding-left: 30px;
+  padding-right: 30px;
+  box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+#statsAndFollow #followButton:hover {
+  background: #31b9c0;
+}
+
+#githubContainer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 48px;
+  height: 48px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+#feed {
+  background-color: var(--light-teal);
+  flex-grow: 1;
+  width: 100%;
+  margin-top: 10px;
 }

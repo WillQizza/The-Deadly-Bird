@@ -4,6 +4,8 @@ import Button from 'react-bootstrap/Button';
 import { baseURL } from '../../constants';
 import styles from "./LoginForm.module.css";
 import { useNavigate } from 'react-router-dom';
+import { setUserId } from '../../utils/auth';
+import { apiRequest } from '../../utils/request';
 
 const LoginForm: React.FC = () => {
     
@@ -22,8 +24,8 @@ const LoginForm: React.FC = () => {
                 password: password
             }).toString()
             
-            const response = await fetch(`${baseURL}/api/login/`, {
-                method:"POST",
+            const response = await apiRequest(`${baseURL}/api/login/`, {
+                method: "POST",
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
@@ -31,6 +33,9 @@ const LoginForm: React.FC = () => {
             });
             
             if (response.ok) {
+                const userId = (await response.json()).id;
+                setUserId(userId);
+
                 const navigateTo = (path: string) => {
                     navigate(path);
                 };

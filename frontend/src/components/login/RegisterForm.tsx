@@ -3,6 +3,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import styles from "./RegisterForm.module.css";
 import { baseURL } from "../../constants";
+import { apiRequest } from '../../utils/request';
 
 type RegisterProps = {
     showLogin: boolean;
@@ -28,7 +29,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                 password: password
             }).toString()
             
-            const response = await fetch(`${baseURL}/api/register/`, {
+            const response = await apiRequest(`${baseURL}/api/register/`, {
                 method:"POST",
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'

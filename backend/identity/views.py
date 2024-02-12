@@ -70,7 +70,8 @@ def login(request: HttpRequest):
   request.session["id"] = author.id
 
   return Response({
-    "authenticated": True
+    "authenticated": True,
+    "id": request.session["id"]
   })
 
 @api_view(["POST"])
