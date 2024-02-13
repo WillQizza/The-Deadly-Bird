@@ -5,13 +5,20 @@ import Page from '../../components/layout/Page';
 import ExploreView from './ExploreView';
 
 const NetworkPage: React.FC = () => {
-    
-    return ( 
+    return (
         <Page>
-            <div id={styles.NetworkPageHeader}>
-                Explore the Deadly Bird Network
+            <div className={styles.mainHeader}>Network</div>
+            <div className={styles.subHeader}>Explore the Deadly Bird Network</div>
+
+            <div id={styles.NetworkExploreHeader}>
+                Explore Local Authors
             </div>
-            <ExploreView/>
+            <ExploreView />
+
+            <div id={styles.NetworkExploreHeader}>
+                Explore Remote Authors
+            </div>
+            <ExploreView />
         </Page>
     );
 };
