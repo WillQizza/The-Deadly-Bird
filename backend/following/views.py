@@ -81,48 +81,49 @@ def modify_follower(request, author_id, foreign_author_id):
 def request_follower(request, local_author_id:int, foreign_author_id:int):
     """
     Request a follower on local or foreign host.
+    URL: None specified
     """
-    if request.method == "POST":
 
-        session_valid = validate_login_session(request)
-        if not session_valid:
-            return Response({"message": "Authentication required"}, status=403)
+    session_valid = validate_login_session(request)
+    if not session_valid:
+        return Response({"message": "Authentication required"}, status=403)
 
-        if not check_authors_exist(local_author_id, foreign_author_id):
+    if not check_authors_exist(local_author_id, foreign_author_id):
+        return Response({
+            "message": "An author provided does not exist"
+        }, status=404) 
+
+    local_author = Author.objects.get(id=local_author_id)
+    foreign_author = Author.objects.get(id=foreign_author_id)
+    
+    if Following.objects.filter(author__id=local_author_id,
+                                target_author__id=foreign_author_id).exists(): 
+        return Response({
+            "message": "Conflict: Author is already following"
+        }, status=409)
+
+    elif FollowingRequest.objects.filter(author__id=local_author_id, 
+        target_author__id=foreign_author_id).exists():
             return Response({
-                "message": "An author provided does not exist"
-            }, status=404) 
-
-        local_author = Author.objects.get(id=local_author_id)
-        foreign_author = Author.objects.get(id=foreign_author_id)
-        
-        if Following.objects.filter(author__id=local_author_id,
-                                    target_author__id=foreign_author_id).exists(): 
-            return Response({
-                "message": "Conflict: Author is already following"
+                "message": "Conflict: Outstanding request in existence"
             }, status=409)
 
-        elif FollowingRequest.objects.filter(author__id=local_author_id, 
-            target_author__id=foreign_author_id).exists():
-                return Response({
-                    "message": "Conflict: Outstanding request in existence"
-                }, status=409)
+    if local_author.host != foreign_author.host:
+        # TODO: handle remote host inbox object: 
+        # https://uofa-cmput404.github.io/general/project.html#friendfollow-request
+        return Response({
+            "error": True,
+            "message": "remote inboxed not supported yet"
+        })
+    else:
+        FollowingRequest.objects.create(
+            target_author_id = foreign_author_id,
+            author_id = local_author_id
+        )
 
-        if local_author.host != foreign_author.host:
-            # TODO: handle remote host inbox object: https://uofa-cmput404.github.io/general/project.html#friendfollow-request
-            return Response({
-                "error": True,
-                "message": "remote inboxed not supported yet"
-            })
-        else:
-            FollowingRequest.objects.create(
-                target_author_id = foreign_author_id,
-                local_author_id = local_author_id
-            )
+        # TODO: notfiy inbox 
 
-            # TODO: notfiy inbox 
-
-            return Response({
-                "error": False,
-                "message": "Follow Request Created"
-            }, status=201)
+        return Response({
+            "error": False,
+            "message": "Follow Request Created"
+        }, status=201)

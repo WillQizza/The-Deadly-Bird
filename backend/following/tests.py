@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 from django.contrib.auth.models import User
 from django.urls import reverse
 from identity.models import Author
-from .models import Following
+from .models import Following, FollowingRequest
 from typing import List
 
 class FollowersTestCase(TestCase):
@@ -81,3 +81,34 @@ class FollowersTestCase(TestCase):
             'author_id': author1.id, 'foreign_author_id': author2.id
             }))
         self.assertEqual(response.status_code, 404)
+
+    def test_follow_requests(self):
+        author1, author2, _ = self.authors
+
+        # Create a following request from author1 to author2
+        follow_reqs = FollowingRequest.objects.filter()
+        self.assertTrue(len(follow_reqs) == 0)
+
+        url = reverse('request_follower', kwargs={
+            'local_author_id': author1.id, 'foreign_author_id': author2.id
+        })
+        self.client.post(url)
+        follow_req_obj = FollowingRequest.objects.filter(target_author=author2.id, author=author1.id) 
+        self.assertTrue(follow_req_obj is not None)
+
+        # Test sending the same request, while it is already outstanding
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 409)
+
+
+    def test_follow_request_to_existing_follow(self):
+
+        author1, author2, _ = self.authors
+        self.test_create_following()
+
+        url = reverse('request_follower', kwargs={
+            'local_author_id': author1.id, 'foreign_author_id': author2.id
+        })
+        self.client.post(url)
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 409)
