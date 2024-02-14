@@ -1,19 +1,17 @@
 from django.test import TestCase
 from rest_framework import status
-
-from identity.models import Author
+from django.urls import reverse
+from identity.models import Author, InboxMessage
 from django.contrib.auth.models import User
+from typing import List
+from deadlybird.base_test import BaseTestCase
 
 # Create your tests here.
-class AuthenticationViewsTest(TestCase):
+class AuthenticationViewsTest(BaseTestCase):
   def setUp(self):
-    admin_user = User.objects.create_user(username="admin", password="admin")
-    Author.objects.create(
-      user=admin_user,
-      host="localhost",
-      profile_url="localhost"
-    )
-
+    super().setUp()
+    self.admin_user = self.create_author(username="admin", password="admin")
+  
   def test_incomplete_credentials(self):
     # Should return error that we did not supply both the username and password
     response = self.client.post("/api/login/", {
