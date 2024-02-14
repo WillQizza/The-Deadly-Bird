@@ -12,7 +12,10 @@ class Author(models.Model):
 
 class InboxMessage(models.Model):
   class ContentType(models.TextChoices):
-    pass # TODO: At some point this will need to be updated with things like, post, follow, followrequest, and whatnot.
+    POST="post"
+    FOLLOW="follow"
+    FOLLOW_REQUEST="follow_request"
+    COMMENT="comment"
 
   id = models.AutoField(primary_key=True)
   author = models.ForeignKey(Author, on_delete=models.CASCADE, blank=False, null=False)
