@@ -152,7 +152,7 @@ def inbox(request: HttpRequest, author_id: int):
     page = paginator.paginate_queryset(inbox_messages, request)
     serializer = InboxMessageListSerializer(instance=page, context={'author_id': author_id})
 
-    return Response(serializer.data)
+    return paginator.get_paginated_response(serializer.data)
   
   if request.method == "DELETE":
     #TODO: implement delete inbox (clear)

@@ -103,7 +103,7 @@ export type LikedResponse = {
 export type InboxResponse = {
     type: "inbox",
     author: "string",
-    items: Post[],
+    items: (Post | Comment | Like)[], //TODO: Add follow request type
 };
 
 enum ContentType {
