@@ -17,7 +17,7 @@ class BaseTestCase(TestCase):
         self.posts              = self.create_posts(self.authors)
         self.follow_requests    = self.create_follow_request(self.authors)
         self.following          = self.create_following(self.authors)
-        self.create_inbox_messages()
+        self.inbox_messages     = self.create_inbox_messages()
 
     @staticmethod
     def create_authors():
@@ -81,19 +81,23 @@ class BaseTestCase(TestCase):
         """
         Create inbox messages for posts and follow requests.
         """
+        inbox_messages = []
         for post in self.posts:
-            InboxMessage.objects.create(
+            msg = InboxMessage.objects.create(
                 author=post.author,
                 content_id=post.id,
                 content_type=InboxMessage.ContentType.POST
             )
+            inbox_messages.append(msg)
 
         for follow_request in self.follow_requests:
-            InboxMessage.objects.create(
+            msg = InboxMessage.objects.create(
                 author=follow_request.target_author,
                 content_id=follow_request.id,
-                content_type=InboxMessage.ContentType.FOLLOW_REQUEST
+                content_type=InboxMessage.ContentType.FOLLOW
             )
+            inbox_messages.append(msg)
+        return inbox_messages
 
     def create_author(self, username=None, password=None):
         """
@@ -109,3 +113,4 @@ class BaseTestCase(TestCase):
         self.authors.append(author)
 
         return author 
+    

@@ -14,7 +14,7 @@ class InboxMessage(models.Model):
   class ContentType(models.TextChoices):
     POST="post"
     FOLLOW="follow"
-    FOLLOW_REQUEST="follow_request"
+    LIKE="like"
     COMMENT="comment"
 
   id = models.AutoField(primary_key=True)

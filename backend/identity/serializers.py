@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from posts.models import Post
-from following.models import Following
-from .models import Author
-
+from following.models import Following, FollowingRequest
+from .models import Author, InboxMessage
+from typing import List
 
 class AuthorSerializer(serializers.ModelSerializer):
   type = serializers.ReadOnlyField(default='author')
@@ -43,3 +43,38 @@ class AuthorListSerializer(serializers.Serializer):
 
   class Meta:
       fields = ['type', 'items'] 
+
+class InboxMessageListSerializer(serializers.Serializer):
+  """
+  Serialize a list of inbox mesasges.
+  Items field is a list of heterogenous serialized objects.
+  """
+  type = serializers.CharField(default="inbox", read_only=True)
+  author = serializers.CharField(read_only=True)
+  items = serializers.SerializerMethodField()
+
+  def get_items(self, inbox_messages: List[InboxMessage]):
+    items = []
+    for msg in inbox_messages:
+      if msg.content_type == InboxMessage.ContentType.POST:
+        from posts.serializers import PostSerializer
+        post = Post.objects.get(id=msg.content_id)
+        serializer = PostSerializer(instance=post)
+        items.append(serializer.data)
+      elif msg.content_type == InboxMessage.ContentType.FOLLOW:
+        # TODO: this one is confusing since the follow object is not yet created.
+        pass
+      elif msg.content_type == InboxMessage.ContentType.LIKE:
+        # TODO: implement like 
+        pass
+      elif msg.content_type == InboxMessage.ContentType.COMMENT:
+        pass
+    return items
+  
+  def to_representation(self, instance):
+    ret = super().to_representation(instance)
+    ret['author'] = self.context.get('author_id')
+    return ret
+  
+  class Meta:
+    fields = ['type', 'author', 'items']

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
 from .serializers import FollowingSerializer
-from identity.models import Author
+from identity.models import Author, InboxMessage
 from django.views.decorators.csrf import csrf_exempt
 from deadlybird.pagination import Pagination
 
@@ -122,7 +122,7 @@ def request_follower(request, local_author_id:int, foreign_author_id:int):
         )
 
         # TODO: notfiy inbox 
-
+        
         return Response({
             "error": False,
             "message": "Follow Request Created"
