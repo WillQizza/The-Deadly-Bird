@@ -13,12 +13,14 @@
 FROM ubuntu:latest
 
 ENV PORT 8000
+ENV REACT_APP_BASE_URL ""
 
 RUN apt-get update && apt-get install -y curl software-properties-common
 
 # Get Node 20 and Yarn
 RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
 RUN apt-get install -y nodejs
+RUN corepack enable pnpm
 
 # Install Python and pip
 RUN apt-get install -y python3 python3-pip
@@ -31,7 +33,7 @@ RUN pip3 install -r requirements.txt
 # Set the working directory for Node.js dependencies
 WORKDIR /usr/src/app/frontend
 COPY frontend/*.json .
-RUN npm install
+RUN pnpm install
 
 # Copy the source files to the working directory
 WORKDIR /usr/src/app
@@ -39,7 +41,7 @@ COPY . .
 
 # Copy frontend files to backend deployment
 WORKDIR /usr/src/app/frontend
-RUN npm run build
+RUN pnpm run build
 
 # Set the working directory for running Django commands
 WORKDIR /usr/src/app/backend
