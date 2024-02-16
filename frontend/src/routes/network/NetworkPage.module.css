@@ -1,14 +1,21 @@
-#NetworkPageHeader {
+#NetworkExploreHeader {
     color: white;
-    font-size: 50px;
-    border: 5px solid teal; 
-    border-radius: 15px;
-    margin: auto;
-    display: flex;
-    justify-content: center;
-    background-color: #1e1e1e;
-    width: min-content;
-    white-space: nowrap;
-    padding: 10px;
-    margin-bottom: 20px;
+    font-size: 25px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.mainHeader {
+    font-size: 36px;
+    color: #FFFFFF;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.subHeader {
+    font-size: 24px;
+    color: #CCCCCC;
+    text-align: center;
+    margin-bottom: 30px;
 }

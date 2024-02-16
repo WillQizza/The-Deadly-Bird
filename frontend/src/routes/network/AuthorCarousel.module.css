@@ -1,0 +1,46 @@
+.card {
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 80px;
+}
+.card:hover {
+    cursor: pointer;
+}
+
+.card img {
+    margin: auto;
+    display: block;
+    min-width: 100px;
+    transition: filter 0.3s ease;
+}
+
+.card:hover img {
+    filter: brightness(90%);
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden; 
+}
+
+.cardDisplayname {
+    color: teal;
+    font-size: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-host {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.carousel {
+    width: max-content;
+}

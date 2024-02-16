@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 from django.http import HttpRequest
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Author
-from .serializers import AuthorSerializer, AuthorListSerializer
+from .models import Author, InboxMessage
+from .serializers import AuthorListSerializer, AuthorSerializer, InboxMessageListSerializer
 from deadlybird.pagination import Pagination
 
 @api_view(["GET"])
@@ -40,8 +40,7 @@ def author(request: HttpRequest, author_id: int):
 def login(request: HttpRequest):
   if (not "username" in request.POST):
     return Response({
-      "authenticated": False,
-      "message": "Username is required."
+      "authenticated": False, "message": "Username is required."
     }, status=400)
   if (not "password" in request.POST):
     return Response({
@@ -109,3 +108,52 @@ def register(request: HttpRequest):
     "error": False,
     "message": "Success!"
   }, status=201)
+
+
+@api_view(["GET", "POST"])
+def inbox(request: HttpRequest, author_id: int):
+  """
+  URL: ://service/authors/{AUTHOR_ID}/inbox
+  GET [local]: if authenticated get a paginated list of posts sent to AUTHOR_ID
+  POST [local, remote]: send a post to the author
+  DELETE [local]: clear the inbox
+  """
+  if request.method == "POST":
+    # add a new inbox message item  
+    content_type = request.data.get("content_type")
+    content_id = request.data.get("content_id")
+
+    if content_id == None or content_type == None:
+      return Response({
+        "error": True,
+        "message": "Missing necessary request body parameters"
+      }, status_code=400)
+
+    try:
+      InboxMessage.objects.create(
+        author_id=author_id,
+        content_id=content_id,
+        content_type=content_type
+      )
+      return Response({
+        "error": False,
+        "message": "Created inbox message"
+      }, status=201)
+    except:
+      return Response({
+        "error": True,
+        "message": "Failed to create inbox message"
+      }, status=400)
+  
+  if request.method == "GET":
+    # return the list of inbox messages for the author   
+    inbox_messages = InboxMessage.objects.filter(author=author_id).order_by("id")
+    paginator = Pagination()
+    page = paginator.paginate_queryset(inbox_messages, request)
+    serializer = InboxMessageListSerializer(instance=page, context={'author_id': author_id})
+
+    return paginator.get_paginated_response(serializer.data)
+  
+  if request.method == "DELETE":
+    #TODO: implement delete inbox (clear)
+    pass

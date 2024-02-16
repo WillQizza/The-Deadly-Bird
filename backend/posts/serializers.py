@@ -12,7 +12,7 @@ class PostSerializer(serializers.ModelSerializer):
   published = serializers.DateTimeField(source="published_date")
 
   def get_author(self, object: Post):
-    return AuthorSerializer(object.author).dat
+    return AuthorSerializer(object.author).data
 
   def get_count(self, object: Post):
     return Comment.objects.filter(post=object).count()
