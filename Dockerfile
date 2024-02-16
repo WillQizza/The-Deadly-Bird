@@ -1,6 +1,6 @@
 # Dockerfile
-# Date: January 28th 2024
-# Author: Justin Meimar
+# Date: Feburary 16 2024
+# Author: Justin Meimar & William Qi
 #
 # Purpose: Simplify local development and heroku deployment by bundling the build 
 #   process into a single, isolated userspace. Deployment becomes configurable with
@@ -10,41 +10,34 @@
 #   PORT:       8000            Auto Assigned 
 #   DEBUG:      True            False
 
-FROM ubuntu:latest
-
-ENV PORT 8000
+# Get Node 20 and pnpm
+FROM node:20 AS frontend
 ENV REACT_APP_BASE_URL ""
 
-RUN apt-get update && apt-get install -y curl software-properties-common
-
-# Get Node 20 and Yarn
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
-RUN apt-get install -y nodejs
+# Install Node.js dependencies
 RUN corepack enable pnpm
-
-# Install Python and pip
-RUN apt-get install -y python3 python3-pip
-
-# Set the working directory for Python dependencies
-WORKDIR /usr/src/app/backend
-COPY backend/requirements.txt .
-RUN pip3 install -r requirements.txt
-
-# Set the working directory for Node.js dependencies
-WORKDIR /usr/src/app/frontend
+WORKDIR /app/frontend
 COPY frontend/*.json .
 RUN pnpm install
 
-# Copy the source files to the working directory
-WORKDIR /usr/src/app
-COPY . .
-
-# Copy frontend files to backend deployment
-WORKDIR /usr/src/app/frontend
+# Copy entire app so that postbuild.js can find the backend path to move static files to
+COPY . /app
 RUN pnpm run build
 
-# Set the working directory for running Django commands
-WORKDIR /usr/src/app/backend
-RUN python3 manage.py collectstatic --noinput
 
+
+FROM python:3 AS backend
+ENV PORT 8000
+
+# Install Python dependencies
+WORKDIR /app
+COPY backend/requirements.txt .
+RUN pip3 install -r requirements.txt
+
+# Copy backend source + frontend build files to backend deployment
+COPY ./backend .
+COPY --from=frontend /app/backend/react/static/ /app/react/static/
+
+# Compile static files and run app
+RUN python3 manage.py collectstatic --noinput
 CMD gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT
