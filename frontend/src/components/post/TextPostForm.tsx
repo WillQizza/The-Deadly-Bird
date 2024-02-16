@@ -1,17 +1,19 @@
-import { useState } from 'react';
-import { Alert, Button, Form, ToggleButton, ToggleButtonGroup } from 'react-bootstrap';
 import styles from './PostForm.module.css';
+import { useRef, useState } from 'react';
+import { Alert, Button, Form } from 'react-bootstrap';
 import { baseURL } from '../../constants';
 import { useNavigate } from 'react-router-dom';
 import { getUserId } from '../../utils/auth';
 import { apiRequest } from '../../utils/request';
+import FormTextbox from './FormTextbox';
+import RadioButtonGroup from './RadioButtonGroup';
 
 const TextPostForm: React.FC = () => {
-    const [title, setTitle] = useState<string>('');
-    const [description, setDescription] = useState<string>('');
-    const [content, setContent] = useState<string>('');
-    const [contentType, setContentType] = useState<string>('text/plain');
-    const [visibility, setVisibility] = useState<string>('PUBLIC');
+    const titleRef = useRef<string>('');
+    const descriptionRef = useRef<string>('');
+    const contentRef = useRef<string>('');
+    const visibilityRef = useRef<string>('');
+    const contentTypeRef = useRef<string>('');
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [responseMessage, setResponseMessage] = useState<string>('');
     const navigate = useNavigate();
@@ -21,11 +23,11 @@ const TextPostForm: React.FC = () => {
         event.preventDefault();
         if (validateForm()) {
             const formData = new URLSearchParams({
-                title: title,
-                description: description,
-                content: content,
-                contentType: contentType,
-                visibility: visibility
+                title: titleRef.current,
+                description: descriptionRef.current,
+                content: contentRef.current,
+                contentType: contentTypeRef.current,
+                visibility: visibilityRef.current
             }).toString();
 
             const response = await apiRequest(`${baseURL}/api/authors/${getUserId()}/posts/`, {
@@ -50,15 +52,15 @@ const TextPostForm: React.FC = () => {
         let isValid = true;
         const newFormErrors: { [key: string]: string } = {};
 
-        if (!title) {
+        if (!titleRef.current) {
             isValid = false;
             newFormErrors.title = 'A title is required';
         }
-        if (!description) {
+        if (!descriptionRef.current) {
             isValid = false;
             newFormErrors.description = 'A description is required';
         }
-        if (!content) {
+        if (!contentRef.current) {
             isValid = false;
             newFormErrors.content = 'Post content is required';
         }
@@ -81,116 +83,52 @@ const TextPostForm: React.FC = () => {
             <Form onSubmit={handleSubmit} data-bs-theme='dark'>
                 <div className={`${styles.selectToolbar} ${styles.formGroup}`}>
                     {/** Visibility Select */}
-                    <ToggleButtonGroup
-                        type='radio'
-                        name='visibility-options'
+                    <RadioButtonGroup
+                        name='visibility-select'
                         defaultValue='PUBLIC'
-                    >
-                        <ToggleButton
-                            id='visibility-radio-1'
-                            value='PUBLIC'
-                            onChange={(e) => setVisibility('PUBLIC')}
-                            variant='secondary'
-                            className={styles.radioSelectOption}
-                        >
-                            Public
-                        </ToggleButton>
-                        <ToggleButton
-                            id='visibility-radio-2'
-                            value='FRIENDS'
-                            onChange={(e) => setVisibility('FRIENDS')}
-                            variant='secondary'
-                            className={styles.radioSelectOption}
-                        >
-                            Friends
-                        </ToggleButton>
-                        <ToggleButton
-                            id='visibility-radio-3'
-                            value='UNLISTED'
-                            onChange={(e) => setVisibility('UNLISTED')}
-                            variant='secondary'
-                            className={styles.radioSelectOption}
-                        >
-                            Unlisted
-                        </ToggleButton>
-                    </ToggleButtonGroup>
+                        options={[
+                            { value: 'PUBLIC', label: 'Public'},
+                            { value: 'FRIENDS', label: 'Friends' },
+                            { value: 'UNLISTED', label: 'Unlisted' }
+                        ]}
+                        valueRef={visibilityRef}
+                    />
                     {/** Content Type Select */}
-                    <ToggleButtonGroup
-                        type='radio'
-                        name='ctype-options'
+                    <RadioButtonGroup
+                        name='ctype-select'
                         defaultValue='text/plain'
-                    >
-                        <ToggleButton
-                            id='ctype-radio-1'
-                            value='text/plain'
-                            onChange={(e) => setContentType('text/plain')}
-                            variant='secondary'
-                            className={styles.radioSelectOption}
-                        >
-                            Plain
-                        </ToggleButton>
-                        <ToggleButton
-                            id='ctype-radio-2'
-                            value='text/markdown'
-                            onChange={(e) => setContentType('text/markdown')}
-                            variant='secondary'
-                            className={styles.radioSelectOption}
-                        >
-                            Markdown
-                        </ToggleButton>
-                    </ToggleButtonGroup>
+                        options={[
+                            { value: 'text/plain', label: 'Plain' },
+                            { value: 'text/markdown', label: 'Markdown' }
+                        ]}
+                        valueRef={contentTypeRef}
+                    />
                 </div>
                 {/** Title Field */}
-                <Form.Group className={styles.formGroup}>
-                    <Form.Label className={styles.formLabel}>
-                        Title
-                    </Form.Label>
-                    <Form.Control
-                        type='text'
-                        placeholder='Enter a Title for Your Post'
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        isInvalid={!!formErrors.title}
-                        className={styles.formControl}
-                    />
-                    <Form.Control.Feedback type='invalid'>
-                        {formErrors.title}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                <FormTextbox
+                    label='Title'
+                    placeholder='Enter a Title for Your Post'
+                    formErrors={formErrors}
+                    formErrorKey={'title'}
+                    valueRef={titleRef}
+                />
                 {/** Description Field */}
-                <Form.Group className={styles.formGroup}>
-                    <Form.Label className={styles.formLabel}>
-                        Description
-                    </Form.Label>
-                    <Form.Control
-                        type='text'
-                        placeholder='Enter a Description for Your Post'
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        isInvalid={!!formErrors.description}
-                        className={styles.formControl}
-                    />
-                    <Form.Control.Feedback type='invalid'>
-                        {formErrors.description}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                <FormTextbox
+                    label='Description'
+                    placeholder='Enter a Description for Your Post'
+                    formErrors={formErrors}
+                    formErrorKey={'description'}
+                    valueRef={descriptionRef}
+                />
                 {/** Content Field */}
-                <Form.Group className={styles.formGroup}>
-                    <Form.Label className={styles.formLabel}>
-                        Content
-                    </Form.Label>
-                    <Form.Control
-                        as='textarea'
-                        placeholder='Enter Your Post Here'
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        isInvalid={!!formErrors.content}
-                        className={styles.formControl}
-                    />
-                    <Form.Control.Feedback type='invalid'>
-                        {formErrors.content}
-                    </Form.Control.Feedback>
-                </Form.Group>
+                <FormTextbox
+                    label='Content'
+                    placeholder='Enter Your Post Here'
+                    formErrors={formErrors}
+                    formErrorKey={'content'}
+                    valueRef={contentRef}
+                    textarea={true}
+                />
                 {/** Post Button */}
                 <Button type='submit' className={styles.submitButton}>
                     Submit

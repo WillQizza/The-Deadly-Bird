@@ -1,0 +1,18 @@
+.formGroup {
+    padding: 0.5rem 0;
+}
+
+.formLabel {
+    font-weight: bold;
+}
+
+.formControl {
+    border: 0.125rem solid var(--light-teal);
+    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.formControl:focus {
+    border-color: var(--teal);
+    box-shadow: none;
+}
