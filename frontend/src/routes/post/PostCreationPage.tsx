@@ -1,8 +1,7 @@
-import React from 'react';
 import styles from './PostCreationPage.module.css';
+import React from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
-import TextPostForm from '../../components/post/TextPostForm';
-import ImagePostForm from '../../components/post/ImagePostForm';
+import PostForm from '../../components/post/PostForm';
 import Page from '../../components/layout/Page';
 
 const PostCreationPage: React.FC = () => {
@@ -17,10 +16,10 @@ const PostCreationPage: React.FC = () => {
                     className={styles.pageTabs}
                 >
                     <Tab eventKey='text' title='Text'>
-                        <TextPostForm />
+                        <PostForm />
                     </Tab>
                     <Tab eventKey='image' title='Image'>
-                        <ImagePostForm />
+                        <PostForm image={true} />
                     </Tab>
                 </Tabs>
             </div>

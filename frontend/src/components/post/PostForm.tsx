@@ -7,13 +7,19 @@ import { getUserId } from '../../utils/auth';
 import { apiRequest } from '../../utils/request';
 import FormTextbox from './FormTextbox';
 import RadioButtonGroup from './RadioButtonGroup';
+import ImageUpload from './ImageUpload';
 
-const TextPostForm: React.FC = () => {
+interface PostFormProps {
+    image?: boolean
+}
+
+const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
+    const { image = false } = props;
     const titleRef = useRef<string>('');
     const descriptionRef = useRef<string>('');
     const contentRef = useRef<string>('');
-    const visibilityRef = useRef<string>('');
-    const contentTypeRef = useRef<string>('');
+    const visibilityRef = useRef<string>('PUBLIC');
+    const contentTypeRef = useRef<string>('text/plain');
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [responseMessage, setResponseMessage] = useState<string>('');
     const navigate = useNavigate();
@@ -54,15 +60,15 @@ const TextPostForm: React.FC = () => {
 
         if (!titleRef.current) {
             isValid = false;
-            newFormErrors.title = 'A title is required';
+            newFormErrors['title'] = 'A title is required';
         }
         if (!descriptionRef.current) {
             isValid = false;
-            newFormErrors.description = 'A description is required';
+            newFormErrors['description'] = 'A description is required';
         }
         if (!contentRef.current) {
             isValid = false;
-            newFormErrors.content = 'Post content is required';
+            newFormErrors['content'] = 'Post content is required';
         }
 
         setFormErrors(newFormErrors);
@@ -93,16 +99,18 @@ const TextPostForm: React.FC = () => {
                         ]}
                         valueRef={visibilityRef}
                     />
-                    {/** Content Type Select */}
-                    <RadioButtonGroup
-                        name='ctype-select'
-                        defaultValue='text/plain'
-                        options={[
-                            { value: 'text/plain', label: 'Plain' },
-                            { value: 'text/markdown', label: 'Markdown' }
-                        ]}
-                        valueRef={contentTypeRef}
-                    />
+                    {/** Content Type Select (only for text posts) */}
+                    {image ? null : (
+                        <RadioButtonGroup
+                            name='ctype-select'
+                            defaultValue='text/plain'
+                            options={[
+                                { value: 'text/plain', label: 'Plain' },
+                                { value: 'text/markdown', label: 'Markdown' }
+                            ]}
+                            valueRef={contentTypeRef}
+                        />
+                    )}
                 </div>
                 {/** Title Field */}
                 <FormTextbox
@@ -121,14 +129,23 @@ const TextPostForm: React.FC = () => {
                     valueRef={descriptionRef}
                 />
                 {/** Content Field */}
-                <FormTextbox
-                    label='Content'
-                    placeholder='Enter Your Post Here'
-                    formErrors={formErrors}
-                    formErrorKey={'content'}
-                    valueRef={contentRef}
-                    textarea={true}
-                />
+                {image ? (
+                    <ImageUpload
+                        formErrors={formErrors}
+                        formErrorKey={'content'}
+                        valueRef={contentRef}
+                        typeRef={contentTypeRef}
+                    />
+                ) : (
+                    <FormTextbox
+                        label='Content'
+                        placeholder='Enter Your Post Here'
+                        formErrors={formErrors}
+                        formErrorKey={'content'}
+                        valueRef={contentRef}
+                        textarea={true}
+                    />
+                )}
                 {/** Post Button */}
                 <Button type='submit' className={styles.submitButton}>
                     Submit
@@ -138,4 +155,4 @@ const TextPostForm: React.FC = () => {
     );
 }
 
-export default TextPostForm;
+export default PostForm;
