@@ -1,0 +1,27 @@
+name: Heroku Deploy
+on:
+  push:
+    branches:
+      - prod
+
+concurrency:
+  group: heroku
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: [self-hosted]
+    environment:
+      name: heroku
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Heroku Deployment
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: ${{secrets.HEROKU_APP_NAME}}
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          usedocker: true
