@@ -2,7 +2,7 @@ name: Heroku Deploy
 on:
   push:
     branches:
-      - prod
+      - dev
 
 concurrency:
   group: heroku
