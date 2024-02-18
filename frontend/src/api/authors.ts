@@ -2,7 +2,6 @@ import { baseURL } from "../constants"
 import { apiRequest } from "../utils/request";
 
 import { 
-    PaginatedAPI,
     AuthorsResponse,
     Author  
 } from "./types";
@@ -11,10 +10,10 @@ import {
  * @description function to access the /authors view API.
  */
 export const getAuthors = async (page: number, size: number) 
-    : Promise<PaginatedAPI<AuthorsResponse>> => 
+    : Promise<AuthorsResponse> => 
 {    
     const response = await apiRequest(`${baseURL}/api/authors/?page=${page}&size=${size}`);
-    const data: PaginatedAPI<AuthorsResponse> = await response.json();
+    const data: AuthorsResponse = await response.json();
 
     return data;
 }
