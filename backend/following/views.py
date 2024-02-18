@@ -1,13 +1,10 @@
-#TODO: figure out CSRF stuff
-
 from django.shortcuts import render, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
 from .serializers import FollowingSerializer
-from identity.models import Author, InboxMessage
-from django.views.decorators.csrf import csrf_exempt
+from identity.models import Author
 from deadlybird.pagination import Pagination
 
 @api_view(["GET"])
@@ -32,7 +29,6 @@ def followers(request, author_id:int):
         authors = [following.author for following in queryset]
         serializer = FollowingSerializer(authors)
         return Response(serializer.data)  
-
 
 @api_view(['DELETE', 'PUT', 'GET'])
 def modify_follower(request, author_id, foreign_author_id):
