@@ -25,3 +25,4 @@ jobs:
           heroku_app_name: "thedeadlybird"
           heroku_email: "wqi3@ualberta.ca"
           stack: "container"
+          usedocker: true
