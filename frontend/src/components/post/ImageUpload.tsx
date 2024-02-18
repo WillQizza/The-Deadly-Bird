@@ -5,19 +5,23 @@ import { publicDir } from '../../constants';
 
 interface ImageUploadProps {
     formErrors: { [key: string]: string },
+    setFormErrors: React.Dispatch<React.SetStateAction<{[key: string]: string;}>>,
     formErrorKey: string,
     valueRef: { current: string },
     typeRef: { current: string },
-    placeholder?: string
+    placeholder?: string,
+    allowedTypes?: Set<string>
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
     const {
         formErrors,
+        setFormErrors,
         formErrorKey,
         valueRef,
         typeRef,
-        placeholder = `${publicDir}/static/icons/image.svg`
+        placeholder = `${publicDir}/static/icons/image.svg`,
+        allowedTypes = new Set(['application/base64', 'image/png;base64', 'image/jpeg;base64'])
     } = props;
 
     const [image, setImage] = useState<string>(placeholder);
@@ -33,15 +37,31 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
             // handle the result
             reader.onload = () => {
                 if (reader.result) {
+                    // parse result
                     const base64data = reader.result.toString();
-                    console.log(base64data);
-                    setImage(base64data);
-                    valueRef.current = base64data;
+                    const mediaType = base64data.slice(base64data.indexOf(':')+1,base64data.indexOf(','));
+                    // if image type is valid
+                    if (allowedTypes.has(mediaType)) {
+                        setImage(base64data);
+                        valueRef.current = base64data;
+                        typeRef.current = mediaType;
+                        formErrors[formErrorKey] = '';
+                    }
+                    // if image type is invalid
+                    else {
+                        setImage(placeholder);
+                        valueRef.current = '';
+                        typeRef.current = 'text/plain';
+                        formErrors[formErrorKey] = 'Invalid file type (.png, .jpg, or .jpeg required)';
+                    }
+                    setFormErrors({...formErrors});
                 }
             };
+            // handle file reading errors
             reader.onerror = (err) => {
                 console.log(err);
-                formErrors[formErrorKey] = 'Error reading the uploaded file'
+                formErrors[formErrorKey] = 'Error reading the uploaded file';
+                setFormErrors({...formErrors});
             };
         }
     }
@@ -52,25 +72,23 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                 <Form.Label className={styles.formLabel}>
                     Content
                 </Form.Label>
-                <div className={styles.imgUploadContainer}>
-                    <div
-                        className={styles.imgPreviewContainer}
-                        onClick={(e) => {
-                            if (fileInputRef && fileInputRef.current) {
-                                fileInputRef.current.click();
-                            }
-                        }}
-                    >
-                        <img src={image} alt='image-preview'/>
-                    </div>
-                    <Form.Control
-                        type='file'
-                        accept='.png, .jpg, .jpeg'
-                        ref={fileInputRef}
-                        onChange={handleUpload}
-                        isInvalid={!!formErrors[formErrorKey]}
-                    />
+                <div
+                    className={styles.imgPreviewContainer}
+                    onClick={(e) => {
+                        if (fileInputRef && fileInputRef.current) {
+                            fileInputRef.current.click();
+                        }
+                    }}
+                >
+                    <img src={image} alt='image-preview'/>
                 </div>
+                <Form.Control
+                    type='file'
+                    accept='.png, .jpg, .jpeg'
+                    ref={fileInputRef}
+                    onChange={handleUpload}
+                    isInvalid={!!formErrors[formErrorKey]}
+                />
                 <Form.Control.Feedback type='invalid'>
                     {formErrors.content}
                 </Form.Control.Feedback>

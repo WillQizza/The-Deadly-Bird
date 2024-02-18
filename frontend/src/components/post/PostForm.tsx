@@ -62,9 +62,17 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
             isValid = false;
             newFormErrors['title'] = 'A title is required';
         }
+        if (titleRef.current.length > 255) {
+            isValid = false;
+            newFormErrors['title'] = 'Title is too long (255 characters maximum)';
+        }
         if (!descriptionRef.current) {
             isValid = false;
             newFormErrors['description'] = 'A description is required';
+        }
+        if (descriptionRef.current.length > 255) {
+            isValid = false;
+            newFormErrors['description'] = 'Description is too long (255 characters maximum)'
         }
         if (!contentRef.current) {
             isValid = false;
@@ -90,7 +98,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 <div className={`${styles.selectToolbar} ${styles.formGroup}`}>
                     {/** Visibility Select */}
                     <RadioButtonGroup
-                        name='visibility-select'
+                        name={`visibility-select/image=${image}`}
                         defaultValue='PUBLIC'
                         options={[
                             { value: 'PUBLIC', label: 'Public'},
@@ -132,6 +140,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 {image ? (
                     <ImageUpload
                         formErrors={formErrors}
+                        setFormErrors={setFormErrors}
                         formErrorKey={'content'}
                         valueRef={contentRef}
                         typeRef={contentTypeRef}
