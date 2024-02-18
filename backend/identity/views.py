@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Author, InboxMessage
-from .serializers import AuthorListSerializer, AuthorSerializer, InboxMessageListSerializer
+from .serializers import AuthorSerializer, InboxMessageListSerializer
 from deadlybird.pagination import Pagination
 
 @api_view(["GET"])
@@ -14,15 +14,11 @@ def authors(request):
   """
   authors = Author.objects.all().order_by("id")
 
-  paginator = Pagination()
+  paginator = Pagination("authors")
   page = paginator.paginate_queryset(authors, request)
-  
-  if page is not None:
-    serializer = AuthorListSerializer(page)
-    return paginator.get_paginated_response(serializer.data)
- 
-  serializer = AuthorListSerializer(authors)
-  return Response(serializer.data)  
+
+  serializer = AuthorSerializer(page, many=True)
+  return paginator.get_paginated_response(serializer.data)
 
 @api_view(["GET", "POST"])
 def author(request: HttpRequest, author_id: int):
@@ -148,7 +144,7 @@ def inbox(request: HttpRequest, author_id: int):
   if request.method == "GET":
     # return the list of inbox messages for the author   
     inbox_messages = InboxMessage.objects.filter(author=author_id).order_by("id")
-    paginator = Pagination()
+    paginator = Pagination("inbox")
     page = paginator.paginate_queryset(inbox_messages, request)
     serializer = InboxMessageListSerializer(instance=page, context={'author_id': author_id})
 

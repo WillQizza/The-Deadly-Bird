@@ -18,7 +18,7 @@ def followers(request, author_id:int):
         .select_related('author')\
         .order_by('id')
 
-    paginator = Pagination()
+    paginator = Pagination("followers")
     page = paginator.paginate_queryset(queryset, request)
     
     if page is not None:
