@@ -59,7 +59,7 @@ class BaseTestCase(TestCase):
             followed_author = authors[-i]
             if followed_author != author:
                 follow = Following.objects.create(author=author, target_author=followed_author)
-                followings.append(follow) 
+                followings.append(follow)
         return followings
  
     @staticmethod

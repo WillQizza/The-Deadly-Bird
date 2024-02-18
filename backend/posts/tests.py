@@ -1,5 +1,6 @@
 from django.urls import reverse
 from deadlybird.base_test import BaseTestCase
+from following.models import Following
 from .models import Post
 
 # Create your tests here.
@@ -40,6 +41,9 @@ class AuthorPostTest(BaseTestCase):
       self.assertNotIn(post["id"], response_1_ids)
 
   def test_getting_friend_posts(self):
+    """
+    Check that friends posts are only shown to friends or ourselves.
+    """
     # Create a friend post
     Post.objects.create(
         title=f"FRIEND",
@@ -47,25 +51,35 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.UNLISTED
+        visibility=Post.Visibility.FRIENDS
     )
 
     # Should not have the friend post
     response = self.client.get(reverse("posts", kwargs={ "author_id": self.authors[0].id }), { "size": 100 }).json()
     for post in response["items"]:
-      self.assertNotEqual(post["visibility"], "UNLISTED")
+      self.assertNotEqual(post["visibility"], "FRIENDS")
 
     # Should now have the friend post
-    self.client.session["id"] = self.authors[1].id
+    Following.objects.create(
+      author=self.authors[0],
+      target_author=self.authors[1]
+    )
+    Following.objects.create(
+      author=self.authors[1],
+      target_author=self.authors[0]
+    )
+    session = self.client.session
+    session["id"] = self.authors[1].id
+    session.save()
     response = self.client.get(reverse("posts", kwargs={ "author_id": self.authors[0].id }), { "size": 100 }).json()
 
     found_friends_visibility = next((True for post in response["items"] if post["visibility"] == "FRIENDS"), False)
     self.assertTrue(found_friends_visibility)
 
-    # TODO: Check again but with our user id
-
-
   def test_getting_unlisted_posts(self):
+    """
+    Check that unlisted posts are not publicly listed unless it is from us.
+    """
     # Create a unlisted post
     Post.objects.create(
         title=f"UNLISTED",
@@ -79,12 +93,14 @@ class AuthorPostTest(BaseTestCase):
     # Should not have the unlisted post
     response = self.client.get(reverse("posts", kwargs={ "author_id": self.authors[0].id }), { "size": 100 }).json()
     for post in response["items"]:
-      self.assertNotEqual(post["visibility"], "FRIENDS")
+      self.assertNotEqual(post["visibility"], "UNLISTED")
 
     # Should now have the unlisted post
-    self.client.session["id"] = self.authors[0].id
+    session = self.client.session
+    session["id"] = self.authors[0].id
+    session.save()
+
     response = self.client.get(reverse("posts", kwargs={ "author_id": self.authors[0].id }), { "size": 100 }).json()
-    
     found_unlisted_visibility = next((True for post in response["items"] if post["visibility"] == "UNLISTED"), False)
     self.assertTrue(found_unlisted_visibility)
 

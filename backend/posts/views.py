@@ -20,10 +20,13 @@ def posts(request: HttpRequest, author_id: int):
       
     # Retrieve and serialize posts that should be shown
     if can_see_friends:
-      posts = Post.objects.all() \
-                .filter(author=author_id) \
-                .exclude(visibility=Post.Visibility.UNLISTED) \
-                .order_by("-published_date")
+      posts = Post.objects.all().filter(author=author_id)
+
+      can_see_unlisted = author_id == request.session["id"]
+      if not can_see_unlisted:
+        posts = posts.exclude(visibility=Post.Visibility.UNLISTED) \
+      
+      posts = posts.order_by("-published_date")
     else:
       posts = Post.objects.all() \
                 .filter(author=author_id, visibility=Post.Visibility.PUBLIC) \
