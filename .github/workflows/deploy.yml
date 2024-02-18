@@ -20,7 +20,7 @@ jobs:
 
       - name: Heroku Deployment
         run: |
-          echo "${{ secret.HEROKU_API_KEY }}" >> $HEROKU_API_KEY
+          echo "${{ secrets.HEROKU_API_KEY }}" >> $HEROKU_API_KEY
           heroku container:login
           heroku container:push web -a thedeadlybird
           heroku container:release web -a thedeadlybird
