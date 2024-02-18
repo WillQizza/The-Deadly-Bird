@@ -3,8 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Carousel, Card, Row, Col, Button } from 'react-bootstrap';
 import { Author } from '../../api/types';
 import styles from './AuthorCarousel.module.css';
+import { getUserId } from '../../utils/auth';
+import { apiFollowRequest } from '../../api/following';
 
 const AuthorCarousel = ({authors}: {authors: Author[]}) => {
+
+    const userId: string = getUserId().toString();
     const chunk = (arr: any, size: number) =>
         Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
             arr.slice(i * size, i * size + size)
@@ -25,16 +29,13 @@ const AuthorCarousel = ({authors}: {authors: Author[]}) => {
                             {group.map((author: Author, idx: number) => (
                                 <Col key={idx}>
                                     
-                                    <Card className={styles.card}
-                                        onClick={() => handleCardClick(author.id)} 
-                                    >
-                                        <Card.Img variant="top" src={author.profileImage || 'https://via.placeholder.com/150'} />
+                                    <Card className={styles.card}>
+                                        <Card.Img variant="top" src={author.profileImage || 'https://via.placeholder.com/150'} 
+                                            onClick={() => handleCardClick(author.id)} 
+                                        />
                                         <Card.Body>
                                             <div className={styles.cardDisplayname}>{author.displayName}</div>
-                                            <div className="card-host">{author.host}</div>
-                                            <Button variant="primary" href={author.url} style={{ width: '100%' }}>
-                                                Follow
-                                            </Button> 
+                                            <div className="card-host">{author.host}</div> 
                                         </Card.Body>
                                     </Card>
                                 </Col>

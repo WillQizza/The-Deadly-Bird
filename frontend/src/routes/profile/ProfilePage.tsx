@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy } from 'react';
 
 import { publicDir } from "../../constants";
 
@@ -7,9 +7,18 @@ import Page from '../../components/layout/Page';
 import styles from './ProfilePage.module.css';
 import { useParams } from 'react-router-dom';
 import { getAuthor } from '../../api/authors';
+import { getUserId } from '../../utils/auth';
+import { apiDeleteFollower, apiFollowRequest, apiGetFollower, apiGetFollowing } from '../../api/following';
+
+enum FollowState {
+    FOLLOWING="following",
+    PENDING="pending",
+    NOT_FOLLOWING="not_following"
+};
 
 const ProfilePage: React.FC = () => {
     // GET request on user to request actual API?...
+    const [authorId, setAuthorId] = useState<string>("");
     const [avatarURL, setAvatarURL] = useState(`${publicDir}/static/default-avatar.png`);
     const [githubUsername, setGithubUsername] = useState("");
     const [username, setUsername] = useState("");
@@ -17,7 +26,9 @@ const ProfilePage: React.FC = () => {
     const [postCount, setPostCount] = useState(-1);
     const [followingCount, setFollowingCount] = useState(-1);
     const [followerCount, setFollowerCount] = useState(-1);
+    const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
 
+    const curAuthorId : string = getUserId().toString(); 
     const params = useParams();
 
     useEffect(() => {
@@ -33,6 +44,7 @@ const ProfilePage: React.FC = () => {
                 setPostCount(author.posts);
                 setFollowerCount(author.followers);
                 setFollowingCount(author.following);
+                setAuthorId(author.id);
 
                 if (author.github) {
                     setGithubUsername(author.github);
@@ -41,7 +53,34 @@ const ProfilePage: React.FC = () => {
                     setAvatarURL(author.profileImage);
                 }
             });
+        
+        if (userId) {
+            apiGetFollower(userId, curAuthorId)
+            .then(async response => {
+                console.log(response);
+                if (response.items && response.items.length !== 0) { 
+                    setFollowState(FollowState.FOLLOWING);
+                }
+            });
+        }
+         
     }, [params]);
+
+    const handleFollow = async () => {
+        if (followState == FollowState.NOT_FOLLOWING) {
+            const responseJSON = await apiFollowRequest(curAuthorId, authorId);
+            if (!responseJSON["error"]) {
+                setFollowState(FollowState.PENDING);
+                console.log(followState);
+            }
+        } else if (followState == FollowState.FOLLOWING) {
+            const responseJSON = await apiDeleteFollower(authorId, curAuthorId);
+            if (!responseJSON["error"]) {
+                setFollowState(FollowState.NOT_FOLLOWING);
+            }
+        }
+        
+    }
 
     return <Page>
         <div id={styles.container}>
@@ -55,8 +94,14 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <div id={styles.statsAndFollow}>
                     <div className={styles.item}>
-                        <div id={styles.followButton}>
-                            Follow
+                        <div id={styles.followButton}
+                            onClick={handleFollow} 
+                        >
+                            {followState === FollowState.FOLLOWING ?  
+                            "Unfollow" : 
+                            followState === FollowState.PENDING ? 
+                            "Pending" : "Follow"
+                            }
                         </div>
                     </div>
                     <div className={styles.item}>

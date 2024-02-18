@@ -3,7 +3,8 @@ import { Author } from "../../api/types";
 import { getAuthors } from "../../api/authors";
 import styles from "./ExploreView.module.css";
 import AuthorCarousel from "./AuthorCarousel";
-
+import { apiGetFollowing } from "../../api/following";
+import { getUserId } from "../../utils/auth";
 
 const ExploreView: React.FC = () => {
     
@@ -22,28 +23,8 @@ const ExploreView: React.FC = () => {
         fetchSetAuthors(curPage);
     }, [curPage]);
 
-    const handlePrevPage = () => {
-        if (curPage > 1) {
-            setCurPage(curPage - 1);
-        }
-    };
-
-    const handleNextPage = () => {
-        if (isNextPageAvailable) {
-            setCurPage(curPage + 1);
-        }
-    };
-
-    const handleFollow = (authorId: string) => {
-        console.log(`Following author with ID: ${authorId}`);
-        // Implement follow functionality here
-    };
-
     return (
         <div>
-            {/* <div id={styles.NetworkExploreHeader}>
-                Explore Local Authors
-            </div> */}
             <div className={styles.carouselContainer}>
                 <div className={`${styles.pageButton} ${styles.prevButton}`} onClick={() => curPage > 1 && setCurPage(curPage - 1)}>
                     &lt;

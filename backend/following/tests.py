@@ -13,6 +13,7 @@ from identity.models import Author
 from .models import Following, FollowingRequest
 from typing import List
 from deadlybird.base_test import BaseTestCase
+from identity.models import InboxMessage
 
 class FollowersTestCase(BaseTestCase):
     def setUp(self):
@@ -111,3 +112,47 @@ class FollowersTestCase(BaseTestCase):
         self.client.post(url)
         response = self.client.post(url)
         self.assertEqual(response.status_code, 409)
+
+    def test_follow_request_inbox_redirect(self):
+
+        author1 = self.create_author()
+        author2 = self.create_author()
+
+        url = reverse('request_follower', kwargs={
+            'local_author_id': author1.id, 'foreign_author_id': author2.id
+        })
+        
+        follow_reqs = FollowingRequest.objects.filter(
+            author=author1.id,
+            target_author=author2.id
+        )
+
+        self.assertTrue(len(follow_reqs) == 0)  
+        response = self.client.post(url)
+        self.assertTrue(response.status_code == 201)
+        
+        
+        follow_req = FollowingRequest.objects.filter(
+            author=author1.id,
+            target_author=author2.id
+        ).first()
+
+        self.assertTrue(follow_req is not None)  
+
+        inbox_message = InboxMessage.objects.filter(
+            author=author2.id,
+            content_id=follow_req.id
+        ).first()
+
+        self.assertTrue(inbox_message is not None)
+
+    def test_following_api(self):
+
+        author2 = self.authors[1]
+        url = reverse('following', kwargs={'author_id': author2.user.id})
+        following = self.client.get(url)
+        self.assertTrue(following.json()['count'] > 0)
+
+        include_author_ids = '1,2,3'
+        response = self.client.get(url, data={'include_author_ids': include_author_ids}) 
+        self.assertTrue(response.json()['count'] == 0)
