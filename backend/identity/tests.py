@@ -1,9 +1,6 @@
-from django.test import TestCase
 from rest_framework import status
 from django.urls import reverse
-from identity.models import Author, InboxMessage
-from django.contrib.auth.models import User
-from typing import List
+from identity.models import InboxMessage
 from deadlybird.base_test import BaseTestCase
 import json
 

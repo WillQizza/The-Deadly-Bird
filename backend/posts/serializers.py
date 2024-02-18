@@ -35,3 +35,21 @@ class PostSerializer(serializers.ModelSerializer):
   class Meta:
     model = Post
     fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
+
+class PostListSerializer(serializers.Serializer):
+  """
+  Serialize a list of authors into "type" and "items" fields for requirement
+  """
+  type = serializers.CharField(default="authors", read_only=True)
+  items = serializers.SerializerMethodField()
+
+  def get_items(self, obj):
+    try:
+      posts = [PostSerializer(post).data for post in obj]
+      return posts
+    except TypeError:
+      post = PostSerializer(obj).data 
+      return post
+
+  class Meta:
+      fields = ['type', 'items'] 
