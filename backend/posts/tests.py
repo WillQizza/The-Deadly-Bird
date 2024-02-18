@@ -68,9 +68,7 @@ class AuthorPostTest(BaseTestCase):
       author=self.authors[1],
       target_author=self.authors[0]
     )
-    session = self.client.session
-    session["id"] = self.authors[1].id
-    session.save()
+    self.edit_session(id=self.authors[1].id)
     response = self.client.get(reverse("posts", kwargs={ "author_id": self.authors[0].id }), { "size": 100 }).json()
 
     found_friends_visibility = next((True for post in response["items"] if post["visibility"] == "FRIENDS"), False)
@@ -96,15 +94,16 @@ class AuthorPostTest(BaseTestCase):
       self.assertNotEqual(post["visibility"], "UNLISTED")
 
     # Should now have the unlisted post
-    session = self.client.session
-    session["id"] = self.authors[0].id
-    session.save()
-
+    self.edit_session(id=self.authors[0].id)
     response = self.client.get(reverse("posts", kwargs={ "author_id": self.authors[0].id }), { "size": 100 }).json()
+    
     found_unlisted_visibility = next((True for post in response["items"] if post["visibility"] == "UNLISTED"), False)
     self.assertTrue(found_unlisted_visibility)
 
   def _is_post_object(self, obj):
+    """
+    Assert that the JSON post object provided matches the API spec.
+    """
     properties = ["type", "title", "id", "source", "origin", "description", "contentType", 
                   "content", "author", "count", "comments", "commentsSrc", "published", 
                   "visibility"]
@@ -114,10 +113,40 @@ class AuthorPostTest(BaseTestCase):
     return True
 
   def test_invalid_post_payload(self):
-    pass
+    """
+    Check that not providing all valid post form properties is handled.
+    """
+    self.edit_session(id=self.authors[0].id)
+    response = self.client.post(reverse("posts", kwargs={ "author_id": 1 }))
+    self.assertEquals(response.status_code, 400)
 
   def test_impersonation_post_payload(self):
-    pass
+    """
+    Check that we cannot create a post as someone else we are not.
+    """
+    self.edit_session(id=self.authors[0].id)
+    response = self.client.post(reverse("posts", kwargs={ "author_id": self.authors[1].id }), {
+      "title": "Post",
+      "description": "Desc",
+      "contentType": "text/plain",
+      "content": "Hello World",
+      "visibility": Post.Visibility.PUBLIC
+    })
+    self.assertEquals(response.status_code, 401)
 
   def test_valid_post_payload(self):
-    pass
+    """
+    Check that we can create a post.
+    """
+    self.edit_session(id=self.authors[0].id)
+    response = self.client.post(reverse("posts", kwargs={ "author_id": self.authors[0].id }), {
+      "title": "Post",
+      "description": "Desc",
+      "contentType": "text/plain",
+      "content": "Hello World",
+      "visibility": Post.Visibility.PUBLIC
+    })
+    self.assertEquals(response.status_code, 201)
+
+    post_exists = Post.objects.all().filter(title="Post").exists()
+    self.assertTrue(post_exists)

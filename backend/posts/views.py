@@ -49,6 +49,14 @@ def posts(request: HttpRequest, author_id: int):
         "message": "Required field missing"
       }, status=400)
     
+    # Check that we are who we say we are
+    if (not "id" in request.session) \
+      or (int(request.session["id"]) != author_id):
+      return Response({
+        "error": True,
+        "message": "You do not have permission to post as this user."
+      }, status=401)
+
     # Create the post
     author = get_object_or_404(Author, id=author_id)
     title = request.POST["title"]
