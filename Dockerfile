@@ -37,6 +37,7 @@ RUN pip3 install -r requirements.txt
 # Copy backend source + frontend build files to backend deployment
 COPY ./backend .
 COPY --from=frontend /app/backend/react/static/ /app/react/static/
+COPY --from=frontend /app/backend/react/templates/ /app/react/templates/
 
 # Compile static files and run app
 RUN python3 manage.py collectstatic --noinput
