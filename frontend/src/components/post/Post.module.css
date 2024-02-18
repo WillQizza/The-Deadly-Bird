@@ -1,0 +1,80 @@
+.postContainer {
+    border-radius: 20px;
+    border: 10px solid var(--dark-teal);
+    max-width: 600px;
+    padding: 1em;
+    background-color: var(--teal);
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.postHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.postProfilePicture {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    overflow: hidden;
+    object-fit: cover;
+    background-color: var(--light-teal);
+}
+
+.postInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.postAuthor {
+    border-radius: 20px;
+    background-color: var(--light-teal);
+    padding: 10px;
+    font-size: 24px;
+}
+
+.postSubInfo {
+    display: flex;
+    justify-content: space-around;
+}
+
+.postSubInfoItem {
+    border-radius: 20px;
+    background-color: var(--light-teal);
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.postBody {
+    border-radius: 20px;
+    background-color: var(--light-teal);
+    padding: 10px;
+}
+
+.postButtons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.postButton {
+    width: 30px;
+    height: 30px;
+    margin: 10px;
+}
+
+.postShare:hover {
+    color: limegreen;
+}
+
+.postLike:hover {
+    color: red;
+}
