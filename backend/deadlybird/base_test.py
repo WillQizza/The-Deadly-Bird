@@ -25,7 +25,7 @@ class BaseTestCase(TestCase):
         Create ten authors
         """
         authors = []
-        for i in range(1, 5):
+        for i in range(1, 11):
             user = User.objects.create_user(username=f'user{i}', password='password123')
             author = Author.objects.create(user=user, host='http://localhost:8000')
             authors.append(author)

@@ -12,7 +12,7 @@ def authors(request):
   """
   get all authors view as to handle https://uofa-cmput404.github.io/general/project.html#authors
   """
-  authors = Author.objects.filter()
+  authors = Author.objects.all().order_by("id")
 
   paginator = Pagination()
   page = paginator.paginate_queryset(authors, request)

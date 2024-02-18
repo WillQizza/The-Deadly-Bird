@@ -8,7 +8,7 @@ from deadlybird.base_test import BaseTestCase
 import json
 
 # Create your tests here.
-class AuthenticationViewsTest(BaseTestCase):
+class AuthenticationTest(BaseTestCase):
   def setUp(self):
     super().setUp()
     self.admin_user = self.create_author(username="admin", password="admin")
@@ -66,6 +66,51 @@ class AuthenticationViewsTest(BaseTestCase):
       "password": "newuser"
     })
     self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+class AuthorTests(BaseTestCase):
+  def setUp(self):
+    super().setUp()
+
+  def test_retrieving_all_authors(self):
+    """
+    Check the list of authors retrieved is valid.
+    """
+    # Check that we only extract 5 authors from page 1
+    response1 = self.client.get(reverse("authors"), { "size": 5 }).json()
+    self.assertEquals(len(response1["results"]["items"]), 5)
+
+    # Check that each author object is a valid author
+    for author in response1["results"]["items"]:
+      self.assertTrue(self._is_author_object(author))
+
+    # Check that the second page also has 5 authors
+    # (we only created 10)
+    response2 = self.client.get(reverse("authors"), { "size": 5, "page": 2 }).json()
+    self.assertEquals(len(response2["results"]["items"]), 5)
+
+    # Check that each author object is a valid author that was not from response1
+    response_1_ids = set(author["id"] for author in response1["results"]["items"])
+    for author in response2["results"]["items"]:
+      self.assertTrue(self._is_author_object(author))
+      self.assertNotIn(author["id"], response_1_ids)
+
+  def test_retrieving_author(self):
+    """
+    Check that details are accurate when retrieving a specific author
+    """
+    response = self.client.get(reverse("author", kwargs={ "author_id": 8 })).json()
+    self.assertEquals(response["id"], 8)
+    self.assertEquals(response["displayName"], "user8")
+
+  def _is_author_object(self, obj):
+    """
+    Check that an author object is valid.
+    """
+    properties = ["type", "id", "url", "host", "displayName", "github", "profileImage"]
+    for property in properties:
+      if not property in obj:
+        return False
+    return True
 
 
 class InboxMessageTests(BaseTestCase):
