@@ -1,5 +1,5 @@
 import { baseURL } from "../constants";
-import { Author, PaginatedAPI, InboxResponse } from "./types";
+import { InboxResponse } from "./types";
 
 /**
  * @description function to retreive inbox mesages for an author

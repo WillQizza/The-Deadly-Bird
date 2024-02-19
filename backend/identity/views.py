@@ -4,8 +4,9 @@ from django.http import HttpRequest
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Author, InboxMessage
-from .serializers import AuthorSerializer, InboxMessageListSerializer
+from .serializers import AuthorSerializer, InboxMessageSerializer
 from deadlybird.pagination import Pagination
+from .pagination import InboxPagination
 
 @api_view(["GET"])
 def authors(request):
@@ -144,9 +145,10 @@ def inbox(request: HttpRequest, author_id: int):
   if request.method == "GET":
     # return the list of inbox messages for the author   
     inbox_messages = InboxMessage.objects.filter(author=author_id).order_by("id")
-    paginator = Pagination("inbox")
+
+    paginator = InboxPagination(author_id=author_id)
     page = paginator.paginate_queryset(inbox_messages, request)
-    serializer = InboxMessageListSerializer(instance=page, context={'author_id': author_id})
+    serializer = InboxMessageSerializer(page, many=True)
 
     return paginator.get_paginated_response(serializer.data)
   

@@ -93,9 +93,9 @@ export type LikedResponse = {
 //url ://service/authors/{AUTHOR_ID}/inbox 
 export type InboxResponse = {
     type: "inbox",
-    author: "string",
-    items: (Post | Comment | Like)[], //TODO: Add follow request type
-};
+    author: number,
+    items: (Post | Comment | Like)[]
+}; // TODO: Add follow request type
 
 enum ContentType {
     MARKDOWN = "text/markdown",
