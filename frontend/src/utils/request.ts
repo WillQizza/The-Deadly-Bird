@@ -22,7 +22,7 @@ const extractCSRFToken = () => {
  */
 export const apiRequest = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
   const data = Object.assign({
-    credentials: "same-origin"
+    credentials: "include"
   }, init || {});
 
   const headers = new Headers(data.headers);
