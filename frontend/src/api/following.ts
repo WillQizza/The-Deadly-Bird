@@ -54,10 +54,8 @@ export const apiGetFollowing = async (
     return data; 
 }
 
-export const apiFollowRequest = async(
-    localAuthorId: string,
-    foreignAuthorId: string
-): Promise<any> => {
+export const apiFollowRequest = async( localAuthorId: string, foreignAuthorId: string)
+: Promise<any> => {
     
     console.log("SEND FOLLOW REQUEST: local: ", localAuthorId, "foreign:", foreignAuthorId);
 
@@ -75,10 +73,13 @@ export const apiFollowRequest = async(
     return data;
 }
 
-export const apiDeleteFollower = async (
-    authorId: string,
-    foreignAuthorId: string
-): Promise<number> => {
+/**
+ * @description remove foreign author as a follower of author id.   
+ * @param authorId author that following
+ * @param foreignAuthorId author that is being followed
+ */
+export const apiDeleteFollower = async (authorId: string, foreignAuthorId: string )
+: Promise<number> => {
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "DELETE",
     });
@@ -86,20 +87,21 @@ export const apiDeleteFollower = async (
     return response.status;
 }
 
-export const apiPutFollower = async (
-    authorId: string, 
-    foreignAuthorId: string
-): Promise<number> => {
+/**
+ * @description idempontent PUT to add foreign author as a follower of author id.   
+ * @param authorId author that following
+ * @param foreignAuthorId author that is being followed
+ */
+export const apiPutFollower = async (authorId: string, foreignAuthorId: string)
+: Promise<number> => {
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "PUT",
     });
     return response.status;
 }
 
-export const apiGetFollower = async (
-    authorId: string, 
-    foreignAuthorId: string
-): Promise<any> => {
+export const apiGetFollower = async (authorId: string, foreignAuthorId: string)
+: Promise<any> => {
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "GET",
     });

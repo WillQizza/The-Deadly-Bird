@@ -6,7 +6,6 @@ import { useParams } from 'react-router-dom';
 import { getAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiFollowRequest, apiGetFollower} from '../../api/following';
-import { Button } from 'react-bootstrap';
 
 enum FollowState {
     FOLLOWING="following",
@@ -59,7 +58,8 @@ const ProfilePage: React.FC = () => {
                 if (response.status != 404) { 
                     setFollowState(FollowState.FOLLOWING);
                 } else {
-                    // TODO: check if follow request is pending
+                    // TODO: check if follow request is pending and set followState
+                    // Currently a pending request appears as not following after refresh
                 }
             });
         }
