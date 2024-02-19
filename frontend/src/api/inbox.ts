@@ -6,15 +6,15 @@ import { Author, PaginatedAPI, InboxResponse } from "./types";
  * @param id author id to retrieve
  */
 export const getInboxMessages = async (
-    authorID: number,
+    authorID: string,
     page: number,
     size: number
-): Promise<PaginatedAPI<InboxResponse>> => {
+): Promise<InboxResponse> => {
     
     const response = await fetch(
         `${baseURL}/api/authors/${authorID}/inbox?page=${page}&size=${size}`
     );    
-    const data: PaginatedAPI<InboxResponse> = await response.json();
+    const data: InboxResponse = await response.json();
     
     return data;
 }

@@ -1,14 +1,11 @@
 import React, { useState, useEffect, lazy } from 'react';
-
 import { publicDir } from "../../constants";
-
 import Page from '../../components/layout/Page';
-
 import styles from './ProfilePage.module.css';
 import { useParams } from 'react-router-dom';
 import { getAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
-import { apiDeleteFollower, apiFollowRequest, apiGetFollower, apiGetFollowing } from '../../api/following';
+import { apiDeleteFollower, apiFollowRequest, apiGetFollower} from '../../api/following';
 
 enum FollowState {
     FOLLOWING="following",
@@ -54,13 +51,13 @@ const ProfilePage: React.FC = () => {
                 }
             });
         
-        if (userId) {
+        if (userId) { 
+            // If logged in user is following viewed profile, set followState accoordingly
             apiGetFollower(userId, curAuthorId)
             .then(async response => {
-                console.log(response);
-                if (response.items && response.items.length !== 0) { 
+                if (response.status != 404) { 
                     setFollowState(FollowState.FOLLOWING);
-                }
+                } 
             });
         }
          
@@ -71,13 +68,12 @@ const ProfilePage: React.FC = () => {
             const responseJSON = await apiFollowRequest(curAuthorId, authorId);
             if (!responseJSON["error"]) {
                 setFollowState(FollowState.PENDING);
-                console.log(followState);
             }
         } else if (followState == FollowState.FOLLOWING) {
-            const responseJSON = await apiDeleteFollower(authorId, curAuthorId);
-            if (!responseJSON["error"]) {
+            const status = await apiDeleteFollower(authorId, curAuthorId);
+            if (status === 204) {
                 setFollowState(FollowState.NOT_FOLLOWING);
-            }
+            } 
         }
         
     }
@@ -95,9 +91,9 @@ const ProfilePage: React.FC = () => {
                 <div id={styles.statsAndFollow}>
                     <div className={styles.item}>
                         <div id={styles.followButton}
-                            onClick={handleFollow} 
-                        >
-                            {followState === FollowState.FOLLOWING ?  
+                            onClick={handleFollow}
+                        >   {
+                            followState === FollowState.FOLLOWING ?  
                             "Unfollow" : 
                             followState === FollowState.PENDING ? 
                             "Pending" : "Follow"

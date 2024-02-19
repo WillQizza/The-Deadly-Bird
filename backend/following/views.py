@@ -155,7 +155,7 @@ def request_follower(request: HttpRequest, local_author_id:int, foreign_author_i
         return Response({
             "error": True,
             "message": "remote inboxed not supported yet"
-        })
+        }, status=400)
     else:
         try:
             follow_req = FollowingRequest.objects.create(

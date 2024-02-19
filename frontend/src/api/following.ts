@@ -16,16 +16,15 @@ export const apiGetFollowers = async (
         `${baseURL}/api/authors/${authorID}/followers?page=${page}&size=${size}`
 
     );    
-    const data: FollowersResponse = await response.json();
-    
+    const data: FollowersResponse = await response.json(); 
     return data;
 }
 
 /**
  * @description function to retreive paginated list of authors authorID is following
  * @param id author id to retrieve
- * @param includeAuthorIDS a list of author ids to exclusively include in query
- * @param excludeAuthorIDS a list of author ids to exclude from query
+ * @param includeAuthorIDS a filter list of author ids to include in query
+ * @param excludeAuthorIDS a filter list of author ids to exclude from query
  */
 export const apiGetFollowing = async (
     authorID: string,
@@ -69,31 +68,30 @@ export const apiFollowRequest = async(
         `${baseURL}/api/authors/request-follower/${localAuthorId}/${foreignAuthorId}`,
         init
     );
-    const data = await response.json();
 
+    const data = await response.json();
     return data;
 }
 
 export const apiDeleteFollower = async (
     authorId: string,
     foreignAuthorId: string
-): Promise<any> => {
+): Promise<number> => {
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "DELETE",
     });
-    const data = await response.json();
-    return data;
+    
+    return response.status;
 }
 
 export const apiPutFollower = async (
     authorId: string, 
     foreignAuthorId: string
-): Promise<any> => {
+): Promise<number> => {
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "PUT",
     });
-    const data = await response.json();
-    return data;
+    return response.status;
 }
 
 export const apiGetFollower = async (
@@ -103,6 +101,9 @@ export const apiGetFollower = async (
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "GET",
     });
+    if (!response.ok) {
+        return {"status": response.status};
+    }
     const data = await response.json();
-    return data;
+    return data; 
 }
