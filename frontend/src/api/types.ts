@@ -91,7 +91,11 @@ export type LikedResponse = {
 };
 
 //url ://service/authors/{AUTHOR_ID}/inbox 
-export type InboxResponse = PaginatedAPI<"inbox", (Post | Comment | Like)>; //TODO: Add follow request type
+export type InboxResponse = {
+    type: "inbox",
+    author: number,
+    items: (Post | Comment | Like)[]
+}; // TODO: Add follow request type
 
 enum ContentType {
     MARKDOWN = "text/markdown",
