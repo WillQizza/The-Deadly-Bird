@@ -21,7 +21,9 @@ const extractCSRFToken = () => {
  * @returns regular fetch response
  */
 export const apiRequest = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-  const data = init || {};
+  const data = Object.assign({
+    credentials: "same-origin"
+  }, init || {});
 
   const headers = new Headers(data.headers);
   const csrfToken = extractCSRFToken();
