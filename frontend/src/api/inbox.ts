@@ -13,7 +13,7 @@ export const getInboxMessages = async (
     
     const response = await fetch(
         `${baseURL}/api/authors/${authorID}/inbox?page=${page}&size=${size}`
-    );    
+    );   
     const data: InboxResponse = await response.json();
     
     return data;

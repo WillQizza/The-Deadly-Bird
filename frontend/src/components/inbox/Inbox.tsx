@@ -15,27 +15,28 @@ const Inbox = () => {
     useEffect(() => {
         const getMessages = async () => {
             try {
-                const res: InboxResponse = await getInboxMessages('1', pageNo, pageSize);
-                console.log(res);
+                const res: InboxResponse = await getInboxMessages(userId, pageNo, pageSize);
                 setInboxMessages(res.items);
             } catch (error) {
                 console.log("failed to fetch inbox:", error);
             };
         };
         getMessages();
-        console.log(inboxMessages);
+        console.log(inboxMessages, inboxMessages.length);
     }, []);
 
     return (
         <div style={{ maxHeight: '100%', overflowY: 'auto' }}>
-            {/* {inboxMessages.map((message) => (
-                <Card key={message} className="mb-2">
-                    <Card.Header>Test</Card.Header>
+            {inboxMessages.map((message, idx) => (
+                <Card key={message+idx} className="mb-2">
+                    <Card.Header>Follow Request</Card.Header>
                     <Card.Body>
-                        <Card.Text>Body</Card.Text>
+                        <Card.Text>{message.type}</Card.Text>
+                        <Card.Text> from: {message.author.displayName}</Card.Text>
+                        <Card.Text> to: {message.target_author.displayName}</Card.Text>
                     </Card.Body>
                 </Card>
-            ))} */}
+            ))}
         </div>
     );
 };

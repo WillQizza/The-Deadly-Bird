@@ -74,8 +74,7 @@ const ProfilePage: React.FC = () => {
             if (status === 204) {
                 setFollowState(FollowState.NOT_FOLLOWING);
             } 
-        }
-        
+        }        
     }
 
     return <Page>

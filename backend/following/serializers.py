@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Following, FollowingRequest
+from identity.models import Author
 from identity.serializers import AuthorSerializer
 
 class FollowingSerializer(serializers.Serializer):
@@ -15,4 +16,24 @@ class FollowingSerializer(serializers.Serializer):
             return author
 
     class Meta:
-        fields = ['type', 'items'] 
+        fields = ['type', 'items']
+
+class FollowRequestSerializer(serializers.Serializer):
+    """
+    Serialize a single instance of a FollowRequest object. No support for
+    many / paginated serialization for now.
+    """
+    type = serializers.CharField(default="follow_request", read_only=True)
+    target_author = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    
+    def get_target_author(self, obj):
+        target_author = AuthorSerializer(obj.author)
+        return target_author.data
+    
+    def get_author(self, obj):
+        author = AuthorSerializer(obj.author)
+        return author.data 
+     
+    class Meta:
+        fields = ['type', 'author', 'target_author']

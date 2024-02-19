@@ -123,6 +123,7 @@ class InboxMessageTests(BaseTestCase):
     })
     response = self.client.get(url)
     self.assertEquals(response.status_code, 200)
+    self.assertTrue(len(response.json()['items']) > 0)
 
   def test_inbox_post(self):
     """

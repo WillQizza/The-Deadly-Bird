@@ -39,8 +39,10 @@ class InboxMessageSerializer(serializers.Serializer):
       serializer = PostSerializer(instance=post)
       return serializer.data
     elif instance.content_type == InboxMessage.ContentType.FOLLOW:
-      # TODO: this one is confusing since the follow object is not yet created.
-      pass
+      from following.serializers import FollowRequestSerializer
+      request = FollowingRequest.objects.get(id=instance.content_id)
+      serializer = FollowRequestSerializer(instance=request)
+      return serializer.data
     elif instance.content_type == InboxMessage.ContentType.LIKE:
       # TODO: implement like 
       pass

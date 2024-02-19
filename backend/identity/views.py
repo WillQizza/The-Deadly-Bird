@@ -145,7 +145,6 @@ def inbox(request: HttpRequest, author_id: int):
   if request.method == "GET":
     # return the list of inbox messages for the author   
     inbox_messages = InboxMessage.objects.filter(author=author_id).order_by("id")
-
     paginator = InboxPagination(author_id=author_id)
     page = paginator.paginate_queryset(inbox_messages, request)
     serializer = InboxMessageSerializer(page, many=True)
