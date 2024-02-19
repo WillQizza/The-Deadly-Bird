@@ -1,19 +1,17 @@
 from django.http import HttpRequest
-from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
 from following.util import is_friends
 from deadlybird.pagination import Pagination
-from .serializers import PostListSerializer
+from .serializers import PostSerializer
 from .models import Post, Author
 
 @api_view(["GET", "POST"])
 def posts(request: HttpRequest, author_id: int):
   if request.method == "GET":
     # Retrieve author posts
-    paginator = Pagination()
+    paginator = Pagination("posts")
 
     can_see_friends = False
     if "id" in request.session:
@@ -22,20 +20,22 @@ def posts(request: HttpRequest, author_id: int):
       
     # Retrieve and serialize posts that should be shown
     if can_see_friends:
-      posts = Post.objects.all() \
-                .filter(author=author_id) \
-                .exclude(visibility=Post.Visibility.UNLISTED) \
-                .order_by("-published_date")
+      posts = Post.objects.all().filter(author=author_id)
+
+      can_see_unlisted = author_id == request.session["id"]
+      if not can_see_unlisted:
+        posts = posts.exclude(visibility=Post.Visibility.UNLISTED) \
+      
+      posts = posts.order_by("-published_date")
     else:
       posts = Post.objects.all() \
                 .filter(author=author_id, visibility=Post.Visibility.PUBLIC) \
                 .order_by("-published_date")
       
     posts_on_page = paginator.paginate_queryset(posts, request)
-    serialized_posts = PostListSerializer(posts_on_page)
+    serialized_posts = PostSerializer(posts_on_page, many=True)
 
-    # Output to user
-    return Response(serialized_posts.data)
+    return paginator.get_paginated_response(serialized_posts.data)
   else:
     # Create author post
     # Check the request body for all the required fields
@@ -49,6 +49,14 @@ def posts(request: HttpRequest, author_id: int):
         "message": "Required field missing"
       }, status=400)
     
+    # Check that we are who we say we are
+    if (not "id" in request.session) \
+      or (int(request.session["id"]) != author_id):
+      return Response({
+        "error": True,
+        "message": "You do not have permission to post as this user."
+      }, status=401)
+
     # Create the post
     author = get_object_or_404(Author, id=author_id)
     title = request.POST["title"]

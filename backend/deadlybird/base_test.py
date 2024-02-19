@@ -19,6 +19,12 @@ class BaseTestCase(TestCase):
         self.following          = self.create_following(self.authors)
         self.inbox_messages     = self.create_inbox_messages()
 
+    def edit_session(self, **kwargs):
+        session = self.client.session
+        for prop in kwargs:
+            session[prop] = kwargs[prop]
+        session.save()
+
     @staticmethod
     def create_authors():
         """
@@ -59,7 +65,7 @@ class BaseTestCase(TestCase):
             followed_author = authors[-i]
             if followed_author != author:
                 follow = Following.objects.create(author=author, target_author=followed_author)
-                followings.append(follow) 
+                followings.append(follow)
         return followings
  
     @staticmethod

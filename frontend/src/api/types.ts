@@ -5,11 +5,11 @@
  */
 
 /* Wraps GET responses that return a paginated list. */
-export type PaginatedAPI<T> = {
-    count: number,
-    next: number | null,
-    previous: number | null,
-    results: T
+export type PaginatedAPI<T, R> = {
+    type: T;
+    next: string | null,
+    prev: string | null,
+    items: R[]
 };
 
 /* Basic Object Types */
@@ -61,16 +61,10 @@ export type Like = {
 };
 
 // url: ://service/authors/
-export type AuthorsResponse = {
-    type: "authors",
-    items: Author[]
-};
+export type AuthorsResponse = PaginatedAPI<"authors", Author>;
 
 // url: ://service/authors/{AUTHOR_ID}/followers
-export type FollowersResponse = {
-    type: "followers",
-    items: Author[]
-};
+export type FollowersResponse = PaginatedAPI<"followers", Author>;
 
 // url : ? Not Specified in Spec.
 export type FollowResponse = {
@@ -88,10 +82,7 @@ export type PostResponse = Post & {
 };
 
 // url: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments
-export type CommentsResponse = {
-    type: "comments",
-    comments: Comment[]
-};
+export type CommentsResponse = PaginatedAPI<"comments", Comment>;
 
 //url: ://service/authors/{AUTHOR_ID}/liked 
 export type LikedResponse = {

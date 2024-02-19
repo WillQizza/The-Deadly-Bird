@@ -74,20 +74,20 @@ class AuthorTests(BaseTestCase):
     """
     # Check that we only extract 5 authors from page 1
     response1 = self.client.get(reverse("authors"), { "size": 5 }).json()
-    self.assertEquals(len(response1["results"]["items"]), 5)
+    self.assertEquals(len(response1["items"]), 5)
 
     # Check that each author object is a valid author
-    for author in response1["results"]["items"]:
+    for author in response1["items"]:
       self.assertTrue(self._is_author_object(author))
 
     # Check that the second page also has 5 authors
     # (we only created 10)
     response2 = self.client.get(reverse("authors"), { "size": 5, "page": 2 }).json()
-    self.assertEquals(len(response2["results"]["items"]), 5)
+    self.assertEquals(len(response2["items"]), 5)
 
     # Check that each author object is a valid author that was not from response1
-    response_1_ids = set(author["id"] for author in response1["results"]["items"])
-    for author in response2["results"]["items"]:
+    response_1_ids = set(author["id"] for author in response1["items"])
+    for author in response2["items"]:
       self.assertTrue(self._is_author_object(author))
       self.assertNotIn(author["id"], response_1_ids)
 

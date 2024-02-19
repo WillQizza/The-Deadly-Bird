@@ -1,6 +1,6 @@
 import { baseURL } from "../constants";
-import { Author, PaginatedAPI, FollowersResponse } from "./types";
 import { apiRequest } from "../utils/request";
+import { FollowersResponse } from "./types";
 
 /**
  * @description function to retreive the followers for an author
@@ -10,12 +10,13 @@ export const apiGetFollowers = async (
     authorID: number,
     page: number,
     size: number
-): Promise<PaginatedAPI<FollowersResponse>> => {
+): Promise<FollowersResponse> => {
     
     const response = await apiRequest(
         `${baseURL}/api/authors/${authorID}/followers?page=${page}&size=${size}`
-    ); 
-    const data = await response.json();
+
+    );    
+    const data: FollowersResponse = await response.json();
     
     return data;
 }
@@ -32,7 +33,7 @@ export const apiGetFollowing = async (
     size: number,
     includeAuthorIDs?: string[],
     excludeAuthorIDs?: string[]
-): Promise<PaginatedAPI<FollowersResponse>> => {
+): Promise<FollowersResponse> => {
     
     const url = new URL(`${baseURL}/api/authors/${authorID}/followers`);
     const params = new URLSearchParams(url.search);
