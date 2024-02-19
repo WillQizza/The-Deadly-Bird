@@ -14,8 +14,8 @@ const ExploreView: React.FC = () => {
 
     const fetchSetAuthors = async (page: number) => {
         const response = await getAuthors(page, pageSize);
-        setExploreAuthors(response.results.items);
-        setIsNextPageAvailable(response.results.items.length === pageSize);
+        setExploreAuthors(response.items);
+        setIsNextPageAvailable(response.items.length === pageSize);
     };
 
     useEffect(() => {

@@ -10,9 +10,9 @@ const Inbox = () => {
     useEffect(() => {
         const getMessages = async () => {
             try {
-                const res: PaginatedAPI<InboxResponse> = await getInboxMessages(1, 1, 10);
-                console.log(res.results);
-                setInboxMessages(res.results.items);
+                const res: InboxResponse = await getInboxMessages(1, 1, 10);
+                console.log(res);
+                setInboxMessages(res.items);
                 console.log(inboxMessages);
             } catch (error) {
                 console.log("failed to fetch inbox:", error);

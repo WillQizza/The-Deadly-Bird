@@ -1,5 +1,5 @@
 import { baseURL } from "../constants";
-import { Author, PaginatedAPI, InboxResponse } from "./types";
+import { InboxResponse } from "./types";
 
 /**
  * @description function to retreive inbox mesages for an author
@@ -9,12 +9,12 @@ export const getInboxMessages = async (
     authorID: number,
     page: number,
     size: number
-): Promise<PaginatedAPI<InboxResponse>> => {
+): Promise<InboxResponse> => {
     
     const response = await fetch(
         `${baseURL}/api/authors/${authorID}/inbox?page=${page}&size=${size}`
     );    
-    const data: PaginatedAPI<InboxResponse> = await response.json();
+    const data: InboxResponse = await response.json();
     
     return data;
 }
