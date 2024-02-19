@@ -11,7 +11,7 @@ const HomePage: React.FC = () => {
     return ( 
         <Page>
             <div className="TEST_DIV"
-            style={{color:'white', fontSize:'40px'}} 
+            style={{color:'white', fontSize:'40px', margin:'auto'}} 
             >
                 User: {getUserId()} Logged In!
             </div>

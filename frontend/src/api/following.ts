@@ -54,12 +54,13 @@ export const apiGetFollowing = async (
     return data; 
 }
 
-
 export const apiFollowRequest = async(
     localAuthorId: string,
     foreignAuthorId: string
 ): Promise<any> => {
     
+    console.log("SEND FOLLOW REQUEST: local: ", localAuthorId, "foreign:", foreignAuthorId);
+
     const init: RequestInit = {
         method: "POST",
     }
@@ -68,8 +69,9 @@ export const apiFollowRequest = async(
         `${baseURL}/api/authors/request-follower/${localAuthorId}/${foreignAuthorId}`,
         init
     );
-
+    
     const data = await response.json();
+    console.log("RESPONSE DATA:", data);
     return data;
 }
 

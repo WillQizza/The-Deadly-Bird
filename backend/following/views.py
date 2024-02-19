@@ -93,14 +93,24 @@ def modify_follower(request, author_id, foreign_author_id):
             return Response({"error": False, "message": "Follower removed successfully."}, status=204)
 
         elif request.method == 'PUT':
-            _, created = Following.objects.get_or_create(
-                author_id=foreign_author_id,
-                target_author_id=author_id
-            )
-            if created:
-                return Response({"message": "Follower added successfully."}, status=201)
-            else:
-                return Response({"message": "The follower already exists."}, status=200)
+            try: 
+                Following.objects.get_or_create(
+                    author_id=foreign_author_id,
+                    target_author_id=author_id
+                )
+                try:
+                    follow_req = FollowingRequest.objects.filter(
+                        author_id=foreign_author_id, 
+                        target_author_id=author_id
+                    ).first()
+
+                    InboxMessage.objects.filter(content_id=follow_req.id).delete()
+                    follow_req.delete() #delete after inbox message because of dependancy
+                    return Response({"message": "Follower added successfully."}, status=201)
+                except:
+                    return Response({"message": "Follower already added."}, status=201) 
+            except: 
+                return Response({"message": "Failed to create follower."}, status=200)
 
         elif request.method == 'GET':
             obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
@@ -163,12 +173,16 @@ def request_follower(request: HttpRequest, local_author_id:int, foreign_author_i
                 author_id=local_author_id
             )
 
-            InboxMessage.objects.create(
+            obj = InboxMessage.objects.create(
               author_id=foreign_author_id,
               content_id=follow_req.id,
               content_type=InboxMessage.ContentType.FOLLOW
             )
 
+            print("Created inbox message:", obj)
+            print("foreign_author:", foreign_author_id)
+            print("local_author:", local_author_id)
+            
             return Response({
                 "error": False,
                 "message": "Follow Request Created"

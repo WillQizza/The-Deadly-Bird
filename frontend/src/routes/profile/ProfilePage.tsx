@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { getAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiFollowRequest, apiGetFollower} from '../../api/following';
+import { Button } from 'react-bootstrap';
 
 enum FollowState {
     FOLLOWING="following",
@@ -57,26 +58,53 @@ const ProfilePage: React.FC = () => {
             .then(async response => {
                 if (response.status != 404) { 
                     setFollowState(FollowState.FOLLOWING);
-                } 
+                } else {
+                    // TODO: check if follow request is pending
+                }
             });
         }
          
     }, [params]);
 
-    const handleFollow = async () => {
-        if (followState == FollowState.NOT_FOLLOWING) {
-            const responseJSON = await apiFollowRequest(curAuthorId, authorId);
-            if (!responseJSON["error"]) {
-                setFollowState(FollowState.PENDING);
-            }
-        } else if (followState == FollowState.FOLLOWING) {
-            const status = await apiDeleteFollower(authorId, curAuthorId);
-            if (status === 204) {
-                setFollowState(FollowState.NOT_FOLLOWING);
-            } 
-        }        
-    }
-
+    const renderButton = () => {
+        switch (followState) {
+            case FollowState.FOLLOWING:
+                return (
+                    <button className="btn btn-danger" onClick={async () => {
+                        await apiDeleteFollower(authorId, curAuthorId)
+                            .then(status => {
+                                if (status && status === 204) {
+                                    setFollowState(FollowState.NOT_FOLLOWING);
+                                }
+                            });
+                    }}>
+                        Unfollow
+                    </button>
+                );
+            case FollowState.PENDING:
+                return (
+                    <button className="btn btn-warning" onClick={() => {
+                        alert("Follow Request Already Pending!");
+                    }}>
+                        Pending
+                    </button>
+                );
+            case FollowState.NOT_FOLLOWING:
+                return (
+                    <button className="btn btn-primary" onClick={async () => {
+                        await apiFollowRequest(curAuthorId, authorId)
+                            .then(res => {
+                                if (res && !res["error"]) {
+                                    setFollowState(FollowState.PENDING);
+                                }
+                            }); 
+                    }}>
+                        Follow
+                    </button>
+                );
+        }
+    };
+    
     return <Page>
         <div id={styles.container}>
             <div id={styles.header} style={{ position: "relative" }}>
@@ -89,15 +117,7 @@ const ProfilePage: React.FC = () => {
                 </div>
                 <div id={styles.statsAndFollow}>
                     <div className={styles.item}>
-                        <div id={styles.followButton}
-                            onClick={handleFollow}
-                        >   {
-                            followState === FollowState.FOLLOWING ?  
-                            "Unfollow" : 
-                            followState === FollowState.PENDING ? 
-                            "Pending" : "Follow"
-                            }
-                        </div>
+                        {renderButton()}
                     </div>
                     <div className={styles.item}>
                         <div>

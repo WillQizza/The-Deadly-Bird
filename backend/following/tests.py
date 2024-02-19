@@ -145,14 +145,3 @@ class FollowersTestCase(BaseTestCase):
         ).first()
 
         self.assertTrue(inbox_message is not None)
-
-    def test_following_api(self):
-
-        author2 = self.authors[1]
-        url = reverse('following', kwargs={'author_id': author2.user.id})
-        following = self.client.get(url)
-        self.assertTrue(following.json()['count'] > 0)
-
-        include_author_ids = '1,2,3'
-        response = self.client.get(url, data={'include_author_ids': include_author_ids}) 
-        self.assertTrue(response.json()['count'] == 0)

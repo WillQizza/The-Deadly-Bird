@@ -24,11 +24,12 @@ class FollowRequestSerializer(serializers.Serializer):
     many / paginated serialization for now.
     """
     type = serializers.CharField(default="follow_request", read_only=True)
+    request_id = serializers.CharField(source="id")
     target_author = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
     
     def get_target_author(self, obj):
-        target_author = AuthorSerializer(obj.author)
+        target_author = AuthorSerializer(obj.target_author)
         return target_author.data
     
     def get_author(self, obj):
@@ -36,4 +37,4 @@ class FollowRequestSerializer(serializers.Serializer):
         return author.data 
      
     class Meta:
-        fields = ['type', 'author', 'target_author']
+        fields = ['type', 'id', 'author', 'target_author']

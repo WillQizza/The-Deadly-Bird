@@ -1,0 +1,18 @@
+.postButtons {
+    /* display: flex; */
+    justify-content: space-around;
+}
+
+.postButton {
+    width: 30px;
+    height: 25px;
+    margin: 10px;
+}
+
+.postShare:hover {
+    color: limegreen;
+}
+
+.postLike:hover {
+    color: red;
+}
