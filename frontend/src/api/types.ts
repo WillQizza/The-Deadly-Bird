@@ -81,6 +81,9 @@ export type PostResponse = Post & {
     commentsSrc: any    
 };
 
+// url: ://service/authors/{AUTHOR_ID}/posts/
+export type PostsResponse = PaginatedAPI<"posts", PostResponse>;
+
 // url: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments
 export type CommentsResponse = PaginatedAPI<"comments", Comment>;
 

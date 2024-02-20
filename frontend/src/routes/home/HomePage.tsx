@@ -8,7 +8,7 @@ const HomePage: React.FC = () => {
     
     return ( 
         <Page>
-            <Post/>
+            {/* <Post/> */}
         </Page>
     );
 };
