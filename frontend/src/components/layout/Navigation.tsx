@@ -7,7 +7,7 @@ import styles from "./Navigation.module.css";
 type NavItem = {
     name: string;
     path: string;
-    icon: string;
+    icon: React.ElementType;
 };
 
 const Navigation = ({ items }: { items: NavItem[] }) => {
@@ -21,7 +21,7 @@ const Navigation = ({ items }: { items: NavItem[] }) => {
                 <a className={styles.buttonLink} href={item.path} key={index}>
                     <div className={styles.button}>
                         <div className={styles.icon}>
-                            <img src={`${publicDir}/static/nav/${item.icon}.png`} alt="Icon" />
+                            <item.icon/>
                         </div>
                         <div className={styles.text}>
                             <div>{item.name}</div>
