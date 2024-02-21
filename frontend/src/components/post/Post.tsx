@@ -1,4 +1,5 @@
 import React from 'react';
+import Markdown from 'react-markdown';
 import styles from './Post.module.css';
 import { Post as PostTy } from '../../api/types'
 import { publicDir } from "../../constants";
@@ -16,7 +17,7 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
     }
 
     // Format post date
-    let postDate = new Date(props.published_date).toLocaleString('en-US', {
+    let postDate = new Date(props.published).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -24,6 +25,13 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
         minute: 'numeric',
         hour12: true,
     });
+
+    // Determine post content format
+    let content = <span>{props.content}</span>;
+    if (props.contentType === "text/markdown") {
+        content = <Markdown>{props.content}</Markdown>;
+    }
+
     return (
         <div className={styles.postContainer}>
             {/* Header */}
@@ -49,7 +57,7 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
                 <div className={styles.postTitle}>{props.title}</div>
                 <div className={styles.postDescr}>{props.description}</div>
                 {/* Content */}
-                <div>{props.content}</div>
+                <div>{content}</div>
                 {/* Buttons */}
                 <div className={styles.postButtons}>
                     {/* Share */}
