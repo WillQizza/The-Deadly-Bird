@@ -8,9 +8,7 @@ interface ImageUploadProps {
     setFormErrors: React.Dispatch<React.SetStateAction<{[key: string]: string;}>>,
     formErrorKey: string,
     valueRef: { current: string },
-    typeRef: { current: string },
-    placeholder?: string,
-    allowedTypes?: Set<string>
+    typeRef: { current: string }
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
@@ -19,11 +17,10 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
         setFormErrors,
         formErrorKey,
         valueRef,
-        typeRef,
-        placeholder = `${publicDir}/static/icons/image.svg`,
-        allowedTypes = new Set(['application/base64', 'image/png;base64', 'image/jpeg;base64'])
+        typeRef
     } = props;
-
+    
+    const placeholder = `${publicDir}/static/icons/image.svg`;
     const [image, setImage] = useState<string>(placeholder);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -37,24 +34,27 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
             // handle the result
             reader.onload = () => {
                 if (reader.result) {
+                    let newFormErrors = {...formErrors};
                     // parse result
                     const base64data = reader.result.toString();
                     const mediaType = base64data.slice(base64data.indexOf(':')+1,base64data.indexOf(','));
                     // if image type is valid
-                    if (allowedTypes.has(mediaType)) {
+                    if (mediaType == 'image/png;base64' || 
+                        mediaType == 'image/jpeg;base64' || 
+                        (mediaType.startsWith('application/') && mediaType.endsWith('base64'))) {
                         setImage(base64data);
                         valueRef.current = base64data;
                         typeRef.current = mediaType;
-                        formErrors[formErrorKey] = '';
+                        newFormErrors[formErrorKey] = '';
                     }
                     // if image type is invalid
                     else {
                         setImage(placeholder);
                         valueRef.current = '';
                         typeRef.current = 'text/plain';
-                        formErrors[formErrorKey] = 'Invalid file type (.png, .jpg, or .jpeg required)';
+                        newFormErrors[formErrorKey] = 'Invalid file type (.png, .jpg, .jpeg, or binary required)';
                     }
-                    setFormErrors({...formErrors});
+                    setFormErrors(newFormErrors);
                 }
             };
             // handle file reading errors
@@ -80,7 +80,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                         }
                     }}
                 >
-                    <img src={image} alt='image-preview'/>
+                    <img src={image} alt='preview (unavailable)'/>
                 </div>
                 <Form.Control
                     type='file'
