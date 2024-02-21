@@ -33,13 +33,15 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
 
         apiGetAuthorPosts(props.id, currentPage.current, pageSize)
             .then(async response => {
-                const newPosts = response.items.map((postResponse, index) => {
-                    // remove comments and commentsSrc fields from post response
-                    // TODO: this will probably be needed when comments are implemented
-                    const { comments, commentsSrc, ...post} = postResponse;
-                    return <Post key={`${post.author.id}/${post.id}`} {...post} />;
-                })
-                addPosts(newPosts);
+                if ('items' in response) {
+                    const newPosts = response.items.map((postResponse, index) => {
+                        // remove comments and commentsSrc fields from post response
+                        // TODO: this will probably be needed when comments are implemented
+                        const { comments, commentsSrc, ...post} = postResponse;
+                        return <Post key={`${post.author.id}/${post.id}`} {...post} />;
+                    })
+                    addPosts(newPosts);
+                }
             });
     }
 
