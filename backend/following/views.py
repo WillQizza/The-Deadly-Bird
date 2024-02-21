@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
-from .serializers import FollowingSerializer
+from .serializers import FollowRequestSerializer, FollowingSerializer
 from identity.models import Author, InboxMessage
 from deadlybird.pagination import Pagination
 
@@ -123,73 +123,82 @@ def modify_follower(request, author_id, foreign_author_id):
         return Response({"message": "Unexpected error occurred."}, status=400)
     
 
-@api_view(["POST"])
+@api_view(["POST", "GET"])
 def request_follower(request: HttpRequest, local_author_id:int, foreign_author_id:int):
     """
     Request a follower on local or foreign host.
     URL: None specified
     """
-
-    session_valid = validate_login_session(request)
-    if not session_valid:
-        return Response({
-            "error": True,
-            "message": "Authentication required"
-        }, status=403)
-
-    if not check_authors_exist(local_author_id, foreign_author_id):
-        return Response({
-            "error": True,
-            "message": "An author provided does not exist"
-        }, status=404) 
-
-    local_author = Author.objects.get(id=local_author_id)
-    foreign_author = Author.objects.get(id=foreign_author_id)
     
-    if Following.objects.filter(author__id=local_author_id,
-                                target_author__id=foreign_author_id).exists(): 
-        return Response({
-            "message": "Conflict: Author is already following"
-        }, status=409)
+    if request.method == "GET":
+        follow_req = FollowingRequest.objects.filter(
+            author=local_author_id,
+            target_author=foreign_author_id
+        ).first()
 
-    elif FollowingRequest.objects.filter(author__id=local_author_id, 
-        target_author__id=foreign_author_id).exists():
+        follow_req = get_object_or_404(FollowingRequest, 
+                                       author_id=local_author_id, 
+                                       target_author_id=foreign_author_id)
+        serializer = FollowRequestSerializer(follow_req)
+        return Response(serializer.data)
+         
+    elif request.method == "POST":
+        session_valid = validate_login_session(request)
+        if not session_valid:
             return Response({
                 "error": True,
-                "message": "Conflict: Outstanding request in existence"
+                "message": "Authentication required"
+            }, status=403)
+
+        if not check_authors_exist(local_author_id, foreign_author_id):
+            return Response({
+                "error": True,
+                "message": "An author provided does not exist"
+            }, status=404) 
+
+        local_author = Author.objects.get(id=local_author_id)
+        foreign_author = Author.objects.get(id=foreign_author_id)
+        
+        if Following.objects.filter(author__id=local_author_id,
+                                    target_author__id=foreign_author_id).exists(): 
+            return Response({
+                "message": "Conflict: Author is already following"
             }, status=409)
 
-    if local_author.host != foreign_author.host:
-        # TODO: handle remote host inbox object: 
-        # https://uofa-cmput404.github.io/general/project.html#friendfollow-request
-        return Response({
-            "error": True,
-            "message": "remote inboxed not supported yet"
-        }, status=400)
-    else:
-        try:
-            follow_req = FollowingRequest.objects.create(
-                target_author_id=foreign_author_id,
-                author_id=local_author_id
-            )
+        elif FollowingRequest.objects.filter(author__id=local_author_id, 
+            target_author__id=foreign_author_id).exists():
+                return Response({
+                    "error": True,
+                    "message": "Conflict: Outstanding request in existence"
+                }, status=409)
 
-            obj = InboxMessage.objects.create(
-              author_id=foreign_author_id,
-              content_id=follow_req.id,
-              content_type=InboxMessage.ContentType.FOLLOW
-            )
-
-            print("Created inbox message:", obj)
-            print("foreign_author:", foreign_author_id)
-            print("local_author:", local_author_id)
-            
-            return Response({
-                "error": False,
-                "message": "Follow Request Created"
-            }, status=201)          
-
-        except Exception:
+        if local_author.host != foreign_author.host:
+            # TODO: handle remote host inbox object: 
+            # https://uofa-cmput404.github.io/general/project.html#friendfollow-request
             return Response({
                 "error": True,
-                "message": "Failed to create FollowRequest or InboxMessage"
-            }, status=500) 
+                "message": "remote inboxed not supported yet"
+            }, status=400)
+        else:
+            try:
+                follow_req = FollowingRequest.objects.create(
+                    target_author_id=foreign_author_id,
+                    author_id=local_author_id
+                )
+
+                InboxMessage.objects.create(
+                    author_id=foreign_author_id,
+                    content_id=follow_req.id,
+                    content_type=InboxMessage.ContentType.FOLLOW
+                )
+
+                return Response({
+                    "error": False,
+                    "message": "Follow Request Created"
+                }, status=201)          
+
+            except Exception:
+                return Response({
+                    "error": True,
+                    "message": "Failed to create FollowRequest or InboxMessage"
+                }, status=500)

@@ -130,8 +130,7 @@ class FollowersTestCase(BaseTestCase):
         self.assertTrue(len(follow_reqs) == 0)  
         response = self.client.post(url)
         self.assertTrue(response.status_code == 201)
-        
-        
+         
         follow_req = FollowingRequest.objects.filter(
             author=author1.id,
             target_author=author2.id
@@ -145,3 +144,17 @@ class FollowersTestCase(BaseTestCase):
         ).first()
 
         self.assertTrue(inbox_message is not None)
+    
+    def test_following_request_get(self):
+        req : FollowingRequest = self.follow_requests[0] 
+        from_author_id = req.author.id
+        to_author_id = req.target_author.id
+
+        url = reverse('request_follower', kwargs={
+            'local_author_id': from_author_id, 
+            'foreign_author_id': to_author_id
+        })
+        
+        res = self.client.get(url)
+
+        self.assertTrue(res.status_code == 200)
