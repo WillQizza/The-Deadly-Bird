@@ -78,3 +78,30 @@ def posts(request: HttpRequest, author_id: int):
       "error": False,
       "message": "Post created successfully"
     }, status=201)
+
+@api_view(["GET", "PUT"])
+def post(request: HttpRequest, author_id: int, post_id: int):
+  if request.method == "GET":
+    can_see_friends = False
+    if "id" in request.session:
+      can_see_friends = (author_id == int(request.session["id"])) or \
+                          is_friends(author_id, int(request.session["id"]))
+      
+    # Retrieve and serialize post that should be shown
+    try:
+      if can_see_friends:
+        post = Post.objects.get(id=post_id, author=author_id)
+      else:
+        post = Post.objects.get(id=post_id, author=author_id, visibility=Post.Visibility.PUBLIC)
+    except:
+      return Response({
+        "error": True,
+        "message": "Post not found."
+      }, status=404)
+      
+    serialized_post = PostSerializer(post)
+
+    return Response(serialized_post.data)
+  elif request.method == "PUT":
+    # TODO: Edit post
+    pass
