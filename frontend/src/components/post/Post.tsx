@@ -11,7 +11,19 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
     // Make sure profile image field exists and is not null or empty
     if ('profileImage' in props.author && props.author.profileImage && props.author.profileImage.trim() !== '') {
         profileImgSrc = props.author.profileImage;
+    } else {
+        profileImgSrc = `${publicDir}/static/default-avatar.png`;
     }
+
+    // Format post date
+    let postDate = new Date(props.published_date).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+    });
     return (
         <div className={styles.postContainer}>
             {/* Header */}
@@ -21,11 +33,11 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
                 {/* Post info */}
                 <div className={styles.postInfo}>
                     {/* Author */}
-                    <div className={styles.postAuthor}>{props.author.displayName}</div>
+                    <div className={styles.postAuthor}>@{props.author.displayName}</div>
                     {/* Sub info */}
                     <div className={styles.postSubInfo}>
                         {/* Date */}
-                        <div className={styles.postSubInfoItem}>{props.published_date}</div>
+                        <div className={styles.postSubInfoItem}>{postDate}</div>
                         {/* Origin */}
                         <div className={styles.postSubInfoItem}>{props.origin}</div>
                     </div>
@@ -33,6 +45,9 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
             </div>
             {/* Body */}
             <div className={styles.postBody}>
+                {/* Title */}
+                <div className={styles.postTitle}>{props.title}</div>
+                <div className={styles.postDescr}>{props.description}</div>
                 {/* Content */}
                 <div>{props.content}</div>
                 {/* Buttons */}

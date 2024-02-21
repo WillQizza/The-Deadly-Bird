@@ -80,3 +80,15 @@
 .postLike:hover {
     color: red;
 }
+
+.postTitle {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.postDescr {
+    color: grey;
+    font-style: italic;
+    text-align: center;
+}

@@ -9,7 +9,6 @@ class PostSerializer(serializers.ModelSerializer):
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
-  published = serializers.DateTimeField(source="published_date")
 
   def get_author(self, object: Post):
     return AuthorSerializer(object.author).data
@@ -35,4 +34,4 @@ class PostSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Post
-    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
+    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published_date', 'visibility']

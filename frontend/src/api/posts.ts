@@ -7,7 +7,7 @@ import { PostsResponse } from "./types";
  * @param authorID to retreive posts from
  */
 export const apiGetAuthorPosts = async (
-    authorID: number,
+    authorID: string,
     page: number,
     size: number
 ): Promise<PostsResponse> => {
