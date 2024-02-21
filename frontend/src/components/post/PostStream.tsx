@@ -6,7 +6,7 @@ import { apiGetAuthorPosts } from '../../api/posts';
 export enum PostStreamTy {
     Public,
     Author,
-    Friend,
+    Following,
 }
 
 export type PostStreamArgs = {
@@ -31,18 +31,21 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
             return;
         }
 
-        apiGetAuthorPosts(props.id, currentPage.current, pageSize)
-            .then(async response => {
-                if ('items' in response) {
-                    const newPosts = response.items.map((postResponse, index) => {
-                        // remove comments and commentsSrc fields from post response
-                        // TODO: this will probably be needed when comments are implemented
-                        const { comments, commentsSrc, ...post} = postResponse;
-                        return <Post key={`${post.author.id}/${post.id}`} {...post} />;
-                    })
-                    addPosts(newPosts);
-                }
-            });
+        if (props.type === PostStreamTy.Author) {
+            apiGetAuthorPosts(props.id, currentPage.current, pageSize)
+                .then(async response => {
+                    if ('items' in response) {
+                        const newPosts = response.items.map((postResponse) => {
+                            return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} />;
+                        })
+                        addPosts(newPosts);
+                    }
+                });
+        } else if (props.type === PostStreamTy.Public) {
+            // TODO: make api call for public posts
+        } else if (props.type === PostStreamTy.Following) {
+            // TODO: make api call for following posts
+        }
     }
 
     // generate initial posts

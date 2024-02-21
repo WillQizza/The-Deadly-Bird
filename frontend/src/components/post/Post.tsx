@@ -1,11 +1,11 @@
 import React from 'react';
 import styles from './Post.module.css';
-import { Post as PostTy } from '../../api/types'
+import { PostResponse } from '../../api/types'
 import { publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 
-const Post: React.FC<PostTy> = (props: PostTy) => {
+const Post: React.FC<PostResponse> = (props: PostResponse) => {
     // Set profile picture src
     let profileImgSrc: string = '';
     // Make sure profile image field exists and is not null or empty
@@ -16,7 +16,7 @@ const Post: React.FC<PostTy> = (props: PostTy) => {
     }
 
     // Format post date
-    let postDate = new Date(props.published_date).toLocaleString('en-US', {
+    let postDate = new Date(props.published).toLocaleString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',

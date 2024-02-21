@@ -36,7 +36,7 @@ export type Post = {
     content_type: ContentType,
     content: string,
     author: Author,
-    published_date: string,
+    published: string,
     visibility: string,
 
     // extra fields
