@@ -33,7 +33,7 @@ export type Post = {
     source: string,
     origin: string,
     description: string,
-    content_type: ContentType,
+    contentType: ContentType,
     content: string,
     author: Author,
     published: string,
