@@ -19,6 +19,7 @@ export type Author = {
     url: string;
     host: string;
     displayName: string;
+    email?: string;
     github?: string;
     profileImage?: string;
     posts: number;
