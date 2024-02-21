@@ -79,6 +79,11 @@ def modify_follower(request, author_id, foreign_author_id):
     PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
     GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
     """
+    if author_id == foreign_author_id:
+        return Response({
+            "error": True,
+            "message": "Can not request to self"
+            }, status=400)
 
     # TODO: determine if authentication for PUT but not for others is right
     if request.method == 'PUT':

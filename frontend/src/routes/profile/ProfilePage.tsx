@@ -28,6 +28,7 @@ const ProfilePage: React.FC = () => {
 
     const curAuthorId : string = getUserId().toString(); 
     const params = useParams();
+    const userId = params["id"];
 
 
     const updateFollowingState = (userId: string) => {
@@ -47,7 +48,6 @@ const ProfilePage: React.FC = () => {
     }
 
     useEffect(() => {
-        const userId = params["id"];
         getAuthor(parseInt(userId as string))
             .then(async author => {
                 if (!author) {
@@ -77,6 +77,10 @@ const ProfilePage: React.FC = () => {
     }, [params]);
 
     const renderButton = () => {
+        
+        if (userId === curAuthorId) {
+            return;
+        }
         switch (followState) {
             case FollowState.FOLLOWING:
                 return (
@@ -125,7 +129,7 @@ const ProfilePage: React.FC = () => {
                     <h1 id={styles.username}>{username}</h1>
                     <h5 id={styles.bio}>{bio}</h5>
                 </div>
-                <div id={styles.statsAndFollow}>
+                <div id={styles.statsAndFollow}> 
                     <div className={styles.item}>
                         {renderButton()}
                     </div>
