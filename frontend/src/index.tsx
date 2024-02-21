@@ -13,6 +13,7 @@ import './index.css';
 import ProfilePage from './routes/profile/ProfilePage';
 import PostCreationPage from './routes/post/PostCreationPage';
 import { getUserId } from './utils/auth';
+import SettingsPage from './routes/settings/SettingsPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -25,6 +26,7 @@ root.render(
       <Route path="/home" Component={HomePage} />
       <Route path="/network" Component={NetworkPage} />
       <Route path="/profile" element={<Navigate to={`/profile/${getUserId()}`} />} />
+      <Route path="/profile/settings" Component={SettingsPage} />
       <Route path="/profile/:id" Component={ProfilePage} />
       <Route path="/post" Component={PostCreationPage} />
     </Routes>

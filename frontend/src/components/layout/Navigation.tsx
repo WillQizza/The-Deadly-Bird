@@ -10,7 +10,10 @@ type NavItem = {
     icon: React.ElementType;
 };
 
-const Navigation = ({ items }: { items: NavItem[] }) => {
+export type SelectedNavigation = "Home" | "Profile" | "Network" | "Settings";
+
+
+const Navigation = ({ items, selected }: { items: NavItem[], selected?: SelectedNavigation }) => {
     return <Fragment>
         <div id={styles.logoContainer}>
             <img src={`${publicDir}/static/small-logo.png`} alt="Description" />
@@ -19,7 +22,7 @@ const Navigation = ({ items }: { items: NavItem[] }) => {
         <div id={styles.buttons}>
             {items.map((item, index) => (
                 <a className={styles.buttonLink} href={item.path} key={index}>
-                    <div className={styles.button}>
+                    <div className={`${styles.button} ${selected === item.name ? styles.selected : ''}`}>
                         <div className={styles.icon}>
                             <item.icon/>
                         </div>

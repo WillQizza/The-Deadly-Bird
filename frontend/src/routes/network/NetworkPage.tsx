@@ -6,7 +6,7 @@ import ExploreView from './ExploreView';
 
 const NetworkPage: React.FC = () => {
     return (
-        <Page>
+        <Page selected="Network">
             <div className={styles.mainHeader}>Network</div>
             <div className={styles.subHeader}>Explore the Deadly Bird Network</div>
 

@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import styles from "./Page.module.css";
 import Footer from "./Footer";
-import { Offcanvas, Button } from 'react-bootstrap';
+import { Offcanvas } from 'react-bootstrap';
 import Inbox from "../inbox/Inbox";
-import Navigation from "./Navigation";
+import Navigation, { SelectedNavigation } from "./Navigation";
 import { useNavigate } from "react-router-dom";
 import { ReactComponent as House } from 'bootstrap-icons/icons/house.svg';
 import { ReactComponent as Person } from 'bootstrap-icons/icons/person.svg';
 import { ReactComponent as Globe } from 'bootstrap-icons/icons/globe.svg';
 import { ReactComponent as Gear } from 'bootstrap-icons/icons/gear.svg';
 
-const Page = ({ children } : { children: React.ReactNode }) => {
+const Page = ({ children, selected } : { children: React.ReactNode, selected?: SelectedNavigation }) => {
         
     const [showSidebar, setShowSidebar] = useState(false);
     const toggleSidebar = () => setShowSidebar(!showSidebar);
@@ -30,15 +30,17 @@ const Page = ({ children } : { children: React.ReactNode }) => {
                         { name: "Home", icon: House, path: "/home" },
                         { name: "Profile", icon: Person, path: "/profile" },
                         { name: "Network", icon: Globe, path: "/network" },
-                        { name: "Settings", icon: Gear, path: "/settings" }
-                    ]} />
+                        { name: "Settings", icon: Gear, path: "/profile/settings" }
+                    ]} selected={selected} />
                 </div>
-                <div id={styles.content}>
+                <div id={styles.contentAndUpperNav}>
                     <div id={styles.thinNavbar}>
                         <button onClick={() => {toggleSidebar()}}>Inbox</button>
                         <button onClick={() => {logOut()}}>Log Out</button>
                     </div>
-                    {children}
+                    <div id={styles.content}>
+                        {children}
+                    </div>
                 </div>
             </div>
             <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end">

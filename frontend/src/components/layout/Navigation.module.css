@@ -28,6 +28,10 @@
     flex-direction: row;
 }
 
+.button.selected {
+    background-color: var(--darker-teal);
+}
+
 .button > .icon {
     width: 43%;
     height: 100%;

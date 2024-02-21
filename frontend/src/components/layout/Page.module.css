@@ -19,8 +19,14 @@
     background-color: var(--teal);
 }
 
-#content {
+#contentAndUpperNav {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#content {
+    flex-grow: 1;
 }
 
 #thinNavbar {

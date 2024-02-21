@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy } from 'react';
+import React, { useState, useEffect } from 'react';
 import { publicDir } from "../../constants";
 import Page from '../../components/layout/Page';
 import styles from './ProfilePage.module.css';
@@ -106,7 +106,7 @@ const ProfilePage: React.FC = () => {
         }
     };
     
-    return <Page>
+    return <Page selected="Profile">
         <div id={styles.container}>
             <div id={styles.header} style={{ position: "relative" }}>
                 <div id={styles.avatarContainer}>
