@@ -20,7 +20,7 @@ const ProfilePage: React.FC = () => {
     const [avatarURL, setAvatarURL] = useState(`${publicDir}/static/default-avatar.png`);
     const [githubUsername, setGithubUsername] = useState("");
     const [username, setUsername] = useState("");
-    const [bio, setBio] = useState("I don't really know what I'm doing...");     // TODO: Do we want a bio?
+    const [bio, setBio] = useState("");
     const [postCount, setPostCount] = useState(-1);
     const [followingCount, setFollowingCount] = useState(-1);
     const [followerCount, setFollowerCount] = useState(-1);
@@ -60,6 +60,7 @@ const ProfilePage: React.FC = () => {
                 setFollowerCount(author.followers);
                 setFollowingCount(author.following);
                 setAuthorId(author.id);
+                setBio(author.bio);
 
                 if (author.github) {
                     setGithubUsername(author.github);

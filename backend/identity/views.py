@@ -9,7 +9,7 @@ from deadlybird.pagination import Pagination
 from .pagination import InboxPagination
 
 @api_view(["GET"])
-def authors(request):
+def authors(request: HttpRequest):
   """
   get all authors view as to handle https://uofa-cmput404.github.io/general/project.html#authors
   """
@@ -18,7 +18,8 @@ def authors(request):
   paginator = Pagination("authors")
   page = paginator.paginate_queryset(authors, request)
 
-  serializer = AuthorSerializer(page, many=True)
+  our_user_id = request.session["id"] if (request.session.has_key("id")) else None
+  serializer = AuthorSerializer(page, many=True, context={ "id": our_user_id })
   return paginator.get_paginated_response(serializer.data)
 
 @api_view(["GET", "POST"])
@@ -27,7 +28,8 @@ def author(request: HttpRequest, author_id: int):
     # Get profile
     author = get_object_or_404(Author, id=author_id)
 
-    serializer = AuthorSerializer(author)
+    our_user_id = request.session["id"] if (request.session.has_key("id")) else None
+    serializer = AuthorSerializer(author, context={ "id": our_user_id })
     return Response(serializer.data)
   else:
     # Update profile
