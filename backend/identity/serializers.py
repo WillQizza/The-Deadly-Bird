@@ -31,7 +31,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Author
-    fields = ['type', 'id', 'url', 'host', 'email', 'displayName', 'github', 'profileImage', 'posts', 'followers', 'following']
+    fields = ['type', 'id', 'url', 'host', 'email', 'bio', 'displayName', 'github', 'profileImage', 'posts', 'followers', 'following']
 
 class InboxMessageSerializer(serializers.Serializer):
   """

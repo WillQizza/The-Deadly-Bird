@@ -24,7 +24,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       setEmail(author.email!);
       setUsername(author.displayName);
       setHomeServer(author.host);
-      setBio("TODO: SOME SORT OF BIO");
+      setBio(author.bio);
       setLoadedContent(true);
 
       if (author.profileImage) {

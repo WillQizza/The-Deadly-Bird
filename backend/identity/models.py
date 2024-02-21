@@ -7,6 +7,7 @@ class Author(models.Model):
   user = models.OneToOneField(User, blank=False, null=False, on_delete=models.CASCADE)
   host = models.CharField(max_length=255, blank=False, null=False)
   github = models.CharField(max_length=255, blank=True, null=True)
+  bio = models.CharField(max_length=255, blank=True, null=False, default="")
   profile_url = models.CharField(max_length=255, blank=False, null=False)
   profile_picture = models.CharField(max_length=255, blank=True, null=True)
 
