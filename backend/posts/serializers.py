@@ -9,7 +9,6 @@ class PostSerializer(serializers.ModelSerializer):
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
-  published = serializers.DateTimeField(source="published_date")
 
   def get_author(self, object: Post):
     return AuthorSerializer(object.author).data
@@ -18,10 +17,11 @@ class PostSerializer(serializers.ModelSerializer):
     return Comment.objects.filter(post=object).count()
   
   def get_comments(self, object: Post):
+    return None # TODO: (currently sets null)
     # TODO: URL to comments
-    return ""
   
   def get_commentsSrc(self, object: Post):
+    return None # TODO: (currently sets null)
     # TODO: 5 comments sorted newest to oldest in the api spec format
     return {
       'type': 'comments',
@@ -34,4 +34,4 @@ class PostSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Post
-    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
+    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published_date', 'visibility']

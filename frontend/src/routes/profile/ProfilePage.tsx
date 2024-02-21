@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import { getAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiFollowRequest, apiGetFollower} from '../../api/following';
+import PostStream, { PostStreamTy } from '../../components/post/PostStream';
 
 enum FollowState {
     FOLLOWING="following",
@@ -144,7 +145,7 @@ const ProfilePage: React.FC = () => {
                 ) : null}
             </div>
             <div id={styles.feed}>
-                {/* TODO: Profile feed */}
+                {authorId && <PostStream type={PostStreamTy.Author} id={authorId} />}
             </div>
         </div>
     </Page>;

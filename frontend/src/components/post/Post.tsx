@@ -1,33 +1,55 @@
 import React from 'react';
 import styles from './Post.module.css';
+import { Post as PostTy } from '../../api/types'
 import { publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 
-const Post: React.FC = () => {
+const Post: React.FC<PostTy> = (props: PostTy) => {
+    // Set profile picture src
+    let profileImgSrc: string = '';
+    // Make sure profile image field exists and is not null or empty
+    if ('profileImage' in props.author && props.author.profileImage && props.author.profileImage.trim() !== '') {
+        profileImgSrc = props.author.profileImage;
+    } else {
+        profileImgSrc = `${publicDir}/static/default-avatar.png`;
+    }
+
+    // Format post date
+    let postDate = new Date(props.published_date).toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true,
+    });
     return (
         <div className={styles.postContainer}>
             {/* Header */}
             <div className={styles.postHeader}>
                 {/* Profile picture */}
-                <img className={styles.postProfilePicture} src={`${publicDir}/static/small-logo.png`}></img>
+                <img className={styles.postProfilePicture} src={profileImgSrc}></img>
                 {/* Post info */}
                 <div className={styles.postInfo}>
                     {/* Author */}
-                    <div className={styles.postAuthor}>@TheDeadlyBird</div>
+                    <div className={styles.postAuthor}>@{props.author.displayName}</div>
                     {/* Sub info */}
                     <div className={styles.postSubInfo}>
                         {/* Date */}
-                        <div className={styles.postSubInfoItem}>February 17th 2024, 11:25pm</div>
+                        <div className={styles.postSubInfoItem}>{postDate}</div>
                         {/* Origin */}
-                        <div className={styles.postSubInfoItem}>#deadlybird.xyz</div>
+                        <div className={styles.postSubInfoItem}>{props.origin}</div>
                     </div>
                 </div>
             </div>
             {/* Body */}
             <div className={styles.postBody}>
+                {/* Title */}
+                <div className={styles.postTitle}>{props.title}</div>
+                <div className={styles.postDescr}>{props.description}</div>
                 {/* Content */}
-                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
+                <div>{props.content}</div>
                 {/* Buttons */}
                 <div className={styles.postButtons}>
                     {/* Share */}

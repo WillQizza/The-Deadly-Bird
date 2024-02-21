@@ -2,6 +2,7 @@
     border-radius: 20px;
     border: 10px solid var(--dark-teal);
     max-width: 600px;
+    width: 100%;
     padding: 1em;
     background-color: var(--teal);
     box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
@@ -58,6 +59,7 @@
     border-radius: 20px;
     background-color: var(--light-teal);
     padding: 10px;
+    width: 100%;
 }
 
 .postButtons {
@@ -77,4 +79,16 @@
 
 .postLike:hover {
     color: red;
+}
+
+.postTitle {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.postDescr {
+    color: grey;
+    font-style: italic;
+    text-align: center;
 }

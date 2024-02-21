@@ -41,7 +41,8 @@
     justify-content: flex-end;
 }
 
-.button > .icon > img {
+.button > .icon > * {
+    color: white;
     width: 64px;
     height: 64px;
 }

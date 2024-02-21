@@ -5,6 +5,10 @@ import { Offcanvas } from 'react-bootstrap';
 import Inbox from "../inbox/Inbox";
 import Navigation, { SelectedNavigation } from "./Navigation";
 import { useNavigate } from "react-router-dom";
+import { ReactComponent as House } from 'bootstrap-icons/icons/house.svg';
+import { ReactComponent as Person } from 'bootstrap-icons/icons/person.svg';
+import { ReactComponent as Globe } from 'bootstrap-icons/icons/globe.svg';
+import { ReactComponent as Gear } from 'bootstrap-icons/icons/gear.svg';
 
 const Page = ({ children, selected } : { children: React.ReactNode, selected?: SelectedNavigation }) => {
         
@@ -23,10 +27,10 @@ const Page = ({ children, selected } : { children: React.ReactNode, selected?: S
             <div id={styles.contentRoot}>
                 <div id={styles.navigation}>
                     <Navigation items={[
-                        { name: "Home", icon: "home", path: "/home" },
-                        { name: "Profile", icon: "profile", path: "/profile" },
-                        { name: "Network", icon: "network", path: "/network" },
-                        { name: "Settings", icon: "settings", path: "/profile/settings" }
+                        { name: "Home", icon: House, path: "/home" },
+                        { name: "Profile", icon: Person, path: "/profile" },
+                        { name: "Network", icon: Globe, path: "/network" },
+                        { name: "Settings", icon: Gear, path: "/profile/settings" }
                     ]} selected={selected} />
                 </div>
                 <div id={styles.contentAndUpperNav}>

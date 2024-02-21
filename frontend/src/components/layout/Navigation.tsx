@@ -7,7 +7,7 @@ import styles from "./Navigation.module.css";
 type NavItem = {
     name: string;
     path: string;
-    icon: string;
+    icon: React.ElementType;
 };
 
 export type SelectedNavigation = "Home" | "Profile" | "Network" | "Settings";
@@ -24,7 +24,7 @@ const Navigation = ({ items, selected }: { items: NavItem[], selected?: Selected
                 <a className={styles.buttonLink} href={item.path} key={index}>
                     <div className={`${styles.button} ${selected === item.name ? styles.selected : ''}`}>
                         <div className={styles.icon}>
-                            <img src={`${publicDir}/static/nav/${item.icon}.png`} alt="Icon" />
+                            <item.icon/>
                         </div>
                         <div className={styles.text}>
                             <div>{item.name}</div>
