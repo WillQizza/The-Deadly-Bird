@@ -106,6 +106,34 @@ def register(request: HttpRequest):
     "message": "Success!"
   }, status=201)
 
+@api_view(["POST"])
+def update(request: HttpRequest):
+  if (not "username" in request.POST) or (not "password" in request.POST):
+    return Response({
+      "error": True,
+      "message": "No credentials provided"
+    }, status=400)
+  username = request.POST["username"]
+  password = request.POST["password"]
+
+  # Check if an user already exists with that username
+  try:
+    user = User.objects.get(username__iexact=username)
+  except User.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Account does not exist"
+    }, status=404)
+  
+  # Update user object
+  user.set_password(password)
+  user.save()
+  
+  # Send success
+  return Response({
+    "error": False,
+    "message": "Success!"
+  }, status=200)
 
 @api_view(["GET", "POST"])
 def inbox(request: HttpRequest, author_id: int):
