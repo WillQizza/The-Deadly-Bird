@@ -80,7 +80,7 @@ def posts(request: HttpRequest, author_id: int):
       "message": "Post created successfully"
     }, status=201)
 
-@api_view(["GET", "PUT"])
+@api_view(["GET", "DELETE", "PUT"])
 def post(request: HttpRequest, author_id: int, post_id: int):
   if request.method == "GET":
     can_see_friends = False
@@ -106,6 +106,9 @@ def post(request: HttpRequest, author_id: int, post_id: int):
     serialized_post = PostSerializer(post)
 
     return Response(serialized_post.data)
+  elif request.method == "DELETE":
+    # TODO: Delete post
+    pass
   elif request.method == "PUT":
     # TODO: Edit post
     pass

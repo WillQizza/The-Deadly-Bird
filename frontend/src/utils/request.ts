@@ -4,7 +4,7 @@ const DJANGO_COOKIE_NAME = "csrftoken";
  * Extracts Django's CSRFToken that all requests need
  */
 const extractCSRFToken = () => {
-  const csrfCookieStr = document.cookie.split("&")
+  const csrfCookieStr = document.cookie.split("; ")
     .find(cookie => cookie.startsWith(DJANGO_COOKIE_NAME));
 
   if (!csrfCookieStr) {
