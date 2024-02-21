@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import styles from "./Page.module.css";
 import Footer from "./Footer";
-import { Offcanvas, Button } from 'react-bootstrap';
+import { Offcanvas } from 'react-bootstrap';
 import Inbox from "../inbox/Inbox";
-import Navigation from "./Navigation";
+import Navigation, { SelectedNavigation } from "./Navigation";
 import { useNavigate } from "react-router-dom";
 
-const Page = ({ children } : { children: React.ReactNode }) => {
+const Page = ({ children, selected } : { children: React.ReactNode, selected?: SelectedNavigation }) => {
         
     const [showSidebar, setShowSidebar] = useState(false);
     const toggleSidebar = () => setShowSidebar(!showSidebar);
@@ -26,15 +26,17 @@ const Page = ({ children } : { children: React.ReactNode }) => {
                         { name: "Home", icon: "home", path: "/home" },
                         { name: "Profile", icon: "profile", path: "/profile" },
                         { name: "Network", icon: "network", path: "/network" },
-                        { name: "Settings", icon: "settings", path: "/settings" }
-                    ]} />
+                        { name: "Settings", icon: "settings", path: "/profile/settings" }
+                    ]} selected={selected} />
                 </div>
-                <div id={styles.content}>
+                <div id={styles.contentAndUpperNav}>
                     <div id={styles.thinNavbar}>
                         <button onClick={() => {toggleSidebar()}}>Inbox</button>
                         <button onClick={() => {logOut()}}>Log Out</button>
                     </div>
-                    {children}
+                    <div id={styles.content}>
+                        {children}
+                    </div>
                 </div>
             </div>
             <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end">

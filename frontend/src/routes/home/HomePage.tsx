@@ -7,7 +7,7 @@ import Post from '../../components/post/Post'
 const HomePage: React.FC = () => {
     
     return ( 
-        <Page>
+        <Page selected="Home">
             <Post/>
         </Page>
     );
