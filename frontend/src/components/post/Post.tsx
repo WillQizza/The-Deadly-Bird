@@ -57,7 +57,7 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
                 <div className={styles.postTitle}>{props.title}</div>
                 <div className={styles.postDescr}>{props.description}</div>
                 {/* Content */}
-                <div>{content}</div>
+                <div className={styles.postContent}>{content}</div>
                 {/* Buttons */}
                 <div className={styles.postButtons}>
                     {/* Share */}
