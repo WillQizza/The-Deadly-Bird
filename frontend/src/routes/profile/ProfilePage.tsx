@@ -29,6 +29,23 @@ const ProfilePage: React.FC = () => {
     const curAuthorId : string = getUserId().toString(); 
     const params = useParams();
 
+
+    const updateFollowingState = (userId: string) => {
+
+        apiGetFollower(userId, curAuthorId)
+            .then(async response => {
+                if (response.status != 404) { 
+                    setFollowState(FollowState.FOLLOWING);
+                } 
+            });
+        apiFollowRequest(curAuthorId, userId, "GET")
+            .then(response => {
+                if (response.request_id) {
+                    setFollowState(FollowState.PENDING);
+                }
+            });
+    }
+
     useEffect(() => {
         const userId = params["id"];
         getAuthor(parseInt(userId as string))
@@ -53,16 +70,7 @@ const ProfilePage: React.FC = () => {
             });
         
         if (userId) { 
-            // If logged in user is following viewed profile, set followState accoordingly
-            apiGetFollower(userId, curAuthorId)
-            .then(async response => {
-                if (response.status != 404) { 
-                    setFollowState(FollowState.FOLLOWING);
-                } else {
-                    // TODO: check if follow request is pending and set followState
-                    // Currently a pending request appears as not following after refresh
-                }
-            });
+            updateFollowingState(userId);
         }
          
     }, [params]);
@@ -93,7 +101,7 @@ const ProfilePage: React.FC = () => {
             case FollowState.NOT_FOLLOWING:
                 return (
                     <button className="btn btn-primary" onClick={async () => {
-                        await apiFollowRequest(curAuthorId, authorId)
+                        await apiFollowRequest(curAuthorId, authorId, "POST")
                             .then(res => {
                                 if (res && !res["error"]) {
                                     setFollowState(FollowState.PENDING);
