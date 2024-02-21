@@ -100,6 +100,76 @@ class AuthorPostTest(BaseTestCase):
     found_unlisted_visibility = next((True for post in response["items"] if post["visibility"] == "UNLISTED"), False)
     self.assertTrue(found_unlisted_visibility)
 
+  def test_getting_single_public_post(self):
+    """
+    Checks that a specific post can be accessed and is valid.
+    """
+    post = Post.objects.create(
+        title=f"Another Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.PUBLIC
+    )
+
+    # Check that we got the post we made
+    response1 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
+    self.assertEquals(post.id, response1["id"])
+    self.assertEquals(post.author.id, response1["author"]["id"])
+    self.assertTrue(self._is_post_object(response1))
+
+  def test_getting_single_frient_post(self):
+    """
+    Check that a specific post can't be accessed when not friend, but is otherwise valid.
+    """
+    post = Post.objects.create(
+        title=f"Another Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.FRIENDS
+    )
+
+    # Check that we got the post we made
+    response1 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
+    self.assertEquals(response1["error"], True)
+
+    # Should now have the friend post
+    Following.objects.create(
+      author=self.authors[0],
+      target_author=self.authors[1]
+    )
+    Following.objects.create(
+      author=self.authors[1],
+      target_author=self.authors[0]
+    )
+    self.edit_session(id=self.authors[1].id)
+    response2 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
+    self.assertEquals(post.id, response2["id"])
+    self.assertEquals(post.author.id, response2["author"]["id"])
+    self.assertTrue(self._is_post_object(response2))
+
+  def test_getting_single_unlisted_post(self):
+    """
+    Check that a specific unlisted post can be accessed and is valid.
+    """
+    post = Post.objects.create(
+        title=f"Another Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.UNLISTED
+    )
+
+    # Check that we got the post we made
+    response1 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
+    self.assertEquals(post.id, response1["id"])
+    self.assertEquals(post.author.id, response1["author"]["id"])
+    self.assertTrue(self._is_post_object(response1))
+
   def _is_post_object(self, obj):
     """
     Assert that the JSON post object provided matches the API spec.

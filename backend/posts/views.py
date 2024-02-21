@@ -6,6 +6,7 @@ from following.util import is_friends
 from deadlybird.pagination import Pagination
 from .serializers import PostSerializer
 from .models import Post, Author
+from django.db.models import Q
 
 @api_view(["GET", "POST"])
 def posts(request: HttpRequest, author_id: int):
@@ -92,7 +93,10 @@ def post(request: HttpRequest, author_id: int, post_id: int):
       if can_see_friends:
         post = Post.objects.get(id=post_id, author=author_id)
       else:
-        post = Post.objects.get(id=post_id, author=author_id, visibility=Post.Visibility.PUBLIC)
+        post = Post.objects.get(
+            Q(id=post_id, author=author_id, visibility=Post.Visibility.PUBLIC) |
+            Q(id=post_id, author=author_id, visibility=Post.Visibility.UNLISTED)
+        )
     except:
       return Response({
         "error": True,
