@@ -7,6 +7,7 @@ from deadlybird.pagination import Pagination
 from .serializers import PostSerializer
 from .models import Post, Author
 from django.db.models import Q
+from .util import send_post_to_inboxes
 
 @api_view(["GET", "POST"])
 def posts(request: HttpRequest, author_id: str):
@@ -66,7 +67,7 @@ def posts(request: HttpRequest, author_id: str):
     content = request.POST["content"]
     visibility = request.POST["visibility"]
 
-    Post.objects.create(
+    post = Post.objects.create(
       title=title,
       description=description,
       content_type=content_type,
@@ -74,7 +75,8 @@ def posts(request: HttpRequest, author_id: str):
       author=author,
       visibility=visibility
     )
-    
+    send_post_to_inboxes(post.id, author_id)
+
     return Response({
       "error": False,
       "message": "Post created successfully"

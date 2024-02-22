@@ -32,12 +32,11 @@ const Inbox = () => {
 
     
     const renderPostCard = (message: any, idx: number) => {
-        // TODO: Implement 
         return (
             <Card key={message+idx} className="mb-2">
-                <Card.Header>Follow Request</Card.Header>
+                <Card.Header>{message.author.displayName} just posted!</Card.Header>
                 <Card.Body>
-                    <Card.Text>Liked your post!</Card.Text> 
+                    <Card.Text>Preview: {message.description}</Card.Text> 
                 </Card.Body>
             </Card>
         );

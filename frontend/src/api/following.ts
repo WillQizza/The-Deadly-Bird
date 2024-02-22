@@ -54,13 +54,15 @@ export const apiGetFollowing = async (
     return data; 
 }
 
-export const apiFollowRequest = async( localAuthorId: string, foreignAuthorId: string)
+export const apiFollowRequest = async(
+    localAuthorId: string, 
+    foreignAuthorId: string,
+    method: string
+)
 : Promise<any> => {
     
-    console.log("SEND FOLLOW REQUEST: local: ", localAuthorId, "foreign:", foreignAuthorId);
-
     const init: RequestInit = {
-        method: "POST",
+        method: method,
     }
 
     const response = await apiRequest(
@@ -69,7 +71,6 @@ export const apiFollowRequest = async( localAuthorId: string, foreignAuthorId: s
     );
     
     const data = await response.json();
-    console.log("RESPONSE DATA:", data);
     return data;
 }
 
@@ -101,6 +102,18 @@ export const apiPutFollower = async (authorId: string, foreignAuthorId: string)
 }
 
 export const apiGetFollower = async (authorId: string, foreignAuthorId: string)
+: Promise<any> => {
+    const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+        method: "GET",
+    });
+    if (!response.ok) {
+        return {"status": response.status};
+    }
+    const data = await response.json();
+    return data; 
+}
+
+export const apiGetFollowRequest = async (authorId: string, foreignAuthorId: string)
 : Promise<any> => {
     const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "GET",
