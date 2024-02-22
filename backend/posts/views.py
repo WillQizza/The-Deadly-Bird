@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from following.util import is_friends
 from deadlybird.pagination import Pagination
 from .serializers import PostSerializer
-from .models import Post, Author
+from .models import Post, Author, Following
 from django.db.models import Q
 from .util import send_post_to_inboxes
 
@@ -130,7 +130,27 @@ def post_stream(request: HttpRequest, stream_type: str):
 
     return paginator.get_paginated_response(serialized_posts.data)
   elif stream_type == 'following':
-    pass
+    paginator = Pagination("posts")
+
+    # Get all authors following
+    following = Following.objects.all() \
+        .filter(author=request.session["id"]) \
+        .values_list('target_author', flat=True)
+
+    # Get all not friends from those following
+    not_friends = [follow for follow in following if not is_friends(int(follow), int(request.session["id"]))]
+
+    # Get all posts all posts from authors following
+    posts = Post.objects.all() \
+        .filter(author__in=following) \
+        .exclude(visibility=Post.Visibility.UNLISTED) \
+        .exclude(visibility=Post.Visibility.FRIENDS, author__in=not_friends) \
+        .order_by("-published_date")
+
+    posts_on_page = paginator.paginate_queryset(posts, request)
+    serialized_posts = PostSerializer(posts_on_page, many=True)
+
+    return paginator.get_paginated_response(serialized_posts.data)
   else:
     return Response({
       "error": True,
