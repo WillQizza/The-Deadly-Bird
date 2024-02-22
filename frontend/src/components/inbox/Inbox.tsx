@@ -13,7 +13,7 @@ const Inbox = () => {
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [pageNo, setPageNo] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
-    const curAuthorId = getUserId().toString();
+    const curAuthorId = getUserId();
     
     useEffect(() => {
         const getMessages = async () => {
@@ -32,12 +32,11 @@ const Inbox = () => {
 
     
     const renderPostCard = (message: any, idx: number) => {
-        // TODO: Implement 
         return (
             <Card key={message+idx} className="mb-2">
-                <Card.Header>Follow Request</Card.Header>
+                <Card.Header>{message.author.displayName} just posted!</Card.Header>
                 <Card.Body>
-                    <Card.Text>Liked your post!</Card.Text> 
+                    <Card.Text>Preview: {message.description}</Card.Text> 
                 </Card.Body>
             </Card>
         );

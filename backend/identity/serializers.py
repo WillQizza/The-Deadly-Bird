@@ -12,6 +12,7 @@ class AuthorSerializer(serializers.ModelSerializer):
   posts = serializers.SerializerMethodField()
   followers = serializers.SerializerMethodField()
   following = serializers.SerializerMethodField()
+  email = serializers.SerializerMethodField()
 
   def get_posts(self, obj: Author):
     return Post.objects.filter(author=obj).count()
@@ -21,10 +22,16 @@ class AuthorSerializer(serializers.ModelSerializer):
 
   def get_following(self, obj: Author):
     return Following.objects.filter(author=obj).count()
+  
+  def get_email(self, obj: Author):
+    if "id" in self.context and obj.id == self.context["id"]:
+      # Only return the user's email if they are the one requesting it
+      return obj.user.email
+    return None
 
   class Meta:
     model = Author
-    fields = ['type', 'id', 'url', 'host', 'displayName', 'github', 'profileImage', 'posts', 'followers', 'following']
+    fields = ['type', 'id', 'url', 'host', 'email', 'bio', 'displayName', 'github', 'profileImage', 'posts', 'followers', 'following']
 
 class InboxMessageSerializer(serializers.Serializer):
   """

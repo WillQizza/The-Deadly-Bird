@@ -5,19 +5,20 @@ from rest_framework.response import Response
 from following.util import is_friends
 from deadlybird.pagination import Pagination
 from .serializers import PostSerializer
-from .models import Post, Author
+from .models import Post, Author, Following
 from django.db.models import Q
+from .util import send_post_to_inboxes
 
 @api_view(["GET", "POST"])
-def posts(request: HttpRequest, author_id: int):
+def posts(request: HttpRequest, author_id: str):
   if request.method == "GET":
     # Retrieve author posts
     paginator = Pagination("posts")
 
     can_see_friends = False
     if "id" in request.session:
-      can_see_friends = (author_id == int(request.session["id"])) or \
-                          is_friends(author_id, int(request.session["id"]))
+      can_see_friends = (author_id == request.session["id"]) or \
+                          is_friends(author_id, request.session["id"])
       
     # Retrieve and serialize posts that should be shown
     if can_see_friends:
@@ -52,7 +53,7 @@ def posts(request: HttpRequest, author_id: int):
     
     # Check that we are who we say we are
     if (not "id" in request.session) \
-      or (int(request.session["id"]) != author_id):
+      or (request.session["id"] != author_id):
       return Response({
         "error": True,
         "message": "You do not have permission to post as this user."
@@ -66,7 +67,7 @@ def posts(request: HttpRequest, author_id: int):
     content = request.POST["content"]
     visibility = request.POST["visibility"]
 
-    Post.objects.create(
+    post = Post.objects.create(
       title=title,
       description=description,
       content_type=content_type,
@@ -74,19 +75,20 @@ def posts(request: HttpRequest, author_id: int):
       author=author,
       visibility=visibility
     )
-    
+    send_post_to_inboxes(post.id, author_id)
+
     return Response({
       "error": False,
       "message": "Post created successfully"
     }, status=201)
 
 @api_view(["GET", "DELETE", "PUT"])
-def post(request: HttpRequest, author_id: int, post_id: int):
+def post(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
     can_see_friends = False
     if "id" in request.session:
-      can_see_friends = (author_id == int(request.session["id"])) or \
-                          is_friends(author_id, int(request.session["id"]))
+      can_see_friends = (author_id == request.session["id"]) or \
+                          is_friends(author_id, request.session["id"])
       
     # Retrieve and serialize post that should be shown
     try:
@@ -112,3 +114,45 @@ def post(request: HttpRequest, author_id: int, post_id: int):
   elif request.method == "PUT":
     # TODO: Edit post
     pass
+
+@api_view(["GET"])
+def post_stream(request: HttpRequest, stream_type: str):
+  if stream_type == "public":
+    paginator = Pagination("posts")
+
+    # Get all public posts
+    posts = Post.objects.all() \
+      .filter(visibility=Post.Visibility.PUBLIC) \
+      .order_by("-published_date")
+
+    posts_on_page = paginator.paginate_queryset(posts, request)
+    serialized_posts = PostSerializer(posts_on_page, many=True)
+
+    return paginator.get_paginated_response(serialized_posts.data)
+  elif stream_type == 'following':
+    paginator = Pagination("posts")
+
+    # Get all authors following
+    following = Following.objects.all() \
+        .filter(author=request.session["id"]) \
+        .values_list('target_author', flat=True)
+
+    # Get all not friends from those following
+    not_friends = [follow for follow in following if not is_friends(int(follow), int(request.session["id"]))]
+
+    # Get all posts all posts from authors following
+    posts = Post.objects.all() \
+        .filter(author__in=following) \
+        .exclude(visibility=Post.Visibility.UNLISTED) \
+        .exclude(visibility=Post.Visibility.FRIENDS, author__in=not_friends) \
+        .order_by("-published_date")
+
+    posts_on_page = paginator.paginate_queryset(posts, request)
+    serialized_posts = PostSerializer(posts_on_page, many=True)
+
+    return paginator.get_paginated_response(serialized_posts.data)
+  else:
+    return Response({
+      "error": True,
+      "message": "Invalid stream type."
+    }, status=404)

@@ -3,6 +3,7 @@
     background-color: var(--grey);
     display: flex;
     flex-direction: column;
+    height: 100vh;
 }
 
 
@@ -25,8 +26,14 @@
     flex-direction: column;
 }
 
-#content {
+.content {
     flex-grow: 1;
+    height: 100%;
+    overflow: hidden;
+}
+
+.overflowScroll {
+    overflow-y: scroll;
 }
 
 #thinNavbar {

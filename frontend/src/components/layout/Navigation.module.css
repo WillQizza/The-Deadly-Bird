@@ -1,6 +1,7 @@
 #logoContainer {
     margin: auto;
     margin-top: 20px;
+    margin-bottom: 20px;
     width: 50%;
 }
 
@@ -10,7 +11,6 @@
 
 #buttons {
     display: flex;
-    /* min-width: min-content; */
     flex-direction: column;
     gap: 10px;
 }
@@ -22,8 +22,6 @@
 .button {
     height: 64px;
     background-color: var(--dark-teal);
-
-    /* min-width: min-content; */
     display: flex;
     flex-direction: row;
 }
@@ -35,7 +33,8 @@
 .button > .icon {
     width: 43%;
     height: 100%;
-
+    padding: 15px;
+    margin-top:15px;
     display: flex;
     align-items: flex-end;
     justify-content: flex-end;
@@ -56,4 +55,39 @@
     justify-content: center;
     color: #fff;
     font-size: 1.5em;
+}
+
+#navigationContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+#buttons {
+    flex-grow: 1;
+}
+
+
+#createPost {
+    margin: auto;
+    color: white;
+    margin-bottom: 40px;
+    display: flex;
+    font-size: 24px;
+    background-color: var(--darker-teal);
+    border-radius: 5px; 
+    padding: 20px;
+}
+
+#createPost:hover {
+    color: yellow;
+    cursor: pointer;
+}
+
+.postCreate {
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+    cursor: pointer;
 }
