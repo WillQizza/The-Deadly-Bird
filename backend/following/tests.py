@@ -5,13 +5,8 @@
 Run tests for the Following and FollowRequest models and views
 """
 
-from django.test import TestCase
-from rest_framework.test import APIClient
-from django.contrib.auth.models import User
 from django.urls import reverse
-from identity.models import Author
 from .models import Following, FollowingRequest
-from typing import List
 from deadlybird.base_test import BaseTestCase
 from identity.models import InboxMessage
 
@@ -157,4 +152,4 @@ class FollowersTestCase(BaseTestCase):
         
         res = self.client.get(url)
 
-        self.assertTrue(res.status_code == 200)
+        self.assertEqual(res.status_code, 200)

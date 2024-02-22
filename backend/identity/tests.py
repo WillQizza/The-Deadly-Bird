@@ -95,9 +95,9 @@ class AuthorTests(BaseTestCase):
     """
     Check that details are accurate when retrieving a specific author
     """
-    response = self.client.get(reverse("author", kwargs={ "author_id": 8 })).json()
-    self.assertEquals(response["id"], 8)
-    self.assertEquals(response["displayName"], "user8")
+    response = self.client.get(reverse("author", kwargs={ "author_id": self.authors[0].id })).json()
+    self.assertEquals(response["id"], self.authors[1].id)
+    self.assertEquals(response["displayName"], "user2")
 
   def _is_author_object(self, obj):
     """

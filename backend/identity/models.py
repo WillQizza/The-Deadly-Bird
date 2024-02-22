@@ -21,5 +21,5 @@ class InboxMessage(models.Model):
 
   id = models.CharField(primary_key=True, max_length=10, default=generate_next_id)
   author = models.ForeignKey(Author, on_delete=models.CASCADE, blank=False, null=False)
-  content_id = models.IntegerField(blank=False, null=False)
+  content_id = models.CharField(max_length=10, blank=False, null=False)
   content_type = models.CharField(choices=ContentType.choices, max_length=50, blank=False, null=False)
