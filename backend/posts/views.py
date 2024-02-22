@@ -114,3 +114,25 @@ def post(request: HttpRequest, author_id: int, post_id: int):
   elif request.method == "PUT":
     # TODO: Edit post
     pass
+
+@api_view(["GET"])
+def post_stream(request: HttpRequest, stream_type: str):
+  if stream_type == "public":
+    paginator = Pagination("posts")
+
+    # Get all public posts
+    posts = Post.objects.all() \
+      .filter(visibility=Post.Visibility.PUBLIC) \
+      .order_by("-published_date")
+
+    posts_on_page = paginator.paginate_queryset(posts, request)
+    serialized_posts = PostSerializer(posts_on_page, many=True)
+
+    return paginator.get_paginated_response(serialized_posts.data)
+  elif stream_type == 'following':
+    pass
+  else:
+    return Response({
+      "error": True,
+      "message": "Invalid stream type."
+    }, status=404)
