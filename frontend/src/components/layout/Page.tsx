@@ -51,6 +51,8 @@ const Page = ({ children, selected } : { children: React.ReactNode, selected?: S
                     <Inbox></Inbox>
                 </Offcanvas.Body>
             </Offcanvas>
+
+
             <Footer />
         </div>
     );
