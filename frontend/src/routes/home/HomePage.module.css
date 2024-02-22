@@ -1,0 +1,11 @@
+.tabs {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.tabContent {
+    max-height: 100%;
+    overflow-y: scroll;
+    flex: 1;
+}
