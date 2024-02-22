@@ -1,5 +1,6 @@
 from django.db import models
 from identity.models import Author
+from following.models import Following
 from nodes.models import Node
 from deadlybird.util import generate_next_id
 

@@ -10,7 +10,7 @@ import { ReactComponent as Person } from 'bootstrap-icons/icons/person.svg';
 import { ReactComponent as Globe } from 'bootstrap-icons/icons/globe.svg';
 import { ReactComponent as Gear } from 'bootstrap-icons/icons/gear.svg';
 
-const Page = ({ children, selected } : { children: React.ReactNode, selected?: SelectedNavigation }) => {
+const Page = ({ children, selected, overflowScrollOff } : { children: React.ReactNode, selected?: SelectedNavigation, overflowScrollOff?: Boolean }) => {
         
     const [showSidebar, setShowSidebar] = useState(false);
     const toggleSidebar = () => setShowSidebar(!showSidebar);
@@ -38,7 +38,7 @@ const Page = ({ children, selected } : { children: React.ReactNode, selected?: S
                         <button onClick={() => {toggleSidebar()}}>Inbox</button>
                         <button onClick={() => {logOut()}}>Log Out</button>
                     </div>
-                    <div id={styles.content}>
+                    <div className={`${styles.content} ${!overflowScrollOff ? styles.overflowScroll : ''}`}>
                         {children}
                     </div>
                 </div>
