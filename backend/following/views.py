@@ -128,7 +128,7 @@ def modify_follower(request, author_id, foreign_author_id):
         return Response({"message": "Unexpected error occurred."}, status=400)
     
 
-@api_view(["POST"])
+@api_view(["POST", "GET"])
 def request_follower(request: HttpRequest, local_author_id: str, foreign_author_id: str):
     """
     Request a follower on local or foreign host.
