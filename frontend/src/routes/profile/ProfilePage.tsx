@@ -26,9 +26,9 @@ const ProfilePage: React.FC = () => {
     const [followerCount, setFollowerCount] = useState(-1);
     const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
 
-    const curAuthorId : string = getUserId().toString(); 
+    const curAuthorId : string = getUserId()!; 
     const params = useParams();
-    const userId = params["id"];
+    const userId = params["id"]!;
 
 
     const updateFollowingState = (userId: string) => {
@@ -48,7 +48,7 @@ const ProfilePage: React.FC = () => {
     }
 
     useEffect(() => {
-        getAuthor(parseInt(userId as string))
+        getAuthor(userId)
             .then(async author => {
                 if (!author) {
                     console.error(`Failed to load user profile: ${userId}`);

@@ -2,6 +2,7 @@ from django.db import models
 from identity.models import Author
 from following.models import Following
 from nodes.models import Node
+from deadlybird.util import generate_next_id
 
 # Create your models here.
 class Post(models.Model):
@@ -16,7 +17,7 @@ class Post(models.Model):
     FRIENDS = "FRIENDS"
     UNLISTED = "UNLISTED"
 
-  id = models.AutoField(primary_key=True)
+  id = models.CharField(primary_key=True, max_length=10, default=generate_next_id)
   title = models.CharField(max_length=255, blank=False, null=False)
   source = models.ForeignKey(Node, blank=True, null=True, on_delete=models.CASCADE)
   origin = models.CharField(max_length=255, blank=True, null=True)
@@ -35,7 +36,7 @@ class Comment(models.Model):
     PNG_BASE64 = "image/png;base64"
     JPEG_BASE64 = "image/jpeg;base64"
     
-  id = models.AutoField(primary_key=True)
+  id = models.CharField(primary_key=True, max_length=10, default=generate_next_id)
   post = models.ForeignKey(Post, blank=False, null=False, on_delete=models.CASCADE)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
   content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
