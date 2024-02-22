@@ -48,7 +48,7 @@ def posts(request: HttpRequest, author_id: str):
       or (not "visibility" in request.POST):
       return Response({
         "error": True,
-        "message": "Required field missing"
+        "message": "Required field missing."
       }, status=400)
     
     # Check that we are who we say we are
@@ -61,25 +61,21 @@ def posts(request: HttpRequest, author_id: str):
 
     # Create the post
     author = get_object_or_404(Author, id=author_id)
-    title = request.POST["title"]
-    description = request.POST["description"]
-    content_type = request.POST["contentType"]
-    content = request.POST["content"]
-    visibility = request.POST["visibility"]
 
     post = Post.objects.create(
-      title=title,
-      description=description,
-      content_type=content_type,
-      content=content,
+      title=request.POST["title"],
+      description=request.POST["description"],
+      content_type=request.POST["contentType"],
+      content=request.POST["content"],
       author=author,
-      visibility=visibility
+      visibility=request.POST["visibility"]
     )
+    
     send_post_to_inboxes(post.id, author_id)
 
     return Response({
       "error": False,
-      "message": "Post created successfully"
+      "message": "Post created successfully."
     }, status=201)
 
 @api_view(["GET", "DELETE", "PUT"])
@@ -112,8 +108,54 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     # TODO: Delete post
     pass
   elif request.method == "PUT":
-    # TODO: Edit post
-    pass
+    # Edit a post
+    # Check the request body for all the required fields
+    if (not "title" in request.POST) \
+      or (not "description" in request.POST) \
+      or (not "contentType" in request.POST) \
+      or (not "content" in request.POST) \
+      or (not "visibility" in request.POST):
+      return Response({
+        "error": True,
+        "message": "Required field missing."
+      }, status=400)
+    
+    # Check that we are who we say we are
+    if (not "id" in request.session) \
+      or (request.session["id"] != author_id):
+      return Response({
+        "error": True,
+        "message": "You do not have permission to edit posts as this user."
+      }, status=401)
+    
+    # Check that the post exists
+    try:
+      post = Post.objects.get(id=post_id)
+    except:
+      return Response({
+        "error": True,
+        "message": "Post not found."
+      }, status=404)
+    
+    # Check that the post belongs to us
+    if post.author.id != author_id:
+      return Response({
+        "error": True,
+        "message": "You do not have permission to edit this post."
+      }, status=404)
+
+    # Update the post
+    post.title = request.POST["title"]
+    post.description = request.POST["description"]
+    post.content = request.POST["content"]
+    post.content_type = request.POST["contentType"]
+    post.visibility = request.POST["visibility"]
+    post.save()
+
+    return Response({
+      "error": False,
+      "message": "Post updated successfully."
+    }, status=200)
 
 @api_view(["GET"])
 def post_stream(request: HttpRequest, stream_type: str):
