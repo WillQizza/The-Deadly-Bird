@@ -4,6 +4,9 @@ import SettingsInput from "./SettingsInput";
 import React, { useEffect, useRef, useState } from "react";
 import { Author } from "../../api/types";
 import { publicDir } from "../../constants";
+import { apiRequest } from "../../utils/request";
+import { baseURL } from "../../constants";
+import { getUserId } from "../../utils/auth";
 
 type SettingsFormOptions = {
   author?: Author;
@@ -14,6 +17,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [homeServer, setHomeServer] = useState("");
+  const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
   const [loadedContent, setLoadedContent] = useState(false);
 
@@ -33,10 +37,25 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
     }
   }, [author]);
 
-  function onSaveClicked(event: React.FormEvent<HTMLFormElement>) {
+  async function onSaveClicked(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // TODO: SEND API REQUEST TO BACKEND
+    const formData = new URLSearchParams({
+      displayName: username,
+      email: email,
+      bio: bio,
+    })
+    if (password !== "") {
+      formData.append("password", password);
+    }
+  
+    const response = await apiRequest(`${baseURL}/api/authors/${getUserId()}/`, {
+        method:"PUT",
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData.toString()
+    });
   }
 
   function onDeleteAccount(event: React.MouseEvent<HTMLButtonElement>) {
@@ -80,6 +99,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
             </div>
             <div className={styles.row}>
               <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />
+              <SettingsInput title="Password" name="password" type="password" value=""  valueSetter={setPassword} placeholder="*********" />
             </div>
           </div>
         </div>
