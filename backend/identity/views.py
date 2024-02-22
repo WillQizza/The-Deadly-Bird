@@ -22,7 +22,7 @@ def authors(request: HttpRequest):
   serializer = AuthorSerializer(page, many=True, context={ "id": our_user_id })
   return paginator.get_paginated_response(serializer.data)
 
-@api_view(["GET", "POST"])
+@api_view(["GET", "PUT"])
 def author(request: HttpRequest, author_id: str):
   if request.method == "GET":
     # Get profile
@@ -32,8 +32,30 @@ def author(request: HttpRequest, author_id: str):
     serializer = AuthorSerializer(author, context={ "id": our_user_id })
     return Response(serializer.data)
   else:
-    # Update profile
-    pass
+    author = Author.objects.get(id=request.session["id"])
+    if ("displayName" in request.POST):
+      new_username = request.POST["displayName"]
+      author.user.username = new_username
+    if "password" in request.POST:
+      password = request.POST["password"]
+      author.user.set_password(password)
+    if "email" in request.POST:
+      email = request.POST["email"]
+      author.user.email = email
+    if "github" in request.POST:
+      github = request.POST["github"]
+      author.github = github
+    if "profileImage" in request.POST:
+      profile_picture = request.POST["profileImage"]
+      author.profile_picture = profile_picture
+
+    author.user.save()
+    author.save()
+
+    return Response({
+      "error": False,
+      "message": "Success!"
+    }, status=201)
 
 @api_view(["POST"])
 def login(request: HttpRequest):
@@ -74,13 +96,14 @@ def login(request: HttpRequest):
 
 @api_view(["POST"])
 def register(request: HttpRequest):
-  if (not "username" in request.POST) or (not "password" in request.POST):
+  if (not "username" in request.POST) or (not "password" in request.POST) or (not "email" in request.POST):
     return Response({
       "error": True,
       "message": "No credentials provided"
     }, status=400)
   username = request.POST["username"]
   password = request.POST["password"]
+  email = request.POST["email"]
 
   # Check if an user already exists with that username
   try:
@@ -91,9 +114,17 @@ def register(request: HttpRequest):
     }, status=409)
   except User.DoesNotExist:
     pass
+  try:
+    User.objects.get(email__iexact=email)
+    return Response({
+      "error": True,
+      "message": "Account already exists"
+    }, status=409)
+  except:
+    pass
   
   # Create user object
-  created_user = User.objects.create_user(username=username, password=password)
+  created_user = User.objects.create_user(username=username, email=email, password=password)
 
   # Create author object from user object
   Author.objects.create(
@@ -108,34 +139,6 @@ def register(request: HttpRequest):
     "message": "Success!"
   }, status=201)
 
-@api_view(["POST"])
-def update(request: HttpRequest):
-  if (not "username" in request.POST) or (not "password" in request.POST):
-    return Response({
-      "error": True,
-      "message": "No credentials provided"
-    }, status=400)
-  username = request.POST["username"]
-  password = request.POST["password"]
-
-  # Check if an user already exists with that username
-  try:
-    user = User.objects.get(username__iexact=username)
-  except User.DoesNotExist:
-    return Response({
-      "error": True,
-      "message": "Account does not exist"
-    }, status=404)
-  
-  # Update user object
-  user.set_password(password)
-  user.save()
-  
-  # Send success
-  return Response({
-    "error": False,
-    "message": "Success!"
-  }, status=200)
 
 @api_view(["GET", "POST"])
 def inbox(request: HttpRequest, author_id: str):
