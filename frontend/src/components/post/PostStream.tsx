@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './PostStream.module.css';
 import Post from './Post';
-import { apiGetAuthorPosts, apiGetPublicPosts } from '../../api/posts';
+import { apiGetAuthorPosts, apiGetPosts, APIPostStreamTy } from '../../api/posts';
 
 export enum PostStreamTy {
     Public,
@@ -38,7 +38,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                     }
                 });
         } else if (props.type === PostStreamTy.Public) {
-            apiGetPublicPosts(currentPage.current, pageSize)
+            apiGetPosts(APIPostStreamTy.Public, currentPage.current, pageSize)
                 .then(async response => {
                     if ('items' in response) {
                         const newPosts = response.items.map((postResponse) => {
@@ -47,8 +47,16 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         addPosts(newPosts);
                     }
                 });
-        } else if (props.type === PostStreamTy.Following && props.id) {
-            // TODO: make api call for following posts
+        } else if (props.type === PostStreamTy.Following) {
+            apiGetPosts(APIPostStreamTy.Following, currentPage.current, pageSize)
+                .then(async response => {
+                    if ('items' in response) {
+                        const newPosts = response.items.map((postResponse) => {
+                            return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} />;
+                        })
+                        addPosts(newPosts);
+                    }
+                });
         }
     }
 
