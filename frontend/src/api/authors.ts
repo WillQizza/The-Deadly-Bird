@@ -22,7 +22,7 @@ export const getAuthors = async (page: number, size: number)
  * @description function to access the /authors/id view API.
  * @param id author id to retrieve
  */
-export const getAuthor = async (id: number): Promise<Author|null> => {
+export const getAuthor = async (id: string): Promise<Author|null> => {
     const response = await apiRequest(`${baseURL}/api/authors/${id}/`);
 
     if (response.status === 404) {

@@ -13,7 +13,7 @@ const Inbox = () => {
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [pageNo, setPageNo] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(10);
-    const curAuthorId = getUserId().toString();
+    const curAuthorId = getUserId();
     
     useEffect(() => {
         const getMessages = async () => {

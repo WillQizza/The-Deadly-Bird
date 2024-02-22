@@ -23,7 +23,7 @@ def authors(request: HttpRequest):
   return paginator.get_paginated_response(serializer.data)
 
 @api_view(["GET", "POST"])
-def author(request: HttpRequest, author_id: int):
+def author(request: HttpRequest, author_id: str):
   if request.method == "GET":
     # Get profile
     author = get_object_or_404(Author, id=author_id)
@@ -110,7 +110,7 @@ def register(request: HttpRequest):
 
 
 @api_view(["GET", "POST"])
-def inbox(request: HttpRequest, author_id: int):
+def inbox(request: HttpRequest, author_id: str):
   """
   URL: ://service/authors/{AUTHOR_ID}/inbox
   GET [local]: if authenticated get a paginated list of posts sent to AUTHOR_ID

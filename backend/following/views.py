@@ -11,7 +11,7 @@ from deadlybird.pagination import Pagination
 
 
 @api_view(["GET"])
-def following(request, author_id:int):
+def following(request, author_id: str):
     """
     URL: ://service/authors/{AUTHOR_ID}/following
     GET [local, remote]: get a list of authors who AUTHOR_ID is following
@@ -48,7 +48,7 @@ def following(request, author_id:int):
         return Response(serializer.data)
 
 @api_view(["GET"])
-def followers(request, author_id:int):
+def followers(request, author_id: str):
 
     """
     URL: ://service/authors/{AUTHOR_ID}/followers
@@ -124,7 +124,7 @@ def modify_follower(request, author_id, foreign_author_id):
     
 
 @api_view(["POST"])
-def request_follower(request: HttpRequest, local_author_id:int, foreign_author_id:int):
+def request_follower(request: HttpRequest, local_author_id: str, foreign_author_id: str):
     """
     Request a follower on local or foreign host.
     URL: None specified

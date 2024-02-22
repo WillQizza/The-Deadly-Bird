@@ -7,7 +7,7 @@ import { FollowersResponse } from "./types";
  * @param id author id to retrieve
  */
 export const apiGetFollowers = async (
-    authorID: number,
+    authorID: string,
     page: number,
     size: number
 ): Promise<FollowersResponse> => {

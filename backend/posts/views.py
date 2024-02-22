@@ -9,15 +9,15 @@ from .models import Post, Author
 from django.db.models import Q
 
 @api_view(["GET", "POST"])
-def posts(request: HttpRequest, author_id: int):
+def posts(request: HttpRequest, author_id: str):
   if request.method == "GET":
     # Retrieve author posts
     paginator = Pagination("posts")
 
     can_see_friends = False
     if "id" in request.session:
-      can_see_friends = (author_id == int(request.session["id"])) or \
-                          is_friends(author_id, int(request.session["id"]))
+      can_see_friends = (author_id == request.session["id"]) or \
+                          is_friends(author_id, request.session["id"])
       
     # Retrieve and serialize posts that should be shown
     if can_see_friends:
@@ -52,7 +52,7 @@ def posts(request: HttpRequest, author_id: int):
     
     # Check that we are who we say we are
     if (not "id" in request.session) \
-      or (int(request.session["id"]) != author_id):
+      or (request.session["id"] != author_id):
       return Response({
         "error": True,
         "message": "You do not have permission to post as this user."
@@ -81,12 +81,12 @@ def posts(request: HttpRequest, author_id: int):
     }, status=201)
 
 @api_view(["GET", "DELETE", "PUT"])
-def post(request: HttpRequest, author_id: int, post_id: int):
+def post(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
     can_see_friends = False
     if "id" in request.session:
-      can_see_friends = (author_id == int(request.session["id"])) or \
-                          is_friends(author_id, int(request.session["id"]))
+      can_see_friends = (author_id == request.session["id"]) or \
+                          is_friends(author_id, request.session["id"])
       
     # Retrieve and serialize post that should be shown
     try:
