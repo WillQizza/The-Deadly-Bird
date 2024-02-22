@@ -17,3 +17,17 @@ export const apiGetAuthorPosts = async (
     const data: PostsResponse = await response.json(); 
     return data;
 }
+
+/**
+ * @description function to retreive the public posts
+ */
+export const apiGetPublicPosts = async (
+    page: number,
+    size: number
+): Promise<PostsResponse> => {
+    const response = await apiRequest(
+        `${baseURL}/api/posts/public?page=${page}&size=${size}`
+    );    
+    const data: PostsResponse = await response.json(); 
+    return data;
+}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './PostStream.module.css';
 import Post from './Post';
-import { apiGetAuthorPosts } from '../../api/posts';
+import { apiGetAuthorPosts, apiGetPublicPosts } from '../../api/posts';
 
 export enum PostStreamTy {
     Public,
@@ -27,11 +27,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
 
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = () => {
-        if (props.id === null) {
-            return;
-        }
-
-        if (props.type === PostStreamTy.Author) {
+        if (props.type === PostStreamTy.Author && props.id) {
             apiGetAuthorPosts(props.id, currentPage.current, pageSize)
                 .then(async response => {
                     if ('items' in response) {
@@ -42,8 +38,16 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                     }
                 });
         } else if (props.type === PostStreamTy.Public) {
-            // TODO: make api call for public posts
-        } else if (props.type === PostStreamTy.Following) {
+            apiGetPublicPosts(currentPage.current, pageSize)
+                .then(async response => {
+                    if ('items' in response) {
+                        const newPosts = response.items.map((postResponse) => {
+                            return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} />;
+                        })
+                        addPosts(newPosts);
+                    }
+                });
+        } else if (props.type === PostStreamTy.Following && props.id) {
             // TODO: make api call for following posts
         }
     }
