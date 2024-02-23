@@ -69,7 +69,6 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 contentType: contentType,
                 visibility: visibility
             }).toString();
-            console.log(title);
 
             const reqURL = postId ? `${baseURL}/api/authors/${getUserId()}/posts/${postId}` : `${baseURL}/api/authors/${getUserId()}/posts/`;
             const reqMethod = postId ? 'PUT' : 'POST';
