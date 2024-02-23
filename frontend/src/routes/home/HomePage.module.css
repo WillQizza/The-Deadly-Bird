@@ -4,6 +4,23 @@
     flex-direction: column;
 }
 
+.tab {
+    border-radius: 0 !important;
+    color: white !important;
+}
+
+.tab:hover {
+    filter: brightness(85%);
+}
+
+.tabActive {
+    background-color: var(--teal) !important;
+}
+
+.tabInactive {
+    background-color: var(--grey) !important;
+}
+
 .tabContent {
     max-height: 100%;
     overflow-y: scroll;

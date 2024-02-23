@@ -31,6 +31,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
     } = props;
     
     const placeholder = `${publicDir}/static/icons/image.svg`;
+    const allowedTypes = new Set(['image/png;base64', 'image/jpeg;base64', 'application/base64']);
     const [image, setImage] = useState<string>(placeholder);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -47,11 +48,12 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                     let newFormErrors = {...formErrors};
                     // parse result
                     const base64data = reader.result.toString();
-                    const mediaType = base64data.slice(base64data.indexOf(':')+1,base64data.indexOf(','));
+                    let mediaType = base64data.slice(base64data.indexOf(':')+1,base64data.indexOf(','));
+                    if (mediaType.startsWith('application/') && mediaType.endsWith('base64')) {
+                        mediaType = 'application/base64';
+                    }
                     // if image type is valid
-                    if (mediaType === 'image/png;base64' || 
-                        mediaType === 'image/jpeg;base64' || 
-                        (mediaType.startsWith('application/') && mediaType.endsWith('base64'))) {
+                    if (allowedTypes.has(mediaType)) {
                         setImage(base64data);
                         valueRef.current = await fileToBase64(file);
                         typeRef.current = mediaType;

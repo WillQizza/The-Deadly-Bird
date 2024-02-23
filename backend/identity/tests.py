@@ -45,7 +45,8 @@ class AuthenticationTest(BaseTestCase):
     # Should return error since account exists
     response = self.client.post("/api/register/", {
       "username": "admin",
-      "password": "admin"
+      "password": "admin",
+      "email": "admin@admin.com"
     })
     self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
@@ -53,7 +54,8 @@ class AuthenticationTest(BaseTestCase):
     # Should be successful
     response = self.client.post("/api/register/", {
       "username": "newuser",
-      "password": "newuser"
+      "password": "newuser",
+      "email": "newuser@newuser.com"
     })
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
