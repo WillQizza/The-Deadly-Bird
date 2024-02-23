@@ -30,8 +30,6 @@ const RadioButtonGroup: React.FC<RadioButtonGroupProps> = (props: RadioButtonGro
                         value={option.value}
                         onChange={(e) => {
                             setValue(option.value);
-                            console.log(option.value);
-                            console.log(value);
                         }}
                         variant='outline-secondary'
                         className={styles.radioSelectOption}
