@@ -6,7 +6,7 @@ import styles from "./SettingsInput.module.css";
 type SettingsInputOptions = {
   title: string;
   name: string;
-  type: "text"|"email";
+  type: "text"|"email"|"password";
   value: string;
   valueSetter?: React.Dispatch<React.SetStateAction<string>>;
   disabled?: boolean;

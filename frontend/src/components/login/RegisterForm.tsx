@@ -26,6 +26,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
             
             const formData = new URLSearchParams({
                 username: username,
+                email: email,
                 password: password
             }).toString()
             
