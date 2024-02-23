@@ -97,7 +97,7 @@ class AuthorTests(BaseTestCase):
     """
     response = self.client.get(reverse("author", kwargs={ "author_id": self.authors[1].id })).json()
     self.assertEquals(response["id"], self.authors[1].id)
-    self.assertEquals(response["displayName"], "user2")
+    self.assertEquals(response["displayName"], self.authors[1].username)
 
   def _is_author_object(self, obj):
     """

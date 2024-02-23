@@ -11,6 +11,16 @@ interface ImageUploadProps {
     typeRef: { current: string }
 }
 
+const fileToBase64 = async (file: File) => {
+    const blob = new Uint8Array(await file.arrayBuffer());
+    
+    let result = "";
+    for (let i = 0; i < blob.byteLength; i++) {
+        result += String.fromCharCode(blob[i]);
+    }
+    return btoa(result);
+};
+
 const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
     const {
         formErrors,
@@ -32,18 +42,18 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             // handle the result
-            reader.onload = () => {
+            reader.onload = async () => {
                 if (reader.result) {
                     let newFormErrors = {...formErrors};
                     // parse result
                     const base64data = reader.result.toString();
                     const mediaType = base64data.slice(base64data.indexOf(':')+1,base64data.indexOf(','));
                     // if image type is valid
-                    if (mediaType == 'image/png;base64' || 
-                        mediaType == 'image/jpeg;base64' || 
+                    if (mediaType === 'image/png;base64' || 
+                        mediaType === 'image/jpeg;base64' || 
                         (mediaType.startsWith('application/') && mediaType.endsWith('base64'))) {
                         setImage(base64data);
-                        valueRef.current = base64data;
+                        valueRef.current = await fileToBase64(file);
                         typeRef.current = mediaType;
                         newFormErrors[formErrorKey] = '';
                     }

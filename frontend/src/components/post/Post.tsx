@@ -1,8 +1,8 @@
 import React from 'react';
 import Markdown from 'react-markdown';
 import styles from './Post.module.css';
-import { PostResponse } from '../../api/types'
-import { publicDir } from "../../constants";
+import { ContentType, PostResponse } from '../../api/types'
+import { baseURL, publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 
@@ -27,9 +27,22 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
     });
 
     // Determine post content format
-    let content = <span>{props.content}</span>;
-    if (props.contentType === "text/markdown") {
-        content = <Markdown>{props.content}</Markdown>;
+    let content;
+    switch (props.contentType) {
+        case ContentType.MARKDOWN:
+            content = <Markdown>{props.content}</Markdown>;
+            break;
+        case ContentType.PLAIN:
+            content = <span>{props.content}</span>;
+            break;
+        case ContentType.APPLICATION_BASE64:
+        case ContentType.PNG_BASE64:
+        case ContentType.JPEG_BASE64:
+            content = <img style={{ maxWidth: "100%" }} src={`${baseURL}/api/authors/${props.author.id}/posts/${props.id}/image`} alt="Image Post" />;
+            break;
+        default:
+            content = <span>{props.content}</span>;
+            break;
     }
 
     return (
