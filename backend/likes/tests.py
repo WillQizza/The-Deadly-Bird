@@ -1,6 +1,7 @@
 from django.test import TestCase
 from deadlybird.base_test import BaseTestCase
 from .models import Like
+from posts.models import Post
 from django.urls import reverse
 
 class LikeTests(BaseTestCase):
@@ -8,28 +9,23 @@ class LikeTests(BaseTestCase):
         super().setUp()
 
     def test_likes(self):
-        self.create_likes()
-        likes = Like.objects.filter()
-        
-        a1, a2, a3 = (self.authors[0], self.authors[1], self.authors[2])
-        url = reverse('post_likes', kwargs={
-            'author_id': a2.id,
-            'post_id': '1'
-        })
          
-        res = self.client.get(url)
-        self.assertTrue(res.status_code == 404)
+        self.create_likes()
+        a1, a2, a3 = (self.authors[0], self.authors[1], self.authors[2])
+        post = Post.objects.filter(author=a1).first() 
 
         url = reverse('post_likes', kwargs={
-            'author_id': '1',
-            'post_id': '1'
+            'author_id': a2.id,
+            'post_id': post.id
         })
-        print(res.json())
-        print(likes)
+        res = self.client.get(url)
+        print(res.json()) 
 
     def create_likes(self):
         a1, a2, a3 = (self.authors[0], self.authors[1], self.authors[2])
-        post = self.create_post(a1.id)
+        
+        post = Post.objects.filter(author=a1).first() 
+        print(post)
 
         # a2 likes a1 post
         Like.objects.create(

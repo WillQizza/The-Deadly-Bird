@@ -6,13 +6,15 @@ from posts.models import Post
 from rest_framework.response import Response
 
 @api_view(["GET", "POST"])
-def post_likes(request: HttpRequest, author_id: int, post_id: int):
+def post_likes(request: HttpRequest, author_id: str, post_id: str):
     """
+    author_id:   author of post to retrieve likes from
+    post_id:     post id to retreive likes from
     URL: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/likes
     """ 
     if request.method == "GET":        
         # get the post specified by the url 
-        author_post = Post.objects.filter(author_id=author_id, id=post_id).first()
+        author_post = Post.objects.filter(id=post_id).first()
 
         if author_post is None:
             return Response({
@@ -39,4 +41,4 @@ def liked(request: HttpRequest, author_id: int):
     """
     Get all the liked public things which author_id has liked.
     """
-    
+    pass 

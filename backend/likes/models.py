@@ -13,3 +13,6 @@ class Like(models.Model):
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
   content_id = models.CharField(max_length=10, blank=False, null=False)
   content_type = models.CharField(choices=ContentType.choices, max_length=50, blank=False, null=False) 
+
+  def __str__(self):
+    return f"id:{self.id} author:{self.author.__str__()} content_id: {self.content_id} type: {self.content_type}"
