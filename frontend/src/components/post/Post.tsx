@@ -5,6 +5,7 @@ import { ContentType, PostResponse } from '../../api/types'
 import { baseURL, publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
+import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
 
 const Post: React.FC<PostResponse> = (props: PostResponse) => {
     // Set profile picture src
@@ -77,6 +78,13 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
                     <ArrowRepeat className={`${styles.postButton} ${styles.postShare}`}/>
                     {/* Like */}
                     <Heart className={`${styles.postButton} ${styles.postLike}`}/>
+                    {/* Edit */}
+                    <PencilSquare
+                        className={`${styles.postButton} ${styles.postEdit}`}
+                        onClick={(e) => {
+                            document.location.href = `/post/${props.id}`;
+                        }}
+                    />
                 </div>
             </div>
         </div>
