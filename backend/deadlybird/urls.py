@@ -40,5 +40,5 @@ urlpatterns = [
     path('api/', include('likes.urls')),
     path('api/', include('nodes.urls')),
     path('api/', include('posts.urls')),
-    re_path(r'.*', include('react.urls'))   # Note: ALL API urls should be above this path so that they are searched first
+    re_path(r'^(?!api\/).*', include('react.urls')) # Paths that do not start with api
 ]
