@@ -6,9 +6,10 @@ database for each app's test-suite.
 
 from django.test import TestCase
 from identity.models import Author, InboxMessage
-from posts.models import Post
+from posts.models import Post, Comment
 from following.models import Following, FollowingRequest
 from django.contrib.auth.models import User
+from likes.models import Like
 
 class BaseTestCase(TestCase):
 
@@ -119,4 +120,31 @@ class BaseTestCase(TestCase):
         self.authors.append(author)
 
         return author 
-    
+
+    def create_post(self, author_id):
+        post = Post.objects.create(
+            title=f"Post from {author_id}",
+            description="A sample post.",
+            content_type=Post.ContentType.PLAIN,
+            content="This is a test post.",
+            author=Author.objects.get(id=author_id),
+            visibility=Post.Visibility.PUBLIC    
+        )
+        self.posts.append(post)
+        return post
+
+    # def create_like(self, author_id, content_id, content_type):
+
+    #     content = None
+    #     if content_type == "POST":
+    #         content = Post.objects.get(id=content_id)
+    #     elif content_type == "COMMENT":
+    #         content = Comment.objects.get(id=content_id)
+
+    #     like = Like.objects.create(
+    #         author_id=author_id,
+    #         content_id=content, 
+    #         content_type=content_type
+    #     )
+    #     self.likes.append(like)
+    #     return like

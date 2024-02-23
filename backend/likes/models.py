@@ -3,8 +3,13 @@ from identity.models import Author
 from posts.models import Post
 from deadlybird.util import generate_next_id
 
-# Create your models here.
-class Like(models.Model):
+class Like(models.Model): 
+  class ContentType(models.TextChoices):
+    # Liked objects can be posts and comments.
+    POST="post"
+    COMMENT="comment"
+
   id = models.CharField(primary_key=True, max_length=10, default=generate_next_id)
-  post = models.ForeignKey(Post, blank=False, null=False, on_delete=models.CASCADE)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
+  content_id = models.CharField(max_length=10, blank=False, null=False)
+  content_type = models.CharField(choices=ContentType.choices, max_length=50, blank=False, null=False) 
