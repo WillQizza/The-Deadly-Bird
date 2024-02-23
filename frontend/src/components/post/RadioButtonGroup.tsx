@@ -8,27 +8,31 @@ interface RadioOptionProps {
 
 interface RadioButtonGroupProps {
     name: string,
-    defaultValue: string,
     options: RadioOptionProps[],
-    valueRef: { current: string }
+    value: string,
+    setValue: React.Dispatch<React.SetStateAction<string>>
 }
 
 const RadioButtonGroup: React.FC<RadioButtonGroupProps> = (props: RadioButtonGroupProps) => {
-    const { name, defaultValue, options, valueRef } = props;
+    const { name, options, value, setValue } = props;
 
     return (
         <>
             <ToggleButtonGroup
                 name={name}
                 type='radio'
-                defaultValue={defaultValue}
+                value={value}
             >
                 {options.map((option, index) => (
                     <ToggleButton
                         key={index}
                         id={`${name}-radio-${index}`}
                         value={option.value}
-                        onChange={(e) => valueRef.current = option.value}
+                        onChange={(e) => {
+                            setValue(option.value);
+                            console.log(option.value);
+                            console.log(value);
+                        }}
                         variant='outline-secondary'
                         className={styles.radioSelectOption}
                     >

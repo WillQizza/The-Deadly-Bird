@@ -1,0 +1,19 @@
+* {
+    box-sizing: border-box;
+}
+
+.postEditContentContainer {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: var(--grey);
+    color: white;
+    padding: 3rem;
+}
+
+.pageTitle {
+    display: flex;
+    width: 100%;
+    color: var(--dark-teal);
+}

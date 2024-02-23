@@ -6,7 +6,8 @@ interface FormTextboxProps {
     placeholder: string,
     formErrors: { [key: string]: string },
     formErrorKey: string,
-    valueRef: { current: string }
+    value: string,
+    setValue: React.Dispatch<React.SetStateAction<string>>,
     textarea?: boolean
 }
 
@@ -16,7 +17,8 @@ const FormTextbox: React.FC<FormTextboxProps> = (props: FormTextboxProps) => {
         placeholder,
         formErrors,
         formErrorKey,
-        valueRef,
+        value,
+        setValue,
         textarea = false
     } = props;
 
@@ -30,7 +32,8 @@ const FormTextbox: React.FC<FormTextboxProps> = (props: FormTextboxProps) => {
                     type='text'
                     as={ textarea ? 'textarea' : 'input' }
                     placeholder={placeholder}
-                    onChange={(e) => valueRef.current = e.target.value}
+                    value={value}
+                    onChange={(e) => setValue(e.target.value)}
                     isInvalid={!!formErrors[formErrorKey]}
                     className={styles.formControl}
                 />
