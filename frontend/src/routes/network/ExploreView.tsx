@@ -24,7 +24,7 @@ const ExploreView: React.FC = () => {
     }, [curPage]);
 
     return (
-        <div>
+        <div className={styles.exploreViewContainer}>
             <div className={styles.carouselContainer}>
                 <div className={`${styles.pageButton} ${styles.prevButton}`} onClick={() => curPage > 1 && setCurPage(curPage - 1)}>
                     &lt;

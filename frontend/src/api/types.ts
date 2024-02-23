@@ -90,10 +90,7 @@ export type PostsResponse = PaginatedAPI<"posts", PostResponse>;
 export type CommentsResponse = PaginatedAPI<"comments", Comment>;
 
 //url: ://service/authors/{AUTHOR_ID}/liked 
-export type LikedResponse = {
-    type: "liked",
-    items: Like[]
-};
+export type LikedResponse = PaginatedAPI<"liked", Like> 
 
 //url ://service/authors/{AUTHOR_ID}/inbox 
 export type InboxResponse = {

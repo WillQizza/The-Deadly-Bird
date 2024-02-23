@@ -1,11 +1,5 @@
-.followButton {
-    padding: 10px 20px;
-    margin-top: 10px;
-    background-color: #007bff; 
-    color: white; 
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.exploreViewContainer  {
+    overflow-x: hidden;
 }
 
 #AuthorCards {
@@ -13,8 +7,23 @@
     flex-wrap: wrap;
 }
 
-.pageButton {
+.carouselContainer {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between; 
+    width: min-content;
+    margin: auto;
+}
 
+.pageNo {
+    color: lightgray;
+    text-align: center;
+    max-width: 50%;
+    font-size: 18px;
+    margin: auto;
+}
+
+.pageButton {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -33,16 +42,12 @@
     color: rgb(24, 212, 212);
 }
 
-.carouselContainer {
-    display: flex;
-    align-items: center; 
-    justify-content: space-between; 
-    width: min-content;
-    margin: auto;
-}
-
-.pageNo {
-    color: lightgray;
-    text-align: center;
-    font-size: 18px;
+.followButton {
+    padding: 10px 20px;
+    margin-top: 10px;
+    background-color: #007bff; 
+    color: white; 
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
 }

@@ -1,3 +1,7 @@
+.networkPageContainer {
+    width: 100%;
+}
+
 #NetworkExploreHeader {
     color: white;
     font-size: 25px;
@@ -11,6 +15,7 @@
     text-align: center;
     margin-top: 20px;
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .subHeader {

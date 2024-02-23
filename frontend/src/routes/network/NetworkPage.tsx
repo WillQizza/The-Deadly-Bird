@@ -7,18 +7,20 @@ import ExploreView from './ExploreView';
 const NetworkPage: React.FC = () => {
     return (
         <Page selected="Network">
-            <div className={styles.mainHeader}>Network</div>
-            <div className={styles.subHeader}>Explore the Deadly Bird Network</div>
+            <div className={styles.networkPageContainer}>
+                <div className={styles.mainHeader}>Network</div>
+                <div className={styles.subHeader}>Explore the Deadly Bird Network</div>
 
-            <div id={styles.NetworkExploreHeader}>
-                Explore Local Authors
-            </div>
-            <ExploreView />
+                <div id={styles.NetworkExploreHeader}>
+                    Explore Local Authors
+                </div>
+                <ExploreView />
 
-            <div id={styles.NetworkExploreHeader}>
-                Explore Remote Authors
+                <div id={styles.NetworkExploreHeader}>
+                    Explore Remote Authors
+                </div>
+                <ExploreView />
             </div>
-            <ExploreView />
         </Page>
     );
 };
