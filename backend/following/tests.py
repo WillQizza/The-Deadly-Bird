@@ -55,7 +55,7 @@ class FollowersTestCase(BaseTestCase):
         response = self.client.put(reverse('modify_follower', kwargs={
             'author_id': author1.id, 'foreign_author_id': author2.id
             }))
-        self.assertIn(response.status_code, [201, 200])
+        self.assertIn(response.status_code, [409])
         self.assertTrue(Following.objects.filter(author=author2, target_author=author1).exists())
 
 
