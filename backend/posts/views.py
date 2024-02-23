@@ -1,4 +1,5 @@
-from django.http import HttpRequest
+import base64
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -156,6 +157,12 @@ def post(request: HttpRequest, author_id: str, post_id: str):
       "error": False,
       "message": "Post updated successfully."
     }, status=200)
+
+@api_view(["GET"])
+def post_image(_: HttpRequest, author_id: str, post_id: str):
+  # Retrieve post image
+  post = get_object_or_404(Post, id=post_id)
+  return HttpResponse(base64.b64decode(post.content), content_type="image/*")
 
 @api_view(["GET"])
 def post_stream(request: HttpRequest, stream_type: str):

@@ -1,7 +1,7 @@
-import { Button } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import styles from "./SettingsForm.module.css";
 import SettingsInput from "./SettingsInput";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { Author } from "../../api/types";
 import { publicDir } from "../../constants";
 import { apiRequest } from "../../utils/request";
@@ -84,40 +84,45 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   }
 
   return (
-    <div id={styles.container}>
-      <form method="POST" onSubmit={onSaveClicked}>
-        <div className={styles.row}>
-          {/* Avatar + Modifiable Information */}
-          <div id={styles.avatarContainer} onClick={onAvatarButtonClicked}>
-            <img alt="Profile Avatar" src={profileImage} />
-            <input type="file" onChange={onAvatarUploaded} accept=",png,.jpeg,.jpg" ref={avatarElement} style={{ display: "none" }} />
-          </div>
-          <div style={{ flexGrow: 1 }}>
-            <div className={styles.row}>  
-              <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
-              <SettingsInput title="Username" name="username" type="text" value={username} valueSetter={setUsername} disabled={!loadedContent} />
+    <Fragment>
+      <div id={styles.container}>
+        <form method="POST" onSubmit={onSaveClicked}>
+          <div className={styles.row}>
+            {/* Avatar + Modifiable Information */}
+            <div id={styles.avatarContainer} onClick={onAvatarButtonClicked}>
+              <img alt="Profile Avatar" src={profileImage} />
+              <input type="file" onChange={onAvatarUploaded} accept=",png,.jpeg,.jpg" ref={avatarElement} style={{ display: "none" }} />
             </div>
-            <div className={styles.row}>
-              <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />
-              <SettingsInput title="Password" name="password" type="password" value=""  valueSetter={setPassword} placeholder="*********" />
+            <div style={{ flexGrow: 1 }}>
+              <div className={styles.row}>  
+                <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
+                <SettingsInput title="Username" name="username" type="text" value={username} valueSetter={setUsername} disabled={!loadedContent} />
+              </div>
+              <div className={styles.row}>
+                <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />
+                <SettingsInput title="Password" name="password" type="password" value=""  valueSetter={setPassword} placeholder="*********" />
+              </div>
             </div>
           </div>
-        </div>
-        <div className={styles.row}>
-          {/* Bio */}
-          <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
-        </div>
+          <div className={styles.row}>
+            {/* Bio */}
+            <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
+          </div>
 
-        <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
-          <Button variant="danger" size="lg" disabled={!loadedContent} onClick={onDeleteAccount}>
-              Delete Account
-          </Button>
-          <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
-              Save Changes
-          </Button>
-        </div>
-      </form>
-    </div>
+          <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
+            <Button variant="danger" size="lg" disabled={!loadedContent} onClick={onDeleteAccount}>
+                Delete Account
+            </Button>
+            <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
+                Save Changes
+            </Button>
+          </div>
+        </form>
+      </div>
+      <Modal>
+        
+      </Modal>
+    </Fragment>
   );
 };
 

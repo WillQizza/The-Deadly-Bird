@@ -1,5 +1,5 @@
 import styles from './PostForm.module.css';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Form } from 'react-bootstrap';
 import { baseURL } from '../../constants';
 import { useNavigate } from 'react-router-dom';
@@ -10,34 +10,72 @@ import RadioButtonGroup from './RadioButtonGroup';
 import ImageUpload from './ImageUpload';
 
 interface PostFormProps {
-    image?: boolean
+    image?: boolean,
+    postId?: string
 }
 
 const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
-    const { image = false } = props;
-    const titleRef = useRef<string>('');
-    const descriptionRef = useRef<string>('');
-    const contentRef = useRef<string>('');
-    const visibilityRef = useRef<string>('PUBLIC');
-    const contentTypeRef = useRef<string>('text/plain');
+    const { image = false, postId = '' } = props;
+    const [isImage, setIsImage] = useState<boolean>(image);
+    const [title, setTitle] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+    const [content, setContent] = useState<string>('');
+    const [visibility, setVisibility] = useState<string>('PUBLIC');
+    const [contentType, setContentType] = useState<string>('text/plain');
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [responseMessage, setResponseMessage] = useState<string>('');
     const navigate = useNavigate();
+
+    /** fill the post fields with existing values if a post id is given  */
+    useEffect(() => {
+        const fetchPostData = async () => {
+            const response = await apiRequest(
+                `${baseURL}/api/authors/${getUserId()}/posts/${postId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                }
+            );
+            const data = await response.json();
+            if (response.ok) {
+                setTitle(data.title);
+                setDescription(data.description);
+                setContent(data.content);
+                setVisibility(data.visibility);
+                setContentType(data.contentType);
+                
+                if (!data.contentType.startsWith('text')) {
+                    setIsImage(true);
+                }
+            } else {
+                setResponseMessage(data.message);
+            }
+        };
+
+        if (postId) {
+            fetchPostData();
+        }
+    }, []);
 
     /** function for handling form submission */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (validateForm()) {
             const formData = new URLSearchParams({
-                title: titleRef.current,
-                description: descriptionRef.current,
-                content: contentRef.current,
-                contentType: contentTypeRef.current,
-                visibility: visibilityRef.current
+                title: title,
+                description: description,
+                content: content,
+                contentType: contentType,
+                visibility: visibility
             }).toString();
+            console.log(title);
 
-            const response = await apiRequest(`${baseURL}/api/authors/${getUserId()}/posts/`, {
-                method: 'POST',
+            const reqURL = postId ? `${baseURL}/api/authors/${getUserId()}/posts/${postId}` : `${baseURL}/api/authors/${getUserId()}/posts/`;
+            const reqMethod = postId ? 'PUT' : 'POST';
+
+            const response = await apiRequest(reqURL, {
+                method: reqMethod,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },
@@ -58,23 +96,23 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         let isValid = true;
         const newFormErrors: { [key: string]: string } = {};
 
-        if (!titleRef.current) {
+        if (!title) {
             isValid = false;
             newFormErrors['title'] = 'A title is required';
         }
-        if (titleRef.current.length > 255) {
+        if (title.length > 255) {
             isValid = false;
             newFormErrors['title'] = 'Title is too long (255 characters maximum)';
         }
-        if (!descriptionRef.current) {
+        if (!description) {
             isValid = false;
             newFormErrors['description'] = 'A description is required';
         }
-        if (descriptionRef.current.length > 255) {
+        if (description.length > 255) {
             isValid = false;
             newFormErrors['description'] = 'Description is too long (255 characters maximum)'
         }
-        if (!contentRef.current) {
+        if (!content) {
             isValid = false;
             newFormErrors['content'] = 'Post content is required';
         }
@@ -98,25 +136,25 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 <div className={`${styles.selectToolbar} ${styles.formGroup}`}>
                     {/** Visibility Select */}
                     <RadioButtonGroup
-                        name={`visibility-select/image=${image}`}
-                        defaultValue='PUBLIC'
+                        name={`visibility-select/image=${isImage}`}
                         options={[
                             { value: 'PUBLIC', label: 'Public'},
                             { value: 'FRIENDS', label: 'Friends' },
                             { value: 'UNLISTED', label: 'Unlisted' }
                         ]}
-                        valueRef={visibilityRef}
+                        value={visibility}
+                        setValue={setVisibility}
                     />
                     {/** Content Type Select (only for text posts) */}
-                    {image ? null : (
+                    {isImage ? null : (
                         <RadioButtonGroup
                             name='ctype-select'
-                            defaultValue='text/plain'
                             options={[
                                 { value: 'text/plain', label: 'Plain' },
                                 { value: 'text/markdown', label: 'Markdown' }
                             ]}
-                            valueRef={contentTypeRef}
+                            value={contentType}
+                            setValue={setContentType}
                         />
                     )}
                 </div>
@@ -126,7 +164,8 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                     placeholder='Enter a Title for Your Post'
                     formErrors={formErrors}
                     formErrorKey={'title'}
-                    valueRef={titleRef}
+                    value={title}
+                    setValue={setTitle}
                 />
                 {/** Description Field */}
                 <FormTextbox
@@ -134,16 +173,18 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                     placeholder='Enter a Description for Your Post'
                     formErrors={formErrors}
                     formErrorKey={'description'}
-                    valueRef={descriptionRef}
+                    value={description}
+                    setValue={setDescription}
                 />
                 {/** Content Field */}
-                {image ? (
+                {isImage ? (
                     <ImageUpload
                         formErrors={formErrors}
                         setFormErrors={setFormErrors}
                         formErrorKey={'content'}
-                        valueRef={contentRef}
-                        typeRef={contentTypeRef}
+                        value={postId ? (`${baseURL}/api/authors/${getUserId()}/posts/${postId}/image`) : (content)}
+                        setValue={setContent}
+                        setType={setContentType}
                     />
                 ) : (
                     <FormTextbox
@@ -151,7 +192,8 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         placeholder='Enter Your Post Here'
                         formErrors={formErrors}
                         formErrorKey={'content'}
-                        valueRef={contentRef}
+                        value={content}
+                        setValue={setContent}
                         textarea={true}
                     />
                 )}

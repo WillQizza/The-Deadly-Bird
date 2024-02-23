@@ -102,7 +102,7 @@ export type InboxResponse = {
     items: (Post | Comment | Like)[]
 }; // TODO: Add follow request type
 
-enum ContentType {
+export enum ContentType {
     MARKDOWN = "text/markdown",
     PLAIN = "text/plain",
     APPLICATION_BASE64 = "application/base64",

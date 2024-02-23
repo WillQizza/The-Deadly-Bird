@@ -68,6 +68,7 @@
 }
 
 .postButton {
+    color: black;
     width: 30px;
     height: 30px;
     margin: 10px;
@@ -79,6 +80,10 @@
 
 .postLike:hover {
     color: red;
+}
+
+.postEdit:hover {
+    color: dodgerblue;
 }
 
 .postTitle {

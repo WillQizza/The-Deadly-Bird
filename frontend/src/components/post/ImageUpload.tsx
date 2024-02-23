@@ -1,28 +1,40 @@
 import styles from './ImageUpload.module.css'
 import { useRef, useState } from 'react';
-import { Form } from "react-bootstrap";
+import { Form } from 'react-bootstrap';
 import { publicDir } from '../../constants';
 
 interface ImageUploadProps {
     formErrors: { [key: string]: string },
     setFormErrors: React.Dispatch<React.SetStateAction<{[key: string]: string;}>>,
     formErrorKey: string,
-    valueRef: { current: string },
-    typeRef: { current: string }
+    value: string,
+    setValue: React.Dispatch<React.SetStateAction<string>>,
+    setType: React.Dispatch<React.SetStateAction<string>>
 }
+
+const fileToBase64 = async (file: File) => {
+    const blob = new Uint8Array(await file.arrayBuffer());
+    
+    let result = '';
+    for (let i = 0; i < blob.byteLength; i++) {
+        result += String.fromCharCode(blob[i]);
+    }
+    return btoa(result);
+};
 
 const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
     const {
         formErrors,
         setFormErrors,
         formErrorKey,
-        valueRef,
-        typeRef
+        value,
+        setValue,
+        setType
     } = props;
     
     const placeholder = `${publicDir}/static/icons/image.svg`;
     const allowedTypes = new Set(['image/png;base64', 'image/jpeg;base64', 'application/base64']);
-    const [image, setImage] = useState<string>(placeholder);
+    const [image, setImage] = useState<string>(value || placeholder);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     /** function for handling file upload */
@@ -33,7 +45,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
             // handle the result
-            reader.onload = () => {
+            reader.onload = async () => {
                 if (reader.result) {
                     let newFormErrors = {...formErrors};
                     // parse result
@@ -45,15 +57,16 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                     // if image type is valid
                     if (allowedTypes.has(mediaType)) {
                         setImage(base64data);
-                        valueRef.current = base64data;
-                        typeRef.current = mediaType;
+                        const newValue = await fileToBase64(file);
+                        setValue(newValue);
+                        setType(mediaType);
                         newFormErrors[formErrorKey] = '';
                     }
                     // if image type is invalid
                     else {
                         setImage(placeholder);
-                        valueRef.current = '';
-                        typeRef.current = 'text/plain';
+                        setValue('');
+                        setType('text/plain');
                         newFormErrors[formErrorKey] = 'Invalid file type (.png, .jpg, .jpeg, or binary required)';
                     }
                     setFormErrors(newFormErrors);
@@ -82,7 +95,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                         }
                     }}
                 >
-                    <img src={image} alt='preview (unavailable)'/>
+                    <img src={image} alt={`${image} (preview unavailable)`}/>
                 </div>
                 <Form.Control
                     type='file'
