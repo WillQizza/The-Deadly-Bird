@@ -37,7 +37,8 @@ def following(request, author_id: str):
 
     paginator = Pagination()
     page = paginator.paginate_queryset(queryset, request)
-
+    
+    #TODO: refactor this
     if page is not None:
         authors = [following.author for following in page]
         serializer = FollowingSerializer(authors)
@@ -49,7 +50,6 @@ def following(request, author_id: str):
 
 @api_view(["GET"])
 def followers(request, author_id: str):
-
     """
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID's followers       
@@ -71,8 +71,7 @@ def followers(request, author_id: str):
         return Response(serializer.data)  
 
 @api_view(['DELETE', 'PUT', 'GET'])
-def modify_follower(request, author_id, foreign_author_id):
-    
+def modify_follower(request, author_id, foreign_author_id): 
     """ 
     URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
     DELETE [local]: remove FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID
@@ -113,9 +112,9 @@ def modify_follower(request, author_id, foreign_author_id):
                     follow_req.delete() #delete after inbox message because of dependancy
                     return Response({"message": "Follower added successfully."}, status=201)
                 except:
-                    return Response({"message": "Follower already added."}, status=201) 
+                    return Response({"message": "Follower already added."}, status=409) 
             except: 
-                return Response({"message": "Failed to create follower."}, status=200)
+                return Response({"message": "Failed to create follower."}, status=400)
 
         elif request.method == 'GET':
             obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)

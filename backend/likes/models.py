@@ -10,9 +10,7 @@ class Like(models.Model):
     COMMENT="comment"
 
   id = models.CharField(primary_key=True, max_length=10, default=generate_next_id)
-  author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
+  send_author = models.ForeignKey(Author, related_name='sent_like', blank=False, null=False, on_delete=models.CASCADE)
+  receive_author = models.ForeignKey(Author, related_name='received_like', blank=False, null=False, on_delete=models.CASCADE)
   content_id = models.CharField(max_length=10, blank=False, null=False)
   content_type = models.CharField(choices=ContentType.choices, max_length=50, blank=False, null=False) 
-
-  def __str__(self):
-    return f"id:{self.id} author:{self.author.__str__()} content_id: {self.content_id} type: {self.content_type}"

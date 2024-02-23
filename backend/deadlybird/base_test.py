@@ -132,19 +132,3 @@ class BaseTestCase(TestCase):
         )
         self.posts.append(post)
         return post
-
-    # def create_like(self, author_id, content_id, content_type):
-
-    #     content = None
-    #     if content_type == "POST":
-    #         content = Post.objects.get(id=content_id)
-    #     elif content_type == "COMMENT":
-    #         content = Comment.objects.get(id=content_id)
-
-    #     like = Like.objects.create(
-    #         author_id=author_id,
-    #         content_id=content, 
-    #         content_type=content_type
-    #     )
-    #     self.likes.append(like)
-    #     return like
