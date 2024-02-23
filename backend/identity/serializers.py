@@ -1,13 +1,13 @@
+from django.conf import settings
 from rest_framework import serializers
 from posts.models import Post
 from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
-from typing import List
 
 class AuthorSerializer(serializers.ModelSerializer):
   type = serializers.ReadOnlyField(default='author')
   displayName = serializers.CharField(source='user.username')
-  profileImage = serializers.CharField(source='profile_picture')
+  profileImage = serializers.SerializerMethodField()
   url = serializers.CharField(source='profile_url')
   posts = serializers.SerializerMethodField()
   followers = serializers.SerializerMethodField()
@@ -28,6 +28,14 @@ class AuthorSerializer(serializers.ModelSerializer):
       # Only return the user's email if they are the one requesting it
       return obj.user.email
     return None
+  
+  def get_profileImage(self, obj: Author):
+    if (obj.profile_picture is not None) and len(obj.profile_picture) > 0:
+      # Return saved avatar
+      return obj.profile_picture
+    else:
+      # Return default avatar
+      return settings.SITE_HOST_URL + "static/default-avatar.png"
 
   class Meta:
     model = Author

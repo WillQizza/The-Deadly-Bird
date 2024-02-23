@@ -174,3 +174,6 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
 }
+
+# Used for internode communication
+SITE_HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000/")

@@ -5,6 +5,7 @@ database for each app's test-suite.
 """
 
 from django.test import TestCase
+from django.conf import settings
 from identity.models import Author, InboxMessage
 from posts.models import Post, Comment
 from following.models import Following, FollowingRequest
@@ -34,7 +35,7 @@ class BaseTestCase(TestCase):
         authors = []
         for i in range(1, 11):
             user = User.objects.create_user(username=f'user{i}', password='password123')
-            author = Author.objects.create(user=user, host='http://localhost:8000')
+            author = Author.objects.create(user=user, host=settings.SITE_HOST_URL)
             authors.append(author)
         return authors
 
@@ -116,7 +117,7 @@ class BaseTestCase(TestCase):
         default_password = password if password is not None else f"user{i}"
         
         user = User.objects.create_user(username=default_username, password=default_password)
-        author = Author.objects.create(user=user, host='http://localhost:8000')
+        author = Author.objects.create(user=user, host=settings.SITE_HOST_URL)
         self.authors.append(author)
 
         return author 

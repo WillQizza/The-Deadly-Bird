@@ -26,3 +26,5 @@ jobs:
           heroku_email: "wqi3@ualberta.ca"
           stack: "container"
           usedocker: true
+        env:
+          SITE_HOST_URL: https://thedeadlybird-123769211974.herokuapp.com/

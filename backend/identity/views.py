@@ -1,10 +1,12 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpRequest
+from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Author, InboxMessage
 from .serializers import AuthorSerializer, InboxMessageSerializer
+from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination
 from .pagination import InboxPagination
 
@@ -127,10 +129,12 @@ def register(request: HttpRequest):
   created_user = User.objects.create_user(username=username, email=email, password=password)
 
   # Create author object from user object
+  id = generate_next_id()
   Author.objects.create(
+    id=id,
     user=created_user,
-    host="http://localhost:8000",
-    profile_url="http://localhost:8000"
+    host=settings.SITE_HOST_URL,
+    profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })
   )
     
   # Send success
