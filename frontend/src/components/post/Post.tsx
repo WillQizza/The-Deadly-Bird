@@ -6,6 +6,7 @@ import { baseURL, publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
+import { getUserId } from '../../utils/auth';
 
 const Post: React.FC<PostResponse> = (props: PostResponse) => {
     // Set profile picture src
@@ -79,12 +80,16 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
                     {/* Like */}
                     <Heart className={`${styles.postButton} ${styles.postLike}`}/>
                     {/* Edit */}
-                    <PencilSquare
-                        className={`${styles.postButton} ${styles.postEdit}`}
-                        onClick={(e) => {
-                            document.location.href = `/post/${props.id}`;
-                        }}
-                    />
+                    {
+                        (props.author.id == getUserId()) ? (
+                            <PencilSquare
+                                className={`${styles.postButton} ${styles.postEdit}`}
+                                onClick={(e) => {
+                                    document.location.href = `/post/${props.id}`;
+                                }}
+                            />
+                        ) : null
+                    }
                 </div>
             </div>
         </div>
