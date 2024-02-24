@@ -3,6 +3,7 @@
     background-color: var(--grey);
     display: flex;
     flex-direction: column;
+    height: 100vh;
 }
 
 #contentRoot {
@@ -12,41 +13,33 @@
 }
 
 #navigation {
-    position: fixed;
-    height: 100vh;
     flex: 0 0 auto;
     width: 14%;
     min-width: 200px;
     background-color: var(--teal);
-    z-index: 100;
 }
 
 #contentAndUpperNav {
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-width: calc(100% - max(14%, 200px));
-    margin-left: max(200px, 14%);
 }
 
 .content {
     flex-grow: 1;
     height: 100%;
+    overflow: hidden;
 }
 
 #thinNavbar {
-    position: sticky;
-    top: 0;
-    height: 42px;
     display: flex;
     justify-content: flex-end;
     background-color: var(--dark-grey);
     border-bottom: 1px solid var(--grey);
+    padding: 10px;
 }
 
 #thinNavbar button {
-    margin-top: 4px;
-    margin-bottom: 4px;
     /* margin-left: 20px; */
     margin-right: 20px;
     padding: 4px 10px;
@@ -59,4 +52,8 @@
 
 #thinNavbar button:hover {
     background-color: #0056b3; 
+}
+
+.overflowScroll {
+    overflow-y: scroll;
 }
