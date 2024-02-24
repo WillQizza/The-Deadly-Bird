@@ -22,7 +22,11 @@
 }
 
 .tabContent {
-    max-height: 100%;
-    overflow-y: scroll;
     flex: 1;
+}
+
+.nav {
+    position: sticky;
+    top: 32px;
+    border-bottom: 1px solid #000;
 }
