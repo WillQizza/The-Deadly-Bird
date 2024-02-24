@@ -50,6 +50,9 @@ def author(request: HttpRequest, author_id: str):
     if "profileImage" in request.POST:
       profile_picture = request.POST["profileImage"]
       author.profile_picture = profile_picture
+    if "bio" in request.POST:
+      bio = request.POST["bio"]
+      author.bio = bio
 
     author.user.save()
     author.save()
