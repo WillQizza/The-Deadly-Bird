@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
         <Page selected="Home" overflowScrollOff={true}>
             <div className={styles.tabs}>
                 <Tab.Container defaultActiveKey="Following">
-                    <Nav className={styles.nav} variant="pills" justify={true} onSelect={handleSelect}>
+                    <Nav variant="pills" justify={true} onSelect={handleSelect}>
                         <Nav.Item>
                             <Nav.Link eventKey="Following" className={`${styles.tab} ${activeKey === 'Following' ? styles.tabActive : styles.tabInactive}`}>Following</Nav.Link>
                         </Nav.Item>
