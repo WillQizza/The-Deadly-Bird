@@ -12,6 +12,9 @@ class Author(models.Model):
   profile_url = models.CharField(max_length=255, blank=False, null=False)
   profile_picture = models.CharField(max_length=255, blank=True, null=True)
 
+  def __str__(self):
+    return f"Author ({self.user.username})"
+
 class InboxMessage(models.Model):
   class ContentType(models.TextChoices):
     POST="post"
