@@ -6,11 +6,15 @@ import AuthorCarousel from "./AuthorCarousel";
 import { apiGetFollowing } from "../../api/following";
 import { getUserId } from "../../utils/auth";
 
-const ExploreView: React.FC = () => {
+interface ExploreViewProps {
+    viewType: string
+};
+
+const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
     
     const [exploreAuthors, setExploreAuthors] = useState<Author[]>([]);
-    const [curPage, setCurPage] = useState<number>(1);
     const [isNextPageAvailable, setIsNextPageAvailable] = useState<boolean>(false);
+    const [curPage, setCurPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(5);
 
     const fetchSetAuthors = async (page: number) => {
@@ -20,22 +24,30 @@ const ExploreView: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchSetAuthors(curPage);
+        if (viewType === "local") {
+            fetchSetAuthors(curPage);
+        } else if (viewType == "remote") {
+            setExploreAuthors([]);
+        }
     }, [curPage]);
 
     return (
         <div className={styles.exploreViewContainer}>
-            <div className={styles.carouselContainer}>
+            {/* {exploreAuthors.length === 0
+                ? "None Found"
+                : "Found" 
+            } */}
+            <div className={styles.pageNo}>
                 <div className={`${styles.pageButton} ${styles.prevButton}`} onClick={() => curPage > 1 && setCurPage(curPage - 1)}>
                     &lt;
-                </div>
-                <AuthorCarousel authors={exploreAuthors} />
+                </div> 
+                Page {curPage} 
                 <div className={`${styles.pageButton} ${styles.nextButton}`} onClick={() => isNextPageAvailable && setCurPage(curPage + 1)}>
                     &gt;
                 </div>
             </div>
-            <div className={styles.pageNo}>
-                Page {curPage}  
+            <div className={styles.carouselContainer}>
+                <AuthorCarousel authors={exploreAuthors} /> 
             </div>
         </div>
     );

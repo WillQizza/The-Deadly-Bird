@@ -3,8 +3,13 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-width: 80px;
 }
+
+.carousel {
+    max-width: 40%;
+    margin: auto;
+}
+
 .card:hover {
     cursor: pointer;
 }
@@ -39,8 +44,4 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.carousel {
-    width: max-content;
 }
