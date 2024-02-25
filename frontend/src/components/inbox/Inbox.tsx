@@ -7,6 +7,7 @@ import { ReactComponent as Allow } from 'bootstrap-icons/icons/check-lg.svg';
 import { ReactComponent as Deny } from 'bootstrap-icons/icons/x-lg.svg';
 import styles from './Inbox.module.css';
 import { apiDeleteFollower, apiPutFollower } from '../../api/following';
+import { apiClearInbox } from '../../api/inbox';
 
 const Inbox = () => {
 
@@ -21,8 +22,7 @@ const Inbox = () => {
                 getInboxMessages(curAuthorId, pageNo, pageSize)
                     .then(res => {
                         setInboxMessages(res.items);
-                        console.log(res.items);
-                    });
+                        console.log(res.items); });
             } catch (error) {
                 console.log("failed to fetch inbox:", error);
             };
@@ -100,7 +100,6 @@ const Inbox = () => {
     }
 
     const renderCard = (message:any, idx: number) => {
-        console.log("type:", message.type); 
         switch (message.type) {
             case 'like':
                 return renderLikeCard(message, idx);
@@ -115,12 +114,20 @@ const Inbox = () => {
         }
     };
 
-
     return (
-        <div style={{ maxHeight: '100%', overflowY: 'auto' }}>
-            {inboxMessages.map((message, idx) => (
-                renderCard(message, idx)
-            ))}
+        <div className={styles.cardContainer}>
+            <div className={styles.cardContainer}>
+                {inboxMessages.map((message, idx) => (
+                    renderCard(message, idx)
+                ))}
+            </div>
+            {(inboxMessages.length === 0) ? "Empty ": ""}
+            <button className="btn btn-warning" onClick={async () => {
+                apiClearInbox(curAuthorId);
+                setInboxMessages([]);
+            }}>
+                Clear Inbox
+            </button>
         </div>
     );
 };

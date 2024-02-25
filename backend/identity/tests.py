@@ -142,3 +142,15 @@ class InboxMessageTests(BaseTestCase):
     
     response = self.client.post(url, data=json.dumps(request_body), content_type='application/json')
     self.assertEquals(response.status_code, 201)
+
+  def test_inbox_delete(self):
+    """
+    Get the contents of Author0's delete and assert nothing remains.
+    """
+    url = reverse('inbox', kwargs={
+      "author_id": self.authors[0].id 
+    })
+    response = self.client.delete(url)
+    self.assertEquals(response.status_code, 204)
+    msgs = InboxMessage.objects.filter(author_id=self.authors[0].id)
+    self.assertTrue(len(msgs) == 0)

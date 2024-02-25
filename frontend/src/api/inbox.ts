@@ -1,4 +1,5 @@
 import { baseURL } from "../constants";
+import { apiRequest } from "../utils/request";
 import { InboxResponse } from "./types";
 
 /**
@@ -17,4 +18,18 @@ export const getInboxMessages = async (
     const data: InboxResponse = await response.json();
     
     return data;
+}
+
+/**
+ * @description function to retreive inbox mesages for an author
+ * @param id author id whose inbox to clear
+ */
+export const apiClearInbox = async (authorID: string): Promise<any> => {
+    const init: RequestInit = {
+        method: "DELETE"
+    }; 
+    const response = await apiRequest(
+        `${baseURL}/api/authors/${authorID}/inbox`, init
+    );   
+    return response; 
 }

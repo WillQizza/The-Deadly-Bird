@@ -47,6 +47,10 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
             break;
     }
 
+    const handleLike = async () => {
+        console.log("Liked!");
+    }
+
     return (
         <div className={styles.postContainer}>
             {/* Header */}
@@ -78,7 +82,7 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
                     {/* Share */}
                     <ArrowRepeat className={`${styles.postButton} ${styles.postShare}`}/>
                     {/* Like */}
-                    <Heart className={`${styles.postButton} ${styles.postLike}`}/>
+                    <Heart className={`${styles.postButton} ${styles.postLike}`} onClick={handleLike}/>
                     {/* Edit */}
                     {
                         (props.author.id == getUserId()) ? (

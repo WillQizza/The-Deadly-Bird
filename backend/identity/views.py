@@ -147,7 +147,7 @@ def register(request: HttpRequest):
   }, status=201)
 
 
-@api_view(["GET", "POST"])
+@api_view(["GET", "POST", "DELETE"])
 def inbox(request: HttpRequest, author_id: str):
   """
   URL: ://service/authors/{AUTHOR_ID}/inbox
@@ -192,5 +192,8 @@ def inbox(request: HttpRequest, author_id: str):
     return paginator.get_paginated_response(serializer.data)
   
   if request.method == "DELETE":
-    #TODO: implement delete inbox (clear)
-    pass
+    try:
+      InboxMessage.objects.filter(author=author_id).delete()
+      return Response({"error": False, "message": "inbox deleted"}, status=204)
+    except:
+      return Response({"error": True, "message": "unable to delete inbox"}, status=404)

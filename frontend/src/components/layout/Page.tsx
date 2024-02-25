@@ -9,11 +9,13 @@ import { ReactComponent as House } from 'bootstrap-icons/icons/house.svg';
 import { ReactComponent as Person } from 'bootstrap-icons/icons/person.svg';
 import { ReactComponent as Globe } from 'bootstrap-icons/icons/globe.svg';
 import { ReactComponent as Gear } from 'bootstrap-icons/icons/gear.svg';
+import { getUserId } from "../../utils/auth";
 
 const Page = ({ children, selected, overflowScrollOff } : { children: React.ReactNode, selected?: SelectedNavigation, overflowScrollOff?: Boolean }) => {
-        
+     
     const [showSidebar, setShowSidebar] = useState(false);
     const toggleSidebar = () => setShowSidebar(!showSidebar);
+    const curAuthorId : string = getUserId()!; 
     let navigate = useNavigate();
 
     const logOut = () => {
@@ -46,13 +48,12 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
             <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Inbox</Offcanvas.Title>
+                    
                 </Offcanvas.Header>
                 <Offcanvas.Body>
                     <Inbox></Inbox>
                 </Offcanvas.Body>
             </Offcanvas>
-
-
             <Footer />
         </div>
     );

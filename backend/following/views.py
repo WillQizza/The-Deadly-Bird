@@ -14,8 +14,7 @@ from deadlybird.pagination import Pagination
 def following(request, author_id: str):
     """
     URL: ://service/authors/{AUTHOR_ID}/following
-    GET [local, remote]: get a list of authors who AUTHOR_ID is following
-    
+    GET [local, remote]: get a list of authors who AUTHOR_ID is following 
     query parameters:
         - target_author_ids: string[], a reduced subset of author_id's to search from.
     """
