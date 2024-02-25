@@ -14,12 +14,12 @@ const NetworkPage: React.FC = () => {
                 <div id={styles.NetworkExploreHeader}>
                     Explore Local Authors
                 </div>
-                <ExploreView />
+                <ExploreView viewType="local"/>
 
                 <div id={styles.NetworkExploreHeader}>
                     Explore Remote Authors
                 </div>
-                <ExploreView />
+                <ExploreView viewType="remote"/>
             </div>
         </Page>
     );
