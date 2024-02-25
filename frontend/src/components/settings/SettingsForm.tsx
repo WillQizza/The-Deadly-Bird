@@ -1,7 +1,7 @@
 import { Button, Modal } from "react-bootstrap";
 import styles from "./SettingsForm.module.css";
 import SettingsInput from "./SettingsInput";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { Author } from "../../api/types";
 import { publicDir } from "../../constants";
 import { apiRequest } from "../../utils/request";
@@ -21,7 +21,8 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   const [bio, setBio] = useState("");
   const [loadedContent, setLoadedContent] = useState(false);
 
-  const avatarElement = useRef<HTMLInputElement>(null);
+  const [showingAvatarModal, setShowingAvatarModal] = useState(false);
+  const [avatarURL, setAvatarURL] = useState("");
 
   useEffect(() => {
     if (author) {
@@ -41,15 +42,16 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
     event.preventDefault();
 
     const formData = new URLSearchParams({
-      displayName: username,
-      email: email,
-      bio: bio,
+      email,
+      bio,
+      profileImage,
+      displayName: username
     })
     if (password !== "") {
       formData.append("password", password);
     }
   
-    const response = await apiRequest(`${baseURL}/api/authors/${getUserId()}/`, {
+    await apiRequest(`${baseURL}/api/authors/${getUserId()}/`, {
         method:"PUT",
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
@@ -58,29 +60,16 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
     });
   }
 
-  function onDeleteAccount(event: React.MouseEvent<HTMLButtonElement>) {
 
+  function onAvatarPromptOpen() {
+    setShowingAvatarModal(true);
+    setAvatarURL("");
   }
 
-  function onAvatarButtonClicked() {
-    avatarElement.current!.click();
-  }
 
-  function onAvatarUploaded(event: React.ChangeEvent<HTMLInputElement>) {
-    if (!event.target.files || !event.target.files[0]) {
-      return;
-    }
-
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    // handle the result
-    reader.onload = () => {
-      if (reader.result) {
-        const b64Data = reader.result.toString();
-        setProfileImage(b64Data);
-      }
-    };
+  function onAvatarURLUploaded() {
+    setProfileImage(avatarURL);
+    setShowingAvatarModal(false);
   }
 
   return (
@@ -89,9 +78,8 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
         <form method="POST" onSubmit={onSaveClicked}>
           <div className={styles.row}>
             {/* Avatar + Modifiable Information */}
-            <div id={styles.avatarContainer} onClick={onAvatarButtonClicked}>
+            <div id={styles.avatarContainer} onClick={onAvatarPromptOpen}>
               <img alt="Profile Avatar" src={profileImage} />
-              <input type="file" onChange={onAvatarUploaded} accept=",png,.jpeg,.jpg" ref={avatarElement} style={{ display: "none" }} />
             </div>
             <div style={{ flexGrow: 1 }}>
               <div className={styles.row}>  
@@ -110,17 +98,27 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
           </div>
 
           <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
-            <Button variant="danger" size="lg" disabled={!loadedContent} onClick={onDeleteAccount}>
-                Delete Account
-            </Button>
             <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
                 Save Changes
             </Button>
           </div>
         </form>
       </div>
-      <Modal>
-        
+
+      <Modal show={showingAvatarModal} centered={true} size="xl" style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}>
+        <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>
+          <Modal.Title>Avatar Upload</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <div id={styles.uploadModalBody}>
+            <h4>Please provide the URL to the image you would like to upload</h4>
+            <input id={styles.uploadImageUrlInput} name="url" type="text" value={avatarURL} onChange={e => setAvatarURL(e.currentTarget.value)} />
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={onAvatarURLUploaded} disabled={avatarURL.length === 0}>Upload Avatar</Button>
+        </Modal.Footer>
       </Modal>
     </Fragment>
   );

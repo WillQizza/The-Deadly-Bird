@@ -38,3 +38,22 @@
 .saveChangesButton {
   color: #fff !important;
 }
+
+
+#uploadModalBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: default;
+}
+
+#uploadModalBody * {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#uploadImageUrlInput {
+  width: 50%;
+  border-radius: 5px;
+  text-align: center;
+}
