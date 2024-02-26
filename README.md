@@ -1,6 +1,12 @@
 CMPUT404-project-socialdistribution
 ===================================
 
+Links
+============
+
+- <a href="https://www.figma.com/file/0yC4iSm1go8vglzSXZPfhy/the-deadly-bird?type=design&node-id=0%3A1&mode=design&t=mczNMkpmOdCOt6Ki-1">Figma</a>
+- <a href="https://thedeadlybird-123769211974.herokuapp.com/">Heroku</a>
+
 Build
 ============
 Run the app locally for development:
