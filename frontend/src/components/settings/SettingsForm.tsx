@@ -15,7 +15,7 @@ type SettingsFormOptions = {
 const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   const [profileImage, setProfileImage] = useState(`${publicDir}/static/default-avatar.png`);
   const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
+  const [displayName, setUsername] = useState("");
   const [homeServer, setHomeServer] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
@@ -45,7 +45,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       email,
       bio,
       profileImage,
-      displayName: username
+      displayName: displayName
     })
     if (password !== "") {
       formData.append("password", password);
@@ -84,7 +84,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
             <div style={{ flexGrow: 1 }}>
               <div className={styles.row}>  
                 <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
-                <SettingsInput title="Username" name="username" type="text" value={username} valueSetter={setUsername} disabled={!loadedContent} />
+                <SettingsInput title="Username" name="username" type="text" value={displayName} valueSetter={setUsername} disabled={!loadedContent} />
               </div>
               <div className={styles.row}>
                 <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />

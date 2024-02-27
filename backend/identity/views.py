@@ -36,8 +36,8 @@ def author(request: HttpRequest, author_id: str):
   else:
     author = Author.objects.get(id=request.session["id"])
     if ("displayName" in request.POST):
-      new_username = request.POST["displayName"]
-      author.user.username = new_username
+      new_display_name = request.POST["displayName"]
+      author.display_name = new_display_name
     if "password" in request.POST:
       password = request.POST["password"]
       author.user.set_password(password)
@@ -136,6 +136,7 @@ def register(request: HttpRequest):
   Author.objects.create(
     id=id,
     user=created_user,
+    display_name=created_user.username,
     host=settings.SITE_HOST_URL,
     profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })
   )

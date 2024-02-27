@@ -35,7 +35,7 @@ class BaseTestCase(TestCase):
         authors = []
         for i in range(1, 11):
             user = User.objects.create_user(username=f'user{i}', password='password123')
-            author = Author.objects.create(user=user, host=settings.SITE_HOST_URL)
+            author = Author.objects.create(user=user, display_name=f'user{i}', host=settings.SITE_HOST_URL)
             authors.append(author)
         return authors
 
@@ -117,7 +117,7 @@ class BaseTestCase(TestCase):
         default_password = password if password is not None else f"user{i}"
         
         user = User.objects.create_user(username=default_username, password=default_password)
-        author = Author.objects.create(user=user, host=settings.SITE_HOST_URL)
+        author = Author.objects.create(user=user, display_name=default_username, host=settings.SITE_HOST_URL)
         self.authors.append(author)
 
         return author 

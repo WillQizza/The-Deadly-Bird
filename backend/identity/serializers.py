@@ -6,7 +6,7 @@ from .models import Author, InboxMessage
 
 class AuthorSerializer(serializers.ModelSerializer):
   type = serializers.ReadOnlyField(default='author')
-  displayName = serializers.CharField(source='user.username')
+  displayName = serializers.CharField(source='display_name')
   profileImage = serializers.SerializerMethodField()
   url = serializers.CharField(source='profile_url')
   posts = serializers.SerializerMethodField()

@@ -6,6 +6,7 @@ from deadlybird.util import generate_next_id
 class Author(models.Model):
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
   user = models.OneToOneField(User, blank=False, null=False, on_delete=models.CASCADE)
+  display_name = models.CharField(max_length=255, blank=False, null=False)
   host = models.CharField(max_length=255, blank=False, null=False)
   github = models.CharField(max_length=255, blank=True, null=True)
   bio = models.CharField(max_length=255, blank=True, null=False, default="")
@@ -13,7 +14,7 @@ class Author(models.Model):
   profile_picture = models.CharField(max_length=255, blank=True, null=True)
 
   def __str__(self):
-    return f"Author ({self.user.username})"
+    return f"Author (displayName: {self.display_name}) [username: {self.user.username}]"
 
 class InboxMessage(models.Model):
   class ContentType(models.TextChoices):
