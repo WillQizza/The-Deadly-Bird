@@ -106,8 +106,18 @@ def post(request: HttpRequest, author_id: str, post_id: str):
 
     return Response(serialized_post.data)
   elif request.method == "DELETE":
-    # TODO: Delete post
-    pass
+    # Delete a single post. Can be initiated by local or remote host.
+    print("recieved delete:", author_id, post_id)
+    post = Post.objects.filter(id=post_id).first()
+    if post is None:
+      return Response({"error": True, "message": "post not found"}, status=404)
+    try: 
+      post.delete()
+      return Response({"error": False, "message": "post deleted"}, status=204)
+    except Exception as e:
+      print(e)
+      return Response({"error": True, "message": "Server errror, failed to delete"}, status=500)
+
   elif request.method == "PUT":
     # Edit a post
     # Check the request body for all the required fields

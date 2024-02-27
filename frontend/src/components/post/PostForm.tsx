@@ -1,6 +1,6 @@
 import styles from './PostForm.module.css';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Form } from 'react-bootstrap';
+import { Alert, Button, Form, Modal } from 'react-bootstrap';
 import { baseURL } from '../../constants';
 import { useNavigate } from 'react-router-dom';
 import { getUserId } from '../../utils/auth';
@@ -8,10 +8,12 @@ import { apiRequest } from '../../utils/request';
 import FormTextbox from './FormTextbox';
 import RadioButtonGroup from './RadioButtonGroup';
 import ImageUpload from './ImageUpload';
+import { apiDeletePosts } from '../../api/posts';
 
 interface PostFormProps {
     image?: boolean,
-    postId?: string
+    postId?: string,
+    edit?: boolean
 }
 
 const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
@@ -24,6 +26,8 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
     const [contentType, setContentType] = useState<string>('text/plain');
     const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
     const [responseMessage, setResponseMessage] = useState<string>('');
+    const [showConfirm, setShowConfirm] = useState(false);
+
     const navigate = useNavigate();
 
     /** fill the post fields with existing values if a post id is given  */
@@ -119,7 +123,49 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         setFormErrors(newFormErrors);
         return isValid;
     };
+   
+    const ConfirmDialog = ({}) => {
+        return (
+            <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Delete Post</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>Are you sure you want to delete this post?</Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => {setShowConfirm(false)}}>
+                        Cancel
+                    </Button>
+                    <Button variant="danger" onClick={handleDeletePost}>
+                        Delete
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    };
     
+    
+    const handleDeleteClick = () => {
+        setShowConfirm(true);
+    };
+
+    /** called from delete button to remove the local post*/
+    const handleDeletePost = async () => {
+     
+        console.log("delete post:", postId);
+        await apiDeletePosts(getUserId(), postId)
+            .then(response => {
+                if (response.status == 204) {
+
+                    navigate("/home")
+                } else if (response.status == 404) {
+                    // alert("post not ound")
+                } else if (response.status == 500) {
+                    alert("Failed to delete: Internal server errror");
+                }
+            });
+        setShowConfirm(false);
+    }
+
     return (
         <>
             {/** Alert for Request Errors */}
@@ -200,6 +246,15 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 <Button type='submit' className={styles.submitButton}>
                     Submit
                 </Button>
+                { props.edit ?
+                    <> 
+                    <Button className={styles.deleteButton} onClick={handleDeleteClick}>
+                        Delete Post
+                    </Button>
+                    <ConfirmDialog/>
+                    </> 
+                    : null
+                } 
             </Form>
         </>
     );

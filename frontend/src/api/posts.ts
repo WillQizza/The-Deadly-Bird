@@ -37,3 +37,21 @@ export const apiGetPosts = async (
     const data: PostsResponse = await response.json(); 
     return data;
 }
+
+/**
+ * @description delete a post locally or from remote
+ * @param authorId author whose post is to be removed
+ * @param postId post of author to remove
+ */
+export const apiDeletePosts = async (authorId: string, postId: string): Promise<any> => {
+    console.log(authorId, postId); 
+    const init: RequestInit = {
+        "method": "delete"
+    }
+    const response = await apiRequest(
+        `${baseURL}/api/authors/${authorId}/posts/${postId}`, init
+    );
+
+    // const data: any = await response.json();
+    return response;
+}

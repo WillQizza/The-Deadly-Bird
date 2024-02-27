@@ -11,7 +11,7 @@ const PostEditPage: React.FC = () => {
         <Page>
             <div className={styles.postEditContentContainer}>
                 <h1 className={styles.pageTitle}>Edit Your Post</h1>
-                <PostForm postId={postId} />
+                <PostForm postId={postId} edit={true}/>
             </div>
         </Page>
     );
