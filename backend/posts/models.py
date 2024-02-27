@@ -17,7 +17,7 @@ class Post(models.Model):
     FRIENDS = "FRIENDS"
     UNLISTED = "UNLISTED"
 
-  id = models.CharField(primary_key=True, max_length=10, default=generate_next_id)
+  id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
   title = models.CharField(max_length=255, blank=False, null=False)
   source = models.ForeignKey(Node, blank=True, null=True, on_delete=models.CASCADE)
   origin = models.CharField(max_length=255, blank=True, null=True)
