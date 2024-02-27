@@ -58,6 +58,8 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
         },
         body: formData.toString()
     });
+
+    window.location.href = "/profile";
   }
 
 
