@@ -139,8 +139,8 @@ def register(request: HttpRequest):
   email = request.POST["email"]
 
   # Check field lengths
-  if (not 0 < len(request.POST["username"]) < 150) \
-    or (not 0 < len(request.POST["email"] < 254)):
+  if not (0 < len(request.POST["username"]) < 150) \
+    or not (0 < len(request.POST["email"]) < 254):
     return Response({
       "error": True,
       "message": "Invalid credential length"
