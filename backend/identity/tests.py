@@ -66,6 +66,15 @@ class AuthenticationTest(BaseTestCase):
     })
     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+  def test_register_invalid(self):
+    response = self.client.post("/api/register/", {
+      "username": "u"*151,
+      "password": "newuser",
+      "email": "e"*255
+    })
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
 class AuthorTests(BaseTestCase):
   def setUp(self):
     super().setUp()

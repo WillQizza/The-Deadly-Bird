@@ -21,11 +21,14 @@ def authors(request: HttpRequest):
   """
   Retrieve list of authors
   """
+  # Get author queryset ordered by their id
   authors = Author.objects.all().order_by("id")
 
+  # Paginate the queryset
   paginator = Pagination("authors")
   page = paginator.paginate_queryset(authors, request)
 
+  # Return serialized result
   our_user_id = request.session["id"] if (request.session.has_key("id")) else None
   serializer = AuthorSerializer(page, many=True, context={ "id": our_user_id })
   return paginator.get_paginated_response(serializer.data)
@@ -61,7 +64,7 @@ def author(request: HttpRequest, author_id: str):
   Retrieve or edit a single author
   """
   if request.method == "GET":
-    # Get profile
+    # Try to get profile from author id
     try:
       author = Author.objects.get(id=author_id)
     except Author.DoesNotExist:
@@ -69,6 +72,7 @@ def author(request: HttpRequest, author_id: str):
         "message": "No author found"
       }, status=404)
 
+    # Return serialized profile
     our_user_id = request.session["id"] if (request.session.has_key("id")) else None
     serializer = AuthorSerializer(author, context={ "id": our_user_id })
     return Response(serializer.data)
@@ -78,6 +82,7 @@ def author(request: HttpRequest, author_id: str):
     if not logged_in:
       return response
 
+    # Retrieve author to edit
     try:
       author = Author.objects.get(id=author_id)
     except Author.DoesNotExist:
@@ -89,26 +94,63 @@ def author(request: HttpRequest, author_id: str):
       return Response({
         "message": "Cannot modify a different author"
       }, status=403)
+
+    # Store error message if any properties do not match property limits
+    error = None
     
+    # Update display name
     if "displayName" in request.POST:
       new_display_name = request.POST["displayName"]
-      author.display_name = new_display_name
+      if (0 < len(new_display_name) < 255):
+        author.display_name = new_display_name
+      else:
+        error = "Invalid display name length"
+
+    # Update password
     if "password" in request.POST:
       password = request.POST["password"]
       author.user.set_password(password)
+
+    # Update email
     if "email" in request.POST:
       email = request.POST["email"]
-      author.user.email = email
+      if (0 < len(email) < 254):
+        author.user.email = email
+      else:
+        error = "Invalid email length"
+
+    # Update github
     if "github" in request.POST:
       github = request.POST["github"]
-      author.github = github
+      if (0 < len(github) < 254):
+        author.github = github
+      else:
+        error = "Invalid github length"
+
+    # Update profile image
     if "profileImage" in request.POST:
       profile_picture = request.POST["profileImage"]
-      author.profile_picture = profile_picture
+      if (0 < len(profile_picture) < 255):
+        author.profile_picture = profile_picture
+      else:
+        error = "Invalid profile picture length"
+
+    # Update bio
     if "bio" in request.POST:
       bio = request.POST["bio"]
-      author.bio = bio
+      if (0 < len(bio) < 255):
+        author.bio = bio
+      else:
+        error = "Invalid bio length"
 
+    # Return error if exists
+    if (error is not None):
+      return Response({
+        "error": True,
+        "message": error
+      }, status=400)
+
+    # Save updates
     author.user.save()
     author.save()
 
@@ -137,6 +179,7 @@ def author(request: HttpRequest, author_id: str):
 )
 @api_view(["POST"])
 def login(request: HttpRequest):
+  # Check for required credentials
   if (not "username" in request.POST):
     return Response({
       "authenticated": False, 
@@ -147,9 +190,12 @@ def login(request: HttpRequest):
       "authenticated": False,
       "message": "Password is required."
     }, status=400)
+  
+  # Get credentials
   username = request.POST["username"]
   password = request.POST["password"]
   
+  # Find user
   try:
     user = User.objects.get(username__iexact=username)
   except User.DoesNotExist:
@@ -158,6 +204,7 @@ def login(request: HttpRequest):
       "message": "Invalid username or password. Please try again."
     }, status=401)
 
+  # Check password
   password_matches = user.check_password(password)
   if not password_matches:
     return Response({
@@ -165,6 +212,7 @@ def login(request: HttpRequest):
       "message": "Invalid username or password. Please try again."
     }, status=401)
 
+  # Start session
   author = Author.objects.get(user=user)
   request.session["id"] = author.id
 
@@ -196,14 +244,25 @@ def login(request: HttpRequest):
 )
 @api_view(["POST"])
 def register(request: HttpRequest):
+  # Check for required credentials
   if (not "username" in request.POST) or (not "password" in request.POST) or (not "email" in request.POST):
     return Response({
       "error": True,
       "message": "No credentials provided"
     }, status=400)
+  
+  # Get credentials
   username = request.POST["username"]
   password = request.POST["password"]
   email = request.POST["email"]
+
+  # Check credential lengths
+  if not (0 < len(request.POST["username"]) < 150) \
+    or not (0 < len(request.POST["email"]) < 254):
+    return Response({
+      "error": True,
+      "message": "Invalid credential length"
+    }, status=400)
 
   # Check if an user already exists with that username
   try:
@@ -214,6 +273,7 @@ def register(request: HttpRequest):
     }, status=409)
   except User.DoesNotExist:
     pass
+  # Check if an user already exists with that email
   try:
     User.objects.get(email__iexact=email)
     return Response({
@@ -282,7 +342,7 @@ def inbox(request: HttpRequest, author_id: str):
   DELETE [local]: clear the inbox
   """
   if request.method == "POST":
-    # add a new inbox message item  
+    # Check request data
     content_type = request.data.get("content_type")
     content_id = request.data.get("content_id")
 
@@ -291,7 +351,8 @@ def inbox(request: HttpRequest, author_id: str):
         "error": True,
         "message": "Missing necessary request body parameters"
       }, status_code=400)
-
+    
+    # Add a new inbox message item
     try:
       InboxMessage.objects.create(
         author_id=author_id,
@@ -309,7 +370,7 @@ def inbox(request: HttpRequest, author_id: str):
       }, status=400)
   
   if request.method == "GET":
-    # return the list of inbox messages for the author   
+    # Return the list of inbox messages for the author   
     inbox_messages = InboxMessage.objects.filter(author=author_id).order_by("id")
     paginator = InboxPagination(author_id=author_id)
     page = paginator.paginate_queryset(inbox_messages, request)
@@ -318,6 +379,7 @@ def inbox(request: HttpRequest, author_id: str):
     return paginator.get_paginated_response(serializer.data)
   
   if request.method == "DELETE":
+    # Delete inbox messages of the author
     try:
       InboxMessage.objects.filter(author=author_id).delete()
       return Response({"error": False, "message": "inbox deleted"}, status=204)

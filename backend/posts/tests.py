@@ -189,6 +189,20 @@ class AuthorPostTest(BaseTestCase):
     self.edit_session(id=self.authors[0].id)
     response = self.client.post(reverse("posts", kwargs={ "author_id": 1 }))
     self.assertEquals(response.status_code, 400)
+  
+  def test_invalid_length_post_payload(self):
+    """
+    Check that providing post form properties with invalid lengths is handled.
+    """
+    self.edit_session(id=self.authors[0].id)
+    response = self.client.post(reverse("posts", kwargs={ "author_id": self.authors[1].id }), {
+      "title": "t"*256,
+      "description": "d"*256,
+      "contentType": "text/plain",
+      "content": "Hello World",
+      "visibility": Post.Visibility.PUBLIC
+    })
+    self.assertEquals(response.status_code, 400)
 
   def test_impersonation_post_payload(self):
     """

@@ -15,13 +15,14 @@ _UNAUTHORIZED_REDIRECT_PATH = "/"
 def index(request: HttpRequest):
     for route_prefix in _PROTECTED_ROUTE_PREFIXES:
         if request.get_full_path().startswith(route_prefix):
+            # User has not logged in
             if not "id" in request.session:
                 return redirect(_UNAUTHORIZED_REDIRECT_PATH)
             
+            # User no longer has account/invalid session
             try:
                 Author.objects.get(id=request.session["id"])
             except Author.DoesNotExist:
-                # User no longer has account/invalid session
                 request.session.clear()
                 return redirect(_UNAUTHORIZED_REDIRECT_PATH)
             break

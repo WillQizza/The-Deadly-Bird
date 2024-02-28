@@ -56,13 +56,24 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
         if (!username) {
             isValid = false;
             newErrors.username = "Username is required";
-        } if (!email) {
+        }
+        if (username.length > 150) {
+            isValid = false;
+            newErrors.username = "Username is too long (150 characters maximum)";
+        }
+        if (!email) {
             isValid = false;
             newErrors.email = "Email is required";
-        } if (!password) {
+        }
+        if (email.length > 254) {
+            isValid = false;
+            newErrors.email = "Email is too long (254 characters maximum)";
+        }
+        if (!password) {
             isValid = false;
             newErrors.password = "Password is required";
-        } if (password !== confirmPassword) {
+        }
+        if (password !== confirmPassword) {
             isValid = false;
             newErrors.confirmPassword = "Passwords do not match";
         }
@@ -86,6 +97,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                         placeholder="Enter username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        isInvalid={!!errors.username}
                         className={styles.formControl}
                     />
                     <Form.Control.Feedback type="invalid">
@@ -100,6 +112,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                         placeholder="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        isInvalid={!!errors.email}
                         className={styles.formControl}
                     />
                     <Form.Control.Feedback type="invalid">

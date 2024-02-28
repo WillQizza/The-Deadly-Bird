@@ -18,25 +18,29 @@ def following(request, author_id: str):
     query parameters:
         - target_author_ids: string[], a reduced subset of author_id's to search from.
     """
-
+    # Get target author ids if target_author_ids parameter is present
     include_author_ids = []
     include_author_ids_str = request.query_params.get('include_author_ids', None)
     if include_author_ids_str:
         include_author_ids = list(map(int, include_author_ids_str.split(',')))
 
+    # Search a subset of author ids if target_author_ids parameter is present
     if include_author_ids: 
         queryset = Following.objects.filter(
             target_author_id__in=include_author_ids, author_id=author_id
         ).select_related('author')\
          .order_by('id')
+    # Otherwise search author ids
     else:
         queryset = Following.objects.filter(target_author_id=author_id)\
             .select_related('author')\
             .order_by('id')
 
+    # Paginate results
     paginator = Pagination()
     page = paginator.paginate_queryset(queryset, request)
     
+    # Return serialized results
     #TODO: refactor this
     if page is not None:
         authors = [following.author for following in page]
@@ -53,13 +57,16 @@ def followers(request, author_id: str):
     URL: ://service/authors/{AUTHOR_ID}/followers
     GET [local, remote]: get a list of authors who are AUTHOR_ID's followers       
     """
+    # Get authors who are following author id
     queryset = Following.objects.filter(target_author_id=author_id)\
         .select_related('author')\
         .order_by('id')
 
+    # Paginate results
     paginator = Pagination("followers")
     page = paginator.paginate_queryset(queryset, request)
     
+    # Return serialized results
     if page is not None:
         authors = [following.author for following in page]
         serializer = FollowingSerializer(authors)
@@ -77,6 +84,7 @@ def modify_follower(request, author_id, foreign_author_id):
     PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
     GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
     """
+    # Check that request is not to self
     if author_id == foreign_author_id:
         return Response({
             "error": True,
@@ -91,22 +99,25 @@ def modify_follower(request, author_id, foreign_author_id):
     
     try:
         if request.method == 'DELETE':
+            # Delete follower
             obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
             obj.delete()
             return Response({"error": False, "message": "Follower removed successfully."}, status=204)
 
         elif request.method == 'PUT':
             try: 
+                # Get following relation or create one if none exist
                 Following.objects.get_or_create(
                     author_id=foreign_author_id,
                     target_author_id=author_id
                 )
                 try:
+                    # Accept follow request
                     follow_req = FollowingRequest.objects.filter(
                         author_id=foreign_author_id, 
                         target_author_id=author_id
                     ).first()
-
+                    # Remove follow request
                     InboxMessage.objects.filter(content_id=follow_req.id).delete()
                     follow_req.delete() #delete after inbox message because of dependancy
                     return Response({"message": "Follower added successfully."}, status=201)
@@ -116,11 +127,13 @@ def modify_follower(request, author_id, foreign_author_id):
                 return Response({"message": "Failed to create follower."}, status=400)
 
         elif request.method == 'GET':
+            # Get serialized following relation
             obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
             serializer = FollowingSerializer(obj)
             return Response(serializer.data)
 
     except Following.DoesNotExist:
+        # Return the appropriate error message and status
         if request.method == 'GET':
             return Response({"message": "Follower does not exist."}, status=404)
         return Response({"message": "Unexpected error occurred."}, status=400)
@@ -132,13 +145,9 @@ def request_follower(request: HttpRequest, local_author_id: str, foreign_author_
     Request a follower on local or foreign host.
     URL: None specified
     """
-    
-    if request.method == "GET":
-        follow_req = FollowingRequest.objects.filter(
-            author=local_author_id,
-            target_author=foreign_author_id
-        ).first()
 
+    if request.method == "GET":
+        # Get serialized following relation
         follow_req = get_object_or_404(FollowingRequest, 
                                        author_id=local_author_id, 
                                        target_author_id=foreign_author_id)
@@ -153,21 +162,25 @@ def request_follower(request: HttpRequest, local_author_id: str, foreign_author_
                 "message": "Authentication required"
             }, status=403)
 
+        # Check that author ids exists
         if not check_authors_exist(local_author_id, foreign_author_id):
             return Response({
                 "error": True,
                 "message": "An author provided does not exist"
             }, status=404) 
 
+        # Get authors
         local_author = Author.objects.get(id=local_author_id)
         foreign_author = Author.objects.get(id=foreign_author_id)
         
+        # Check if following relation already exists
         if Following.objects.filter(author__id=local_author_id,
                                     target_author__id=foreign_author_id).exists(): 
             return Response({
                 "message": "Conflict: Author is already following"
             }, status=409)
 
+        # Check if follow request already exists
         elif FollowingRequest.objects.filter(author__id=local_author_id, 
             target_author__id=foreign_author_id).exists():
                 return Response({
@@ -184,11 +197,13 @@ def request_follower(request: HttpRequest, local_author_id: str, foreign_author_
             }, status=400)
         else:
             try:
+                # Create follow request
                 follow_req = FollowingRequest.objects.create(
                     target_author_id=foreign_author_id,
                     author_id=local_author_id
                 )
 
+                # Add request to inbox
                 InboxMessage.objects.create(
                     author_id=foreign_author_id,
                     content_id=follow_req.id,
