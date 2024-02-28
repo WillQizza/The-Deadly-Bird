@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import styles from './Post.module.css';
-import { ContentType, PostResponse } from '../../api/types'
+import { ContentType, Post as PostTy } from '../../api/types'
 import { baseURL, publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
+import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
 import { getUserId } from '../../utils/auth';
+import { apiCreateLike } from '../../api/likes';
 
-const Post: React.FC<PostResponse> = (props: PostResponse) => {
+type PostOptions = PostTy & {
+    likes: number;
+    isLiked: boolean;
+};
+
+const Post: React.FC<PostOptions> = props => {
     // Set profile picture src
     let profileImgSrc: string = '';
     // Make sure profile image field exists and is not null or empty
@@ -27,6 +34,9 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
         minute: 'numeric',
         hour12: true,
     });
+
+    const [likeCount, setLikeCount] = useState(props.likes);
+    const [isLiked, setIsLiked] = useState(props.isLiked);
 
     // Determine post content format
     let content;
@@ -48,7 +58,9 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
     }
 
     const handleLike = async () => {
-        console.log("Liked!");
+        setIsLiked(true);
+        setLikeCount(likeCount + 1);
+        await apiCreateLike(props.author.id, props.id);
     }
 
     return (
@@ -82,10 +94,15 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
                     {/* Share */}
                     <ArrowRepeat className={`${styles.postButton} ${styles.postShare}`}/>
                     {/* Like */}
-                    <Heart className={`${styles.postButton} ${styles.postLike}`} onClick={handleLike}/>
+                    <div>
+                        {isLiked
+                            ? <HeartFilled className={`${styles.postButton} ${styles.postLiked}`} />
+                            : <Heart className={`${styles.postButton} ${styles.postLike}`} onClick={handleLike}/>}
+                        <span className={styles.likeCount}>{likeCount}</span>
+                    </div>
                     {/* Edit */}
                     {
-                        (props.author.id == getUserId()) ? (
+                        (props.author.id === getUserId()) ? (
                             <PencilSquare
                                 className={`${styles.postButton} ${styles.postEdit}`}
                                 onClick={(e) => {

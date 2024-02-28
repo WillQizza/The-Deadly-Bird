@@ -1,5 +1,5 @@
 import { baseURL } from "../constants";
-import { LikedResponse } from "./types";
+import { LikesResponse } from "./types";
 import { apiRequest } from "../utils/request";
 
 /**
@@ -9,16 +9,9 @@ import { apiRequest } from "../utils/request";
 export const apiGetPostLikes = async (
     authorID: string,
     postID: string,
-    page: number,
-    size: number
-): Promise<LikedResponse> => {
-    const response = await apiRequest(
-        `${baseURL}/api/authors/
-            ${authorID}/posts/
-            ${postID}/likes
-            ?page=${page}&size=${size}`
-    );    
-    const data: LikedResponse = await response.json(); 
+): Promise<LikesResponse> => {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/likes/`);    
+    const data: LikesResponse = await response.json(); 
     return data;
 }
 
@@ -32,17 +25,9 @@ export const apiGetCommentLikes = async (
     authorID: string,
     postID: string,
     commentID: string,
-    page: number,
-    size: number
-): Promise<LikedResponse> => {
-    const response = await apiRequest(
-        `${baseURL}/api/authors/
-            ${authorID}/posts/
-            ${postID}/comments/
-            ${commentID}likes
-            ?page=${page}&size=${size}`
-    );    
-    const data: LikedResponse = await response.json(); 
+): Promise<LikesResponse> => {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}/likes/`);    
+    const data: LikesResponse = await response.json(); 
     return data;
 }
 
@@ -55,9 +40,9 @@ export const apiCreateLike = async (
     authorID: string,
     postId: string
 ): Promise<any> => {
-    const response = await apiRequest( 
-        `${baseURL}/api/authors/${authorID}/posts/${postId}/likes`
-    );    
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postId}/likes/`, {
+        method: "POST"
+    });    
     const data: any = await response.json(); 
     return data;
 }

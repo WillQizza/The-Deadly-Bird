@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import styles from './PostStream.module.css';
 import Post from './Post';
 import { apiGetAuthorPosts, apiGetPosts, APIPostStreamTy } from '../../api/posts';
+import { apiGetPostLikes } from '../../api/likes';
+import { getUserId } from '../../utils/auth';
+import { LikedResponse, PostsResponse } from '../../api/types';
 
 export enum PostStreamTy {
     Public,
@@ -26,37 +29,27 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     };
 
     // function to generate posts (and wait until last post is reached to generate more)
-    const generatePosts = () => {
+    const generatePosts = async () => {
+        let response: PostsResponse;
         if (props.type === PostStreamTy.Author && props.id) {
-            apiGetAuthorPosts(props.id, currentPage.current, pageSize)
-                .then(async response => {
-                    if ('items' in response) {
-                        const newPosts = response.items.map((postResponse) => {
-                            return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} />;
-                        })
-                        addPosts(newPosts);
-                    }
-                });
+            response = await apiGetAuthorPosts(props.id, currentPage.current, pageSize);
         } else if (props.type === PostStreamTy.Public) {
-            apiGetPosts(APIPostStreamTy.Public, currentPage.current, pageSize)
-                .then(async response => {
-                    if ('items' in response) {
-                        const newPosts = response.items.map((postResponse) => {
-                            return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} />;
-                        })
-                        addPosts(newPosts);
-                    }
-                });
+            response = await apiGetPosts(APIPostStreamTy.Public, currentPage.current, pageSize);
         } else if (props.type === PostStreamTy.Following) {
-            apiGetPosts(APIPostStreamTy.Following, currentPage.current, pageSize)
-                .then(async response => {
-                    if ('items' in response) {
-                        const newPosts = response.items.map((postResponse) => {
-                            return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} />;
-                        })
-                        addPosts(newPosts);
-                    }
-                });
+            response = await apiGetPosts(APIPostStreamTy.Following, currentPage.current, pageSize);
+        } else {
+            console.error(`Unknown post stream type: ${props.type}`);
+            return;
+        }
+
+        if ('items' in response) {
+            const newPosts = await Promise.all(response.items.map(async (postResponse) => {
+                const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
+                console.log(likes);
+                const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
+                return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} likes={likes.length} isLiked={isLikedByUs} />;
+            }));
+            addPosts(newPosts);
         }
     }
 

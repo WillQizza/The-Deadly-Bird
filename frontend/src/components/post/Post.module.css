@@ -81,6 +81,16 @@
     color: red;
 }
 
+.postLiked {
+    color: red;
+}
+
+.likeCount {
+    color: var(--teal);
+    font-size: 20px;
+    cursor: default;
+}
+
 .postEdit:hover {
     color: dodgerblue;
 }
