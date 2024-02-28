@@ -3,6 +3,22 @@ from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
 from typing import List
 from .models import Post, Comment
+from .pagination import generate_comments_pagination_schema
+
+class CommentSerializer(serializers.ModelSerializer):
+  type = serializers.CharField(read_only=True, default="comment")
+  author = serializers.SerializerMethodField()
+  comment = serializers.CharField(source="content")
+  contentType = serializers.CharField(source="content_type")
+  published = serializers.DateTimeField(source="published_date")
+
+  def get_author(self, object: Comment) -> AuthorSerializer: # This typing is purposely wrong so that the drf can serialize the docs correctly
+    serializer = AuthorSerializer(object.author)
+    return serializer.data
+
+  class Meta:
+    model = Comment
+    fields = ["type", "id", "author", "comment", "contentType", "published"]
 
 class PostSerializer(serializers.ModelSerializer):
   type = serializers.CharField(read_only=True, default="post")
@@ -23,6 +39,7 @@ class PostSerializer(serializers.ModelSerializer):
     return None # TODO: (currently sets null)
     # TODO: URL to comments
   
+  @extend_schema_field(field=generate_comments_pagination_schema())
   def get_commentsSrc(self, object: Post) -> None:
     return None # TODO: (currently sets null)
     # TODO: 5 comments sorted newest to oldest in the api spec format

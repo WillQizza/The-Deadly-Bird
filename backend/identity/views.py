@@ -13,6 +13,7 @@ from .pagination import InboxPagination, generate_inbox_pagination_query_schema,
 from .serializers import AuthorSerializer, InboxMessageSerializer
 
 @extend_schema(
+    operation_id="api_authors_retrieve_all",
     responses=generate_pagination_schema("authors", AuthorSerializer(many=True)),
     parameters=generate_pagination_query_schema()
 )
@@ -299,6 +300,14 @@ def register(request: HttpRequest):
   }, status=201)
 
 
+InboxFailureResponseSerializer = inline_serializer("InboxDeleteFailureResponse", fields={
+  "error": serializers.BooleanField(default=True),
+  "message": serializers.CharField()
+})
+InboxSuccessResponseSerializer = inline_serializer("InboxDeleteSuccessResponse", fields={
+  "error": serializers.BooleanField(default=False),
+  "message": serializers.CharField()
+})
 @extend_schema(
   methods=["GET"],
   responses=generate_inbox_pagination_schema(),
@@ -311,7 +320,15 @@ def register(request: HttpRequest):
   methods=["POST"],
   parameters=[
     OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with")
-  ] # TODO: Proper docs for inbox POST
+  ],
+  request=inline_serializer("InboxSubmitRequest", fields={
+    "content_type": serializers.CharField(),
+    "content_id": serializers.CharField()
+  }),
+  responses={
+    400: InboxFailureResponseSerializer,
+    201: InboxSuccessResponseSerializer
+  }
 )
 @extend_schema(
   methods=["DELETE"],
@@ -319,14 +336,8 @@ def register(request: HttpRequest):
     OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with")
   ],
   responses={
-    204: inline_serializer("InboxDeleteSuccessResponse", fields={
-            "error": serializers.BooleanField(default=False),
-            "message": serializers.CharField()
-          }),
-    404: inline_serializer("InboxDeleteFailureResponse", fields={
-            "error": serializers.BooleanField(),
-            "message": serializers.CharField()
-          })
+    204: InboxSuccessResponseSerializer,
+    404: InboxFailureResponseSerializer
   }
 )
 @api_view(["GET", "POST", "DELETE"])

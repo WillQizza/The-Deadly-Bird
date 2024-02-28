@@ -28,18 +28,20 @@ PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields=
   "visibility": serializers.CharField(),
 })
 @extend_schema(
-    parameters=[
-        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with")
-    ]
+  parameters=[
+    OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with")
+  ]
 )
 @extend_schema(
-    methods=["GET"],
-    parameters=[
-      *generate_pagination_query_schema()
-    ],
-    responses=generate_pagination_schema("posts", PostSerializer(many=True))
+  operation_id="api_authors_retrieve_all_posts",
+  methods=["GET"],
+  parameters=[
+    *generate_pagination_query_schema()
+  ],
+  responses=generate_pagination_schema("posts", PostSerializer(many=True))
 )
 @extend_schema(
+  operation_id="api_authors_create_new_post",
   methods=["POST"],
   request=PostCreationPayloadSerializer,
   responses={

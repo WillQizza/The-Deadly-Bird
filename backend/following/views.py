@@ -1,15 +1,23 @@
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
-from django.urls import reverse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import serializers
 from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
 from .serializers import FollowRequestSerializer, FollowingSerializer
 from identity.models import Author, InboxMessage
-from deadlybird.pagination import Pagination
+from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 
-
+@extend_schema(
+    parameters=[
+        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to check for following"),
+        OpenApiParameter("target_author_ids", type=str, location=OpenApiParameter.QUERY, description="Reduced subset of author ids to search from"),
+        *generate_pagination_query_schema()
+    ],
+    responses=FollowingSerializer
+)
 @api_view(["GET"])
 def following(request, author_id: str):
     """
@@ -37,7 +45,7 @@ def following(request, author_id: str):
             .order_by('id')
 
     # Paginate results
-    paginator = Pagination()
+    paginator = Pagination("following")
     page = paginator.paginate_queryset(queryset, request)
     
     # Return serialized results
@@ -51,6 +59,14 @@ def following(request, author_id: str):
         serializer = FollowingSerializer(authors)
         return Response(serializer.data)
 
+@extend_schema(
+    operation_id="api_authors_followers_retrieve_all",
+    parameters=[
+        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to check for followers"),
+        *generate_pagination_query_schema()
+    ],
+    responses=FollowingSerializer
+)
 @api_view(["GET"])
 def followers(request, author_id: str):
     """
@@ -76,8 +92,47 @@ def followers(request, author_id: str):
         serializer = FollowingSerializer(authors)
         return Response(serializer.data)  
 
+ModifyFollowersSuccessSerializer = inline_serializer("ModifyFollowersSuccess", fields={
+    "error": serializers.BooleanField(default=False),
+    "message": serializers.CharField()
+})
+ModifyFollowersErrorSerializer = inline_serializer("ModifyFollowersError", fields={
+    "error": serializers.BooleanField(default=True),
+    "message": serializers.CharField()
+})
+@extend_schema(
+    parameters=[
+        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with"),
+        OpenApiParameter("foreign_author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Foreign author id to interact with in relation to author id"),
+    ]
+)
+@extend_schema(
+    methods=["GET"],
+    responses={
+        400: ModifyFollowersErrorSerializer,
+        404: ModifyFollowersErrorSerializer,
+        200: FollowingSerializer
+    }
+)
+@extend_schema(
+    methods=["DELETE"],
+    responses={
+        400: ModifyFollowersErrorSerializer,
+        404: ModifyFollowersErrorSerializer,
+        204: ModifyFollowersSuccessSerializer
+    }
+)
+@extend_schema(
+    methods=["PUT"],
+    request=None,
+    responses={
+        400: ModifyFollowersErrorSerializer,
+        409: ModifyFollowersErrorSerializer,
+        201: ModifyFollowersSuccessSerializer
+    }
+)
 @api_view(['DELETE', 'PUT', 'GET'])
-def modify_follower(request, author_id, foreign_author_id): 
+def modify_follower(request, author_id: str, foreign_author_id: str): 
     """ 
     URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
     DELETE [local]: remove FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID
@@ -89,13 +144,13 @@ def modify_follower(request, author_id, foreign_author_id):
         return Response({
             "error": True,
             "message": "Can not request to self"
-            }, status=400)
+        }, status=400)
 
     # TODO: determine if authentication for PUT but not for others is right
     if request.method == 'PUT':
         session_valid, _ = validate_login_session(request)
         if not session_valid:
-            return Response({"message": "Authentication required"}, status=403)
+            return Response({"error": True, "message": "Authentication required"}, status=403)
     
     try:
         if request.method == 'DELETE':
@@ -120,11 +175,11 @@ def modify_follower(request, author_id, foreign_author_id):
                     # Remove follow request
                     InboxMessage.objects.filter(content_id=follow_req.id).delete()
                     follow_req.delete() #delete after inbox message because of dependancy
-                    return Response({"message": "Follower added successfully."}, status=201)
+                    return Response({"error": False, "message": "Follower added successfully."}, status=201)
                 except:
-                    return Response({"message": "Follower already added."}, status=409) 
+                    return Response({"error": True, "message": "Follower already added."}, status=409) 
             except: 
-                return Response({"message": "Failed to create follower."}, status=400)
+                return Response({"error": True, "message": "Failed to create follower."}, status=400)
 
         elif request.method == 'GET':
             # Get serialized following relation
@@ -135,10 +190,42 @@ def modify_follower(request, author_id, foreign_author_id):
     except Following.DoesNotExist:
         # Return the appropriate error message and status
         if request.method == 'GET':
-            return Response({"message": "Follower does not exist."}, status=404)
-        return Response({"message": "Unexpected error occurred."}, status=400)
-    
+            return Response({"error": True, "message": "Follower does not exist."}, status=404)
+        return Response({"error": True, "message": "Unexpected error occurred."}, status=400)
 
+RequestFollowersSuccessSerializer = inline_serializer("RequestFollowersSuccess", fields={
+    "error": serializers.BooleanField(default=False),
+    "message": serializers.CharField()
+})
+RequestFollowersErrorSerializer = inline_serializer("RequestFollowersError", fields={
+    "error": serializers.BooleanField(default=True),
+    "message": serializers.CharField()
+})
+@extend_schema(
+    parameters=[
+        OpenApiParameter("local_author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with"),
+        OpenApiParameter("foreign_author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Foreign author id to interact with in relation to author id")
+    ]
+)
+@extend_schema(
+    methods=["POST"],
+    request=None,
+    responses={
+        400: RequestFollowersErrorSerializer,
+        403: RequestFollowersErrorSerializer,
+        404: RequestFollowersErrorSerializer,
+        409: RequestFollowersErrorSerializer,
+        201: RequestFollowersSuccessSerializer,
+        500: RequestFollowersErrorSerializer
+    }
+)
+@extend_schema(
+    methods=["GET"],
+    responses={
+        404: RequestFollowersErrorSerializer,
+        200: FollowRequestSerializer
+    }
+)
 @api_view(["POST", "GET"])
 def request_follower(request: HttpRequest, local_author_id: str, foreign_author_id: str):
     """
@@ -177,6 +264,7 @@ def request_follower(request: HttpRequest, local_author_id: str, foreign_author_
         if Following.objects.filter(author__id=local_author_id,
                                     target_author__id=foreign_author_id).exists(): 
             return Response({
+                "error": True,
                 "message": "Conflict: Author is already following"
             }, status=409)
 
