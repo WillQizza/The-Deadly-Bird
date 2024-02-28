@@ -11,8 +11,8 @@ class PostSerializer(serializers.ModelSerializer):
   commentsSrc = serializers.SerializerMethodField()
   published = serializers.DateTimeField(source="published_date")
 
-  def get_author(self, object: Post) -> AuthorSerializer:
-    return AuthorSerializer(object.author)
+  def get_author(self, object: Post) -> AuthorSerializer: # This typing is purposely wrong so that the drf can serialize the docs correctly
+    return AuthorSerializer(object.author).data
 
   def get_count(self, object: Post) -> int:
     return Comment.objects.filter(post=object).count()

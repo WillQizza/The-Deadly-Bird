@@ -157,20 +157,18 @@ def author(request: HttpRequest, author_id: str):
     response_serializer = AuthorSerializer(author)
     return Response(response_serializer.data)
 
+LoginFailureSerializer = inline_serializer("LoginFailure", fields={
+  "authenticated": serializers.BooleanField(),
+  "message": serializers.CharField()
+})
 @extend_schema(
     request=inline_serializer("LoginRequest", fields={
       "username": serializers.CharField(),
       "password": serializers.CharField()
     }),
     responses={
-      400: inline_serializer("LoginFailure", fields={
-        "authenticated": serializers.BooleanField(),
-        "message": serializers.CharField()
-      }),
-      401: inline_serializer("LoginFailure", fields={
-        "authenticated": serializers.BooleanField(),
-        "message": serializers.CharField()
-      }),
+      400: LoginFailureSerializer,
+      401: LoginFailureSerializer,
       200: inline_serializer("LoginSuccess", fields={
         "authenticated": serializers.BooleanField(),
         "id": serializers.CharField()
@@ -221,6 +219,10 @@ def login(request: HttpRequest):
     "id": request.session["id"]
   })
 
+RegistrationResponseErrorSerializer = inline_serializer("RegistrationError", fields={
+  "error": serializers.BooleanField(),
+  "message": serializers.CharField()
+})
 @extend_schema(
     request=inline_serializer("RegistrationDetails", fields={
       "username": serializers.CharField(),
@@ -232,14 +234,8 @@ def login(request: HttpRequest):
         "error": serializers.BooleanField(default=False),
         "message": serializers.CharField()
       }),
-      400: inline_serializer("RegistrationError", fields={
-        "error": serializers.BooleanField(),
-        "message": serializers.CharField()
-      }),
-      409: inline_serializer("RegistrationError", fields={
-        "error": serializers.BooleanField(),
-        "message": serializers.CharField()
-      })
+      400: RegistrationResponseErrorSerializer,
+      409: RegistrationResponseErrorSerializer
     }
 )
 @api_view(["POST"])

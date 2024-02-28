@@ -20,9 +20,14 @@ class Pagination(PageNumberPagination):
             "prev": self.get_previous_link(),
             "items": data
         })
+    
+_cached_pagination_schemas = {}
 
 def generate_pagination_schema(paginator_name: str, serializer: serializers.Serializer):
-    return inline_serializer(
+    if paginator_name in _cached_pagination_schemas:
+        return _cached_pagination_schemas[paginator_name]
+    
+    serializer = inline_serializer(
         name=f"Pagination_{paginator_name}",
         fields={
             "type": serializers.CharField(read_only=True, default=paginator_name),
@@ -31,6 +36,10 @@ def generate_pagination_schema(paginator_name: str, serializer: serializers.Seri
             "items": serializer
         }
     )
+
+    _cached_pagination_schemas[paginator_name] = serializer
+    
+    return serializer
 
 def generate_pagination_query_schema():
     return [
