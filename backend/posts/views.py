@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from deadlybird.util import generate_full_api_url
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
 from following.util import is_friends
 from .serializers import PostSerializer
@@ -111,6 +112,7 @@ def posts(request: HttpRequest, author_id: str):
 
     post = Post.objects.create(
       title=request.POST["title"],
+      origin=generate_full_api_url("api"),
       description=request.POST["description"],
       content_type=request.POST["contentType"],
       content=request.POST["content"],

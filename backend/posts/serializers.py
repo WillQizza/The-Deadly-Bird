@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
-from typing import List
+from deadlybird.util import generate_full_api_url
 from .models import Post, Comment
 from .pagination import generate_comments_pagination_schema
 
@@ -27,6 +27,7 @@ class PostSerializer(serializers.ModelSerializer):
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
+  source = serializers.SerializerMethodField()
   published = serializers.DateTimeField(source="published_date")
 
   def get_author(self, object: Post) -> AuthorSerializer: # This typing is purposely wrong so that the drf can serialize the docs correctly
@@ -38,6 +39,13 @@ class PostSerializer(serializers.ModelSerializer):
   def get_comments(self, object: Post) -> str:
     return None # TODO: (currently sets null)
     # TODO: URL to comments
+  
+  def get_source(self, object: Post) -> str:
+    if object.source is None:
+      # Source is not external, therefore it must be our API
+      return generate_full_api_url("api")
+    else:
+      return object.source.host
   
   @extend_schema_field(field=generate_comments_pagination_schema())
   def get_commentsSrc(self, object: Post) -> None:
