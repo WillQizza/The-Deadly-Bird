@@ -36,10 +36,8 @@ const AuthorCarousel = ({authors}: {authors: Author[]}) => {
                             {group.map((author: Author, idx: number) => (
                                 <Col key={idx}>
                                     {/** Author card */}
-                                    <Card className={styles.card}>
-                                        <Card.Img variant="top" src={author.profileImage || 'https://via.placeholder.com/150'} 
-                                            onClick={() => handleCardClick(author.id)} 
-                                        />
+                                    <Card className={styles.card} onClick={() => handleCardClick(author.id)} >
+                                        <Card.Img variant="top" src={author.profileImage || 'https://via.placeholder.com/150'} />
                                         <Card.Body>
                                             <div className={styles.cardDisplayname}>{author.displayName}</div>
                                             <div className="card-host">{author.host}</div> 
