@@ -19,7 +19,7 @@ def validate_login_session(request: HttpRequest) -> Union[bool, Response]:
     try:
         author_id = request.session.get("id")
         if author_id and check_authors_exist(author_id):
-            return True
+            return True, None
         else:
             return Response({
                 "message": "Forbidden: Unauthorized request or session expired."

@@ -5,7 +5,10 @@ from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
 
 class AuthorSerializer(serializers.ModelSerializer):
-  type = serializers.ReadOnlyField(default='author')
+  """
+  Serialize a author.
+  """
+  type = serializers.CharField(read_only=True, default='author')
   displayName = serializers.CharField(source='display_name')
   profileImage = serializers.SerializerMethodField()
   url = serializers.CharField(source='profile_url')
@@ -14,22 +17,22 @@ class AuthorSerializer(serializers.ModelSerializer):
   following = serializers.SerializerMethodField()
   email = serializers.SerializerMethodField()
 
-  def get_posts(self, obj: Author):
+  def get_posts(self, obj: Author) -> int:
     return Post.objects.filter(author=obj).count()
   
-  def get_followers(self, obj: Author):
+  def get_followers(self, obj: Author) -> int:
     return Following.objects.filter(target_author=obj).count()
 
-  def get_following(self, obj: Author):
+  def get_following(self, obj: Author) -> int:
     return Following.objects.filter(author=obj).count()
   
-  def get_email(self, obj: Author):
+  def get_email(self, obj: Author) -> str|None:
     if "id" in self.context and obj.id == self.context["id"]:
       # Only return the user's email if they are the one requesting it
       return obj.user.email
     return None
   
-  def get_profileImage(self, obj: Author):
+  def get_profileImage(self, obj: Author) -> str:
     if (obj.profile_picture is not None) and len(obj.profile_picture) > 0:
       # Return saved avatar
       return obj.profile_picture

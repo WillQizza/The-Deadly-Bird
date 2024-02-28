@@ -3,7 +3,7 @@ from identity.serializers import AuthorSerializer
 from .models import Post, Comment
 
 class PostSerializer(serializers.ModelSerializer):
-  type = serializers.ReadOnlyField(default="post")
+  type = serializers.CharField(read_only=True, default="post")
   contentType = serializers.CharField(source="content_type")
   author = serializers.SerializerMethodField()
   count = serializers.SerializerMethodField()
@@ -11,10 +11,10 @@ class PostSerializer(serializers.ModelSerializer):
   commentsSrc = serializers.SerializerMethodField()
   published = serializers.DateTimeField(source="published_date")
 
-  def get_author(self, object: Post):
-    return AuthorSerializer(object.author).data
+  def get_author(self, object: Post) -> AuthorSerializer:
+    return AuthorSerializer(object.author)
 
-  def get_count(self, object: Post):
+  def get_count(self, object: Post) -> int:
     return Comment.objects.filter(post=object).count()
   
   def get_comments(self, object: Post):

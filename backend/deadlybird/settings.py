@@ -58,13 +58,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'drf_yasg',
     'react',
     'following',
     'identity',
     'likes',
     'posts',
-    'nodes'
+    'nodes',
+    
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -172,7 +173,8 @@ APPEND_SLASH = True
 # Pagination
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 10
+    'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
 
 # Used for internode communication

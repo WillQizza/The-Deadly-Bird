@@ -1,19 +1,25 @@
-from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.http import HttpRequest
 from django.conf import settings
+from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Author, InboxMessage
-from .serializers import AuthorSerializer, InboxMessageSerializer
 from deadlybird.util import generate_next_id, generate_full_api_url
-from deadlybird.pagination import Pagination
-from .pagination import InboxPagination
+from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
+from .util import validate_login_session
+from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
+from .serializers import AuthorSerializer, InboxMessageSerializer
 
+@extend_schema(
+    responses=generate_pagination_schema("authors", AuthorSerializer(many=True)),
+    parameters=generate_pagination_query_schema()
+)
 @api_view(["GET"])
 def authors(request: HttpRequest):
   """
-  get all authors view as to handle https://uofa-cmput404.github.io/general/project.html#authors
+  Retrieve list of authors
   """
   authors = Author.objects.all().order_by("id")
 
@@ -24,18 +30,67 @@ def authors(request: HttpRequest):
   serializer = AuthorSerializer(page, many=True, context={ "id": our_user_id })
   return paginator.get_paginated_response(serializer.data)
 
+AuthorsFailResponseSerializer = inline_serializer("AuthorsFailResponse", fields={
+  "message": serializers.CharField()
+})
+@extend_schema(
+    methods=["GET", "PUT"],
+    responses={
+      200: AuthorSerializer(),
+      404: AuthorsFailResponseSerializer,
+      403: AuthorsFailResponseSerializer
+    },
+    parameters=[
+      OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id to interact with")
+    ]
+)
+@extend_schema(
+  methods=["PUT"],
+  request=inline_serializer("AuthorEditPayload", fields={
+    "displayName": serializers.CharField(required=False),
+    "password": serializers.CharField(required=False),
+    "email": serializers.EmailField(required=False),
+    "github": serializers.CharField(required=False),
+    "profileImage": serializers.CharField(required=False),
+    "bio": serializers.CharField(required=False)
+  })
+)
 @api_view(["GET", "PUT"])
 def author(request: HttpRequest, author_id: str):
+  """
+  Retrieve or edit a single author
+  """
   if request.method == "GET":
     # Get profile
-    author = get_object_or_404(Author, id=author_id)
+    try:
+      author = Author.objects.get(id=author_id)
+    except Author.DoesNotExist:
+      return Response({
+        "message": "No author found"
+      }, status=404)
 
     our_user_id = request.session["id"] if (request.session.has_key("id")) else None
     serializer = AuthorSerializer(author, context={ "id": our_user_id })
     return Response(serializer.data)
   else:
-    author = Author.objects.get(id=request.session["id"])
-    if ("displayName" in request.POST):
+    # Ensure that we are logged in while attempting to edit a user
+    logged_in, response = validate_login_session(request)
+    if not logged_in:
+      return response
+
+    try:
+      author = Author.objects.get(id=author_id)
+    except Author.DoesNotExist:
+      return Response({
+        "message": "No author found"
+      }, status=404)
+    
+    if author.id != request.session["id"]:
+      return Response({
+        "message": "Cannot modify a different author"
+      }, status=403)
+    
+    if "displayName" in request.POST:
       new_display_name = request.POST["displayName"]
       author.display_name = new_display_name
     if "password" in request.POST:
@@ -57,16 +112,35 @@ def author(request: HttpRequest, author_id: str):
     author.user.save()
     author.save()
 
-    return Response({
-      "error": False,
-      "message": "Success!"
-    }, status=201)
+    response_serializer = AuthorSerializer(author)
+    return Response(response_serializer.data)
 
+@extend_schema(
+    request=inline_serializer("LoginRequest", fields={
+      "username": serializers.CharField(),
+      "password": serializers.CharField()
+    }),
+    responses={
+      400: inline_serializer("LoginFailure", fields={
+        "authenticated": serializers.BooleanField(),
+        "message": serializers.CharField()
+      }),
+      401: inline_serializer("LoginFailure", fields={
+        "authenticated": serializers.BooleanField(),
+        "message": serializers.CharField()
+      }),
+      200: inline_serializer("LoginSuccess", fields={
+        "authenticated": serializers.BooleanField(),
+        "id": serializers.CharField()
+      })
+    }
+)
 @api_view(["POST"])
 def login(request: HttpRequest):
   if (not "username" in request.POST):
     return Response({
-      "authenticated": False, "message": "Username is required."
+      "authenticated": False, 
+      "message": "Username is required."
     }, status=400)
   if (not "password" in request.POST):
     return Response({
@@ -99,6 +173,27 @@ def login(request: HttpRequest):
     "id": request.session["id"]
   })
 
+@extend_schema(
+    request=inline_serializer("RegistrationDetails", fields={
+      "username": serializers.CharField(),
+      "password": serializers.CharField(),
+      "email": serializers.CharField()
+    }),
+    responses={
+      201: inline_serializer("RegistrationResponse", fields={
+        "error": serializers.BooleanField(default=False),
+        "message": serializers.CharField()
+      }),
+      400: inline_serializer("RegistrationError", fields={
+        "error": serializers.BooleanField(),
+        "message": serializers.CharField()
+      }),
+      409: inline_serializer("RegistrationError", fields={
+        "error": serializers.BooleanField(),
+        "message": serializers.CharField()
+      })
+    }
+)
 @api_view(["POST"])
 def register(request: HttpRequest):
   if (not "username" in request.POST) or (not "password" in request.POST) or (not "email" in request.POST):
@@ -148,6 +243,36 @@ def register(request: HttpRequest):
   }, status=201)
 
 
+@extend_schema(
+  methods=["GET"],
+  responses=generate_inbox_pagination_schema(),
+  parameters=[
+    OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with"),
+    *generate_inbox_pagination_query_schema()
+  ]
+)
+@extend_schema(
+  methods=["POST"],
+  parameters=[
+    OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with")
+  ] # TODO: Proper docs for inbox POST
+)
+@extend_schema(
+  methods=["DELETE"],
+  parameters=[
+    OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with")
+  ],
+  responses={
+    204: inline_serializer("InboxDeleteSuccessResponse", fields={
+            "error": serializers.BooleanField(default=False),
+            "message": serializers.CharField()
+          }),
+    404: inline_serializer("InboxDeleteFailureResponse", fields={
+            "error": serializers.BooleanField(),
+            "message": serializers.CharField()
+          })
+  }
+)
 @api_view(["GET", "POST", "DELETE"])
 def inbox(request: HttpRequest, author_id: str):
   """
