@@ -3,7 +3,7 @@ import { publicDir } from "../../constants";
 import Page from '../../components/layout/Page';
 import styles from './ProfilePage.module.css';
 import { useParams } from 'react-router-dom';
-import { getAuthor } from '../../api/authors';
+import { apiGetAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiFollowRequest, apiGetFollower} from '../../api/following';
 import PostStream, { PostStreamTy } from '../../components/post/PostStream';
@@ -48,7 +48,7 @@ const ProfilePage: React.FC = () => {
     }
 
     useEffect(() => {
-        getAuthor(userId)
+        apiGetAuthor(userId)
             .then(async author => {
                 if (!author) {
                     console.error(`Failed to load user profile: ${userId}`);

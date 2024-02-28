@@ -20,7 +20,7 @@ class InboxMessage(models.Model):
   class ContentType(models.TextChoices):
     POST="post"
     FOLLOW="follow"
-    LIKE="like"
+    LIKE="Like"
     COMMENT="comment"
 
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)

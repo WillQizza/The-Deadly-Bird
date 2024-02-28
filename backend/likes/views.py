@@ -53,12 +53,6 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     return serialized_likes.data
 
 @extend_schema(
-    parameters=[
-        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
-        OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id to retrieve likes from")
-    ]
-)
-@extend_schema(
     methods=["GET"],
     responses=APIDocsLikeManySerializer,
     parameters=[
@@ -66,17 +60,7 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
         OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id to retrieve likes from"),
     ]
 )
-@extend_schema(
-    methods=["POST"],
-    request=None,
-    responses={
-        200: GenericSuccessSerializer,
-        404: GenericErrorSerializer,
-        409: GenericErrorSerializer,
-        500: GenericErrorSerializer,
-    }
-)
-@api_view(["GET", "POST"])
+@api_view(["GET"])
 def post_likes(request: HttpRequest, author_id: str, post_id: str):
     """
     author_id:   author of post_id
@@ -104,42 +88,6 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
         # return serialized results
         serialized_likes = LikeSerializer(likes, many=True)
         return Response(serialized_likes.data)
-
-    if request.method == "POST":
-        # author_id likes post_id
-        # Get the post
-        post = Post.objects.filter(id=post_id, author_id=author_id).first()
-        if post is None:
-            return Response({"error": True,"message": "authors post not found"}, status=404)
-        
-        # Check if author has already liked the post
-        existing_like = Like.objects\
-            .filter(send_author_id=author_id, content_id=post.id)\
-            .first()
-        
-        if existing_like is not None:
-            return Response({"error": True, "message": "post already liked"}, status=409)
-
-        try:
-            # Create the like
-            like = Like.objects.create(
-                send_author_id=author_id,
-                receive_author_id=post.author.id,
-                content_id=post.id,
-                content_type=Like.ContentType.POST
-            )
-
-            # Add notification to author's inbox
-            InboxMessage.objects.create(
-                author_id=post.author.id,
-                content_id=like.id,
-                content_type=InboxMessage.ContentType.LIKE
-            )
-
-            return Response({"error": False, "message": "like created"}, status=200)
-        except:
-            return Response({"error": True, "message": "create like failed"}, status=500)
-            
 
 @extend_schema(
         responses=inline_serializer("Liked", fields={

@@ -8,6 +8,9 @@ from .models import Author, InboxMessage
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from likes.serializers import LikeSerializer, APIDocsLikeSerializer
+from likes.models import Like
+from posts.models import Post
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .util import validate_login_session
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
@@ -314,10 +317,7 @@ def register(request: HttpRequest):
   parameters=[
     OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with")
   ],
-  request=inline_serializer("InboxSubmitRequest", fields={
-    "content_type": serializers.CharField(),
-    "content_id": serializers.CharField()
-  }),
+  request=APIDocsLikeSerializer,  # Example used in the docs for specs
   responses={
     400: GenericErrorSerializer,
     201: GenericSuccessSerializer
@@ -330,7 +330,8 @@ def register(request: HttpRequest):
   ],
   responses={
     204: GenericSuccessSerializer,
-    404: GenericErrorSerializer
+    404: GenericErrorSerializer,
+    409: GenericErrorSerializer
   }
 )
 @api_view(["GET", "POST", "DELETE"])
@@ -343,19 +344,68 @@ def inbox(request: HttpRequest, author_id: str):
   """
   if request.method == "POST":
     # Check request data
-    content_type = request.data.get("content_type")
-    content_id = request.data.get("content_id")
+    content_type = request.data.get("type")
 
-    if content_id == None or content_type == None:
+    if content_type == None:
       return Response({
         "error": True,
         "message": "Missing necessary request body parameters"
-      }, status_code=400)
+      }, status=400)
+    
+    content_id = None
+    if content_type == "Like":
+      # Ensure like data is valid data
+      author_payload = request.data.get("author")
+      like_object_id = request.data.get("object")
+
+      # Ensure data exists
+      if (author_payload is None) or (like_object_id is None) or not ("id" in author_payload):
+        return Response({
+          "error": True,
+          "message": "Incomplete like payload"
+        }, status=400)
+      
+      # TODO: For part two, we need a way to actually see if we're liking a post or a comment
+      # Assume it's a post we're liking (since that's all the support we have rn)
+      
+      # Check if like already exists
+      existing_like = Like.objects.filter(content_type=Like.ContentType.POST, 
+                          send_author=author_payload["id"], 
+                          content_id=like_object_id).first()
+      
+      if existing_like is not None:
+        return Response({
+          "error": True,
+          "message": "Like already exists"
+        }, status=409)
+      
+      try:
+        post = Post.objects.get(id=like_object_id)
+      except Post.DoesNotExist:
+        return Response({
+          "error": True,
+          "message": "Post does not exist"
+        }, status=404)
+      
+      like = Like.objects.create(
+          send_author_id=author_payload["id"],
+          receive_author_id=post.author.id,
+          content_id=post.id,
+          content_type=Like.ContentType.POST
+      )
+      content_id = like.id
+
+    elif content_type == "post":
+      return Response({ "error": True, "message": "Not implemented yet." }, status=500)
+    elif content_type == "follow":
+      return Response({ "error": True, "message": "Not implemented yet." }, status=500)
+    elif content_type == "comment":
+      return Response({ "error": True, "message": "Not implemented yet." }, status=500)
     
     # Add a new inbox message item
     try:
       InboxMessage.objects.create(
-        author_id=author_id,
+        author_id=post.author.id,
         content_id=content_id,
         content_type=content_type
       )

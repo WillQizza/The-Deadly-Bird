@@ -3,6 +3,8 @@ from django.urls import reverse
 from identity.models import InboxMessage
 from deadlybird.base_test import BaseTestCase
 import json
+from identity.serializers import AuthorSerializer
+from likes.models import Like
 
 # Create your tests here.
 class AuthenticationTest(BaseTestCase):
@@ -138,15 +140,20 @@ class InboxMessageTests(BaseTestCase):
 
   def test_inbox_post(self):
     """
-    Emulate adding sending a random post to Author0's inbox
+    Emulate adding sending a random like to Author0's inbox
     """
     url = reverse('inbox', kwargs={
       "author_id": self.authors[0].id 
     })
-    post = self.posts[0]
+    
+    post = self.create_post(self.authors[0].id)
+
     request_body = {
-      "content_type": InboxMessage.ContentType.POST,
-      "content_id": post.id
+      "@context": "...",
+      "summary": "Summary",
+      "type": "Like",
+      "author": AuthorSerializer(self.authors[1]).data,
+      "object": post.id
     }
     
     response = self.client.post(url, data=json.dumps(request_body), content_type='application/json')

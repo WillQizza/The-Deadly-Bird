@@ -1,6 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 from posts.models import Post
+from likes.models import Like
 from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
 
@@ -62,8 +63,10 @@ class InboxMessageSerializer(serializers.Serializer):
       serializer = FollowRequestSerializer(instance=request)
       return serializer.data
     elif instance.content_type == InboxMessage.ContentType.LIKE:
-      # TODO: implement like 
-      pass
+      from likes.serializers import LikeSerializer
+      like = Like.objects.get(id=instance.content_id)
+      serializer = LikeSerializer(instance=like)
+      return serializer.data
     elif instance.content_type == InboxMessage.ContentType.COMMENT:
       pass
 

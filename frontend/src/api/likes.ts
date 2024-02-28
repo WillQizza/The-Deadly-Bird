@@ -1,6 +1,8 @@
 import { baseURL } from "../constants";
 import { LikesResponse } from "./types";
 import { apiRequest } from "../utils/request";
+import { apiGetAuthor } from "./authors";
+import { getUserId } from "../utils/auth";
 
 /**
  * @description function to retreive the posts from an author
@@ -38,10 +40,21 @@ export const apiGetCommentLikes = async (
  */
 export const apiCreateLike = async (
     authorID: string,
-    postId: string
+    postID: string
 ): Promise<any> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postId}/likes`, {
-        method: "POST"
+    const ourAuthor = (await apiGetAuthor(getUserId()))!;
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/inbox/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "summary": `${ourAuthor.displayName} Likes your post`,
+            "type": "Like",
+            "author": ourAuthor,
+            "object": postID
+        })
     });    
     const data: any = await response.json(); 
     return data;

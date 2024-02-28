@@ -79,9 +79,9 @@ const Inbox = () => {
         // TODO: Implement 
         return (
             <Card key={message+idx} className="mb-2">
-                <Card.Header>Follow Request</Card.Header>
+                <Card.Header>Like</Card.Header>
                 <Card.Body>
-                    <Card.Text>Liked your post!</Card.Text> 
+                    <Card.Text>{message.summary}</Card.Text> 
                 </Card.Body>
             </Card>
         );
@@ -101,7 +101,7 @@ const Inbox = () => {
 
     const renderCard = (message:any, idx: number) => {
         switch (message.type) {
-            case 'like':
+            case 'Like':
                 return renderLikeCard(message, idx);
             case 'comment':
                 return renderCommentCard(message, idx);

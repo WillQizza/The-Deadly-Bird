@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Author } from "../../api/types";
-import { getAuthors } from "../../api/authors";
+import { apiGetAuthors } from "../../api/authors";
 import styles from "./ExploreView.module.css";
 import AuthorCarousel from "./AuthorCarousel";
 import { apiGetFollowing } from "../../api/following";
@@ -18,7 +18,7 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
     const [pageSize, setPageSize] = useState<number>(5);
 
     const fetchSetAuthors = async (page: number) => {
-        const response = await getAuthors(page, pageSize);
+        const response = await apiGetAuthors(page, pageSize);
         setExploreAuthors(response.items);
         setIsNextPageAvailable(response.items.length === pageSize);
     };

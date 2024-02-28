@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Page from "../../components/layout/Page";
 import SettingsForm from "../../components/settings/SettingsForm";
-import { getAuthor } from "../../api/authors";
+import { apiGetAuthor } from "../../api/authors";
 import { getUserId } from "../../utils/auth";
 import { Author } from "../../api/types";
 
@@ -11,7 +11,7 @@ const SettingsPage: React.FC = () => {
   const [author, setAuthor] = useState<Author>();
 
   useEffect(() => {
-    getAuthor(getUserId()).then(author => {
+    apiGetAuthor(getUserId()).then(author => {
       if (author) {
         setAuthor(author);
       }
