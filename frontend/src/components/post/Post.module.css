@@ -45,7 +45,8 @@
 
 .postSubInfo {
     display: flex;
-    justify-content: space-around;
+    gap: 10px;
+    flex-direction: column;
 }
 
 .postSubInfoItem {
