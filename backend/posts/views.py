@@ -52,6 +52,17 @@ def posts(request: HttpRequest, author_id: str):
         "message": "Required field missing."
       }, status=400)
     
+    # Check that the request body contains valid data
+    if (not 0 < len(request.POST["title"]) <= 255) \
+      or (not 0 < len(request.POST["description"]) <= 255) \
+      or (not 0 < len(request.POST["content"]) <= 255) \
+      or (not request.POST["contentType"] in Post.ContentType.values) \
+      or (not request.POST["visibility"] in Post.Visibility.values):
+      return Response({
+        "error": True,
+        "message": "Request body does not match required schema."
+      }, status=400)
+    
     # Check that we are who we say we are
     if (not "id" in request.session) \
       or (request.session["id"] != author_id):
@@ -116,7 +127,7 @@ def post(request: HttpRequest, author_id: str, post_id: str):
       return Response({"error": False, "message": "post deleted"}, status=204)
     except Exception as e:
       print(e)
-      return Response({"error": True, "message": "Server errror, failed to delete"}, status=500)
+      return Response({"error": True, "message": "Server error, failed to delete"}, status=500)
 
   elif request.method == "PUT":
     # Edit a post
@@ -129,6 +140,17 @@ def post(request: HttpRequest, author_id: str, post_id: str):
       return Response({
         "error": True,
         "message": "Required field missing."
+      }, status=400)
+    
+    # Check that the request body contains valid data
+    if (not 0 < len(request.POST["title"]) <= 255) \
+      or (not 0 < len(request.POST["description"]) <= 255) \
+      or (not 0 < len(request.POST["content"]) <= 255) \
+      or (not request.POST["contentType"] in Post.ContentType.values) \
+      or (not request.POST["visibility"] in Post.Visibility.values):
+      return Response({
+        "error": True,
+        "message": "Request body does not match required schema."
       }, status=400)
     
     # Check that we are who we say we are

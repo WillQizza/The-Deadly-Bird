@@ -34,25 +34,53 @@ def author(request: HttpRequest, author_id: str):
     serializer = AuthorSerializer(author, context={ "id": our_user_id })
     return Response(serializer.data)
   else:
+    reqError = None
     author = Author.objects.get(id=request.session["id"])
+
     if ("displayName" in request.POST):
       new_display_name = request.POST["displayName"]
-      author.display_name = new_display_name
+      if (0 < len(new_display_name) < 255):
+        author.display_name = new_display_name
+      else:
+        reqError = "Invalid display name length"
+
     if "password" in request.POST:
       password = request.POST["password"]
       author.user.set_password(password)
+
     if "email" in request.POST:
       email = request.POST["email"]
-      author.user.email = email
+      if (0 < len(email) < 254):
+        author.user.email = email
+      else:
+        reqError = "Invalid email length"
+
     if "github" in request.POST:
       github = request.POST["github"]
-      author.github = github
+      if (0 < len(github) < 254):
+        author.github = github
+      else:
+        reqError = "Invalid github length"
+
     if "profileImage" in request.POST:
       profile_picture = request.POST["profileImage"]
-      author.profile_picture = profile_picture
+      if (0 < len(profile_picture) < 255):
+        author.profile_picture = profile_picture
+      else:
+        reqError = "Invalid profile picture length"
+
     if "bio" in request.POST:
       bio = request.POST["bio"]
-      author.bio = bio
+      if (0 < len(bio) < 255):
+        author.bio = bio
+      else:
+        reqError = "Invalid bio length"
+
+    if (reqError is not None):
+      return Response({
+        "error": True,
+        "message": reqError
+      }, status=400)
 
     author.user.save()
     author.save()
@@ -109,6 +137,14 @@ def register(request: HttpRequest):
   username = request.POST["username"]
   password = request.POST["password"]
   email = request.POST["email"]
+
+  # Check field lengths
+  if (not 0 < len(request.POST["username"]) < 150) \
+    or (not 0 < len(request.POST["email"] < 254)):
+    return Response({
+      "error": True,
+      "message": "Invalid credential length"
+    }, status=400)
 
   # Check if an user already exists with that username
   try:
