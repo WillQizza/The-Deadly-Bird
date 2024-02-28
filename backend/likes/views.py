@@ -5,21 +5,20 @@ from .models import Like
 from posts.models import Post, Comment
 from rest_framework.response import Response
 from rest_framework import serializers
-from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
-from .serializers import LikeSerializer
+from .serializers import LikeSerializer, APIDocsLikeManySerializer
 from identity.models import InboxMessage
 
 @extend_schema(
         responses={
-            404: inline_serializer("CommentLikes404", fields={ "message": serializers.CharField() }),
-            200: generate_pagination_schema("likes", LikeSerializer(many=True))
+            404: GenericErrorSerializer,
+            200: APIDocsLikeManySerializer
         },
         parameters=[
             OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
             OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id to retrieve comments from"),
-            OpenApiParameter("comment_id", type=str, location=OpenApiParameter.PATH, required=True, description="Comment id to retrieve likes from"),
-            *generate_pagination_query_schema()
+            OpenApiParameter("comment_id", type=str, location=OpenApiParameter.PATH, required=True, description="Comment id to retrieve likes from")
         ]
 )
 @api_view(["GET"])
@@ -36,11 +35,12 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     
     if author_post is None:
         return Response({
+            "error": True,
             "message": "Author post not Found"
         }, 404)
     
     # Get comment and its likes
-    comment = Comment.objects.filter(post_id=author_post.id, author_id=author_id)\
+    comment = Comment.objects.filter(id=comment_id)\
         .first()
 
     likes = Like.objects.all()\
@@ -49,16 +49,9 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
         .order_by("id")
     
     # Paginate and return serialized result
-    paginator = Pagination("likes")
-    likes_page = paginator.paginate_queryset(likes, request)
-    serialized_likes = LikeSerializer(likes_page, many=True)
+    serialized_likes = LikeSerializer(likes, many=True)
+    return serialized_likes.data
 
-    return paginator.get_paginated_response(serialized_likes.data)
-
-LikePostErrorSerializer = inline_serializer("LikePostError", fields={ 
-            "error": serializers.BooleanField(default=True), 
-            "message": serializers.CharField() 
-        })
 @extend_schema(
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
@@ -67,24 +60,20 @@ LikePostErrorSerializer = inline_serializer("LikePostError", fields={
 )
 @extend_schema(
     methods=["GET"],
-    responses=generate_pagination_schema("likes", LikeSerializer(many=True)),
+    responses=APIDocsLikeManySerializer,
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
         OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id to retrieve likes from"),
-        *generate_pagination_query_schema()
     ]
 )
 @extend_schema(
     methods=["POST"],
     request=None,
     responses={
-        200: inline_serializer("LikePostSuccess", fields={ 
-            "error": serializers.BooleanField(default=False), 
-            "message": serializers.CharField() 
-        }),
-        404: LikePostErrorSerializer,
-        409: LikePostErrorSerializer,
-        500: LikePostErrorSerializer,
+        200: GenericSuccessSerializer,
+        404: GenericErrorSerializer,
+        409: GenericErrorSerializer,
+        500: GenericErrorSerializer,
     }
 )
 @api_view(["GET", "POST"])
@@ -102,6 +91,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
 
         if author_post is None:
             return Response({
+                "error": True,
                 "message": "author post not Found"
             }, 404)
         
@@ -111,12 +101,9 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
             .filter(content_id=author_post.id)\
             .order_by('id')
 
-        # Paginate and return serialized results
-        paginator = Pagination("likes")
-        likes_page = paginator.paginate_queryset(likes, request)
-        serialized_likes = LikeSerializer(likes_page, many=True)
-
-        return paginator.get_paginated_response(serialized_likes.data) 
+        # return serialized results
+        serialized_likes = LikeSerializer(likes, many=True)
+        return Response(serialized_likes.data)
 
     if request.method == "POST":
         # author_id likes post_id
@@ -155,10 +142,12 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
             
 
 @extend_schema(
-        responses=generate_pagination_schema("likes", LikeSerializer(many=True)),
+        responses=inline_serializer("Liked", fields={
+            "type": serializers.CharField(default="liked", read_only=True),
+            "items": APIDocsLikeManySerializer
+        }),
         parameters=[
-            OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to lookup likes of"),
-            *generate_pagination_query_schema()
+            OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to lookup likes of")
         ]
 )
 @api_view(["GET"])
@@ -174,9 +163,10 @@ def liked(request: HttpRequest, author_id: int):
             .order_by("id")
         
         # Paginate and return serialized results
-        paginator = Pagination("likes")
-        liked_page = paginator.paginate_queryset(liked, request)
-        serialized_liked = LikeSerializer(liked_page, many=True)
+        serialized_liked = LikeSerializer(liked, many=True)
 
-        return paginator.get_paginated_response(serialized_liked.data)
+        return Response({
+            "type": "liked",
+            "items": serialized_liked.data
+        })
     

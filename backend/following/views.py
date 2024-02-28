@@ -7,7 +7,8 @@ from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
 from .serializers import FollowRequestSerializer, FollowingSerializer
 from identity.models import Author, InboxMessage
-from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from deadlybird.pagination import Pagination, generate_pagination_query_schema
+from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 
 @extend_schema(
@@ -92,14 +93,6 @@ def followers(request, author_id: str):
         serializer = FollowingSerializer(authors)
         return Response(serializer.data)  
 
-ModifyFollowersSuccessSerializer = inline_serializer("ModifyFollowersSuccess", fields={
-    "error": serializers.BooleanField(default=False),
-    "message": serializers.CharField()
-})
-ModifyFollowersErrorSerializer = inline_serializer("ModifyFollowersError", fields={
-    "error": serializers.BooleanField(default=True),
-    "message": serializers.CharField()
-})
 @extend_schema(
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with"),
@@ -109,26 +102,26 @@ ModifyFollowersErrorSerializer = inline_serializer("ModifyFollowersError", field
 @extend_schema(
     methods=["GET"],
     responses={
-        400: ModifyFollowersErrorSerializer,
-        404: ModifyFollowersErrorSerializer,
+        400: GenericErrorSerializer,
+        404: GenericErrorSerializer,
         200: FollowingSerializer
     }
 )
 @extend_schema(
     methods=["DELETE"],
     responses={
-        400: ModifyFollowersErrorSerializer,
-        404: ModifyFollowersErrorSerializer,
-        204: ModifyFollowersSuccessSerializer
+        400: GenericErrorSerializer,
+        404: GenericErrorSerializer,
+        204: GenericSuccessSerializer
     }
 )
 @extend_schema(
     methods=["PUT"],
     request=None,
     responses={
-        400: ModifyFollowersErrorSerializer,
-        409: ModifyFollowersErrorSerializer,
-        201: ModifyFollowersSuccessSerializer
+        400: GenericErrorSerializer,
+        409: GenericErrorSerializer,
+        201: GenericSuccessSerializer
     }
 )
 @api_view(['DELETE', 'PUT', 'GET'])
@@ -193,14 +186,6 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             return Response({"error": True, "message": "Follower does not exist."}, status=404)
         return Response({"error": True, "message": "Unexpected error occurred."}, status=400)
 
-RequestFollowersSuccessSerializer = inline_serializer("RequestFollowersSuccess", fields={
-    "error": serializers.BooleanField(default=False),
-    "message": serializers.CharField()
-})
-RequestFollowersErrorSerializer = inline_serializer("RequestFollowersError", fields={
-    "error": serializers.BooleanField(default=True),
-    "message": serializers.CharField()
-})
 @extend_schema(
     parameters=[
         OpenApiParameter("local_author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with"),
@@ -211,18 +196,18 @@ RequestFollowersErrorSerializer = inline_serializer("RequestFollowersError", fie
     methods=["POST"],
     request=None,
     responses={
-        400: RequestFollowersErrorSerializer,
-        403: RequestFollowersErrorSerializer,
-        404: RequestFollowersErrorSerializer,
-        409: RequestFollowersErrorSerializer,
-        201: RequestFollowersSuccessSerializer,
-        500: RequestFollowersErrorSerializer
+        400: GenericErrorSerializer,
+        403: GenericErrorSerializer,
+        404: GenericErrorSerializer,
+        409: GenericErrorSerializer,
+        201: GenericSuccessSerializer,
+        500: GenericErrorSerializer
     }
 )
 @extend_schema(
     methods=["GET"],
     responses={
-        404: RequestFollowersErrorSerializer,
+        404: GenericErrorSerializer,
         200: FollowRequestSerializer
     }
 )
