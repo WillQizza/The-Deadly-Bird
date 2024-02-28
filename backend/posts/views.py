@@ -53,11 +53,10 @@ def posts(request: HttpRequest, author_id: str):
       }, status=400)
     
     # Check that the request body contains valid data
-    if (not 0 < len(request.POST["title"]) <= 255) \
-      or (not 0 < len(request.POST["description"]) <= 255) \
-      or (not 0 < len(request.POST["content"]) <= 255) \
-      or (not request.POST["contentType"] in Post.ContentType.values) \
-      or (not request.POST["visibility"] in Post.Visibility.values):
+    if not (0 < len(request.POST["title"]) <= 255) \
+      or not (0 < len(request.POST["description"]) <= 255) \
+      or not (request.POST["contentType"] in Post.ContentType.values) \
+      or not (request.POST["visibility"] in Post.Visibility.values):
       return Response({
         "error": True,
         "message": "Request body does not match required schema."
@@ -143,11 +142,10 @@ def post(request: HttpRequest, author_id: str, post_id: str):
       }, status=400)
     
     # Check that the request body contains valid data
-    if (not 0 < len(request.POST["title"]) <= 255) \
-      or (not 0 < len(request.POST["description"]) <= 255) \
-      or (not 0 < len(request.POST["content"]) <= 255) \
-      or (not request.POST["contentType"] in Post.ContentType.values) \
-      or (not request.POST["visibility"] in Post.Visibility.values):
+    if not (0 < len(request.POST["title"]) <= 255) \
+      or not (0 < len(request.POST["description"]) <= 255) \
+      or not (request.POST["contentType"] in Post.ContentType.values) \
+      or not (request.POST["visibility"] in Post.Visibility.values):
       return Response({
         "error": True,
         "message": "Request body does not match required schema."
@@ -180,7 +178,6 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     # Update the post
     post.title = request.POST["title"]
     post.description = request.POST["description"]
-    post.content = request.POST["content"]
     post.content_type = request.POST["contentType"]
     post.visibility = request.POST["visibility"]
     post.save()
