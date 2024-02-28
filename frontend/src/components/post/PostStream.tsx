@@ -20,13 +20,14 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const currentPage = useRef(1);
     const pageSize = 5;
 
-    // function to add posts to current posts
+    /** Function to add posts to current posts */
     const addPosts = (newPosts: React.ReactElement[]) => {
         setPosts([...posts, ...newPosts]);
     };
 
-    // function to generate posts (and wait until last post is reached to generate more)
+    /** Function to generate posts (and wait until last post is reached to generate more) */
     const generatePosts = () => {
+        // Handle getting author posts
         if (props.type === PostStreamTy.Author && props.id) {
             apiGetAuthorPosts(props.id, currentPage.current, pageSize)
                 .then(async response => {
@@ -37,6 +38,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         addPosts(newPosts);
                     }
                 });
+        // Handle getting public posts
         } else if (props.type === PostStreamTy.Public) {
             apiGetPosts(APIPostStreamTy.Public, currentPage.current, pageSize)
                 .then(async response => {
@@ -47,6 +49,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         addPosts(newPosts);
                     }
                 });
+        // Handle getting following posts
         } else if (props.type === PostStreamTy.Following) {
             apiGetPosts(APIPostStreamTy.Following, currentPage.current, pageSize)
                 .then(async response => {
@@ -98,6 +101,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
         }
     }, [posts])
 
+    /** Post stream */
     return (
         <div className={styles.postStream}>
             {posts.map((post, index) => (

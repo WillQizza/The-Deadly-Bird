@@ -18,15 +18,17 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
     const curAuthorId : string = getUserId()!; 
     let navigate = useNavigate();
 
+    /** Function handling logout */
     const logOut = () => {
         // TODO: Handle logout
         navigate("/");
     };
 
+    /** Page */
     return (
         <div id={styles.root}>
-
             <div id={styles.contentRoot}>
+                {/** Navigation bar */}
                 <div id={styles.navigation}>
                     <Navigation items={[
                         { name: "Home", icon: House, path: "/home" },
@@ -36,15 +38,18 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
                     ]} selected={selected} />
                 </div>
                 <div id={styles.contentAndUpperNav}>
+                    {/** Toolbar containing inbox and logout buttons */}
                     <div id={styles.thinNavbar}>
                         <button onClick={() => {toggleSidebar()}}>Inbox</button>
                         <button onClick={() => {logOut()}}>Log Out</button>
                     </div>
+                    {/** Page content */}
                     <div className={`${styles.content} ${!overflowScrollOff ? styles.overflowScroll : ''}`}>
                         {children}
                     </div>
                 </div>
             </div>
+            {/** Inbox */}
             <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Inbox</Offcanvas.Title>

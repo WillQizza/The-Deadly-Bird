@@ -12,6 +12,7 @@ interface ImageUploadProps {
     setType: React.Dispatch<React.SetStateAction<string>>
 }
 
+/** Function for converting a file to base 64 binary */
 const fileToBase64 = async (file: File) => {
     const blob = new Uint8Array(await file.arrayBuffer());
     
@@ -37,7 +38,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
     const [image, setImage] = useState<string>(value || placeholder);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    /** function for handling file upload */
+    /** Function for handling file upload */
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             // read the file
@@ -84,9 +85,11 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
     return (
         <>
             <Form.Group className={styles.formGroup}>
+                {/** Label */}
                 <Form.Label className={styles.formLabel}>
                     Content
                 </Form.Label>
+                {/** Image preview */}
                 <div
                     className={styles.imgPreviewContainer}
                     onClick={(e) => {
@@ -97,6 +100,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                 >
                     <img src={image} alt={`${image} (preview unavailable)`}/>
                 </div>
+                {/** Image upload */}
                 <Form.Control
                     type='file'
                     accept='.png, .jpg, .jpeg'
@@ -104,6 +108,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                     onChange={handleUpload}
                     isInvalid={!!formErrors[formErrorKey]}
                 />
+                {/** Error message */}
                 <Form.Control.Feedback type='invalid'>
                     {formErrors.content}
                 </Form.Control.Feedback>

@@ -16,6 +16,7 @@ const Inbox = () => {
     const [pageSize, setPageSize] = useState<number>(10);
     const curAuthorId = getUserId();
     
+    /** Gets the user's inbox */
     useEffect(() => {
         const getMessages = async () => {
             try {
@@ -30,7 +31,7 @@ const Inbox = () => {
         getMessages();
     }, []);
 
-    
+    /** Function for rendering post notification */
     const renderPostCard = (message: any, idx: number) => {
         return (
             <Card key={message+idx} className="mb-2">
@@ -42,25 +43,31 @@ const Inbox = () => {
         );
     }
 
+    /** Function for rendering follow request */
     const renderRequestCard = (message: any, idx: number) => {
 
+        /** Function for handling acceptance of follow request */
         const followAccept = (author_id: string, target_author_id: string) => {
             apiPutFollower(target_author_id, author_id);
             setInboxMessages(prevMessages => prevMessages.filter((_, index) => index !== idx)); 
         }
 
+        /** Function for handling rejection of follow request */
         const followReject = (author_id: string, target_author_id: string) => {
             // TODO: delete follow request 
             setInboxMessages(prevMessages => prevMessages.filter((_, index) => index !== idx)); 
         }
 
+        /** Follow request card */
         return (
             <Card key={message+idx} className="mb-2">
                 <Card.Header>Follow Request</Card.Header>
                 <Card.Body>
+                    {/** Follow request information */}
                     <Card.Text>type: {message.type}</Card.Text>
                     <Card.Text>from: {message.author.displayName}</Card.Text>
                     <Card.Text>to: {message.target_author.displayName}</Card.Text>
+                    {/** Accept and Reject buttons */}
                     <div className={styles.postButtons}>
                         <Allow 
                             className={`${styles.postButton} ${styles.postShare}`} 
@@ -75,6 +82,7 @@ const Inbox = () => {
         );    
     }
     
+    /** Function for rendering like notification */
     const renderLikeCard = (message: any, idx: number) => {
         // TODO: Implement 
         return (
@@ -87,6 +95,7 @@ const Inbox = () => {
         );
     }
     
+    /** Function for rendering comment like notification */
     const renderCommentCard = (message: any, idx: number) => {
         // TODO: Implement 
         return (
@@ -99,6 +108,7 @@ const Inbox = () => {
         );
     }
 
+    /** Function for rendering an inbox card */
     const renderCard = (message:any, idx: number) => {
         switch (message.type) {
             case 'like':
@@ -114,14 +124,17 @@ const Inbox = () => {
         }
     };
 
+    /** Inbox */
     return (
         <div className={styles.cardContainer}>
+            {/** Render inbox cards */}
             <div className={styles.cardContainer}>
                 {inboxMessages.map((message, idx) => (
                     renderCard(message, idx)
                 ))}
             </div>
             {(inboxMessages.length === 0) ? "Empty ": ""}
+            {/** Clear inbox button */}
             <button className="btn btn-warning" onClick={async () => {
                 apiClearInbox(curAuthorId);
                 setInboxMessages([]);

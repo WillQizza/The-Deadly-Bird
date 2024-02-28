@@ -19,11 +19,13 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [registerMessage, setRegisterMessage] = useState<string>('');
 
+    /** Function for handling form submission */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (validateForm()) {
             console.log("Submit!", baseURL);
             
+            // send registration request
             const formData = new URLSearchParams({
                 username: username,
                 email: email,
@@ -38,6 +40,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                 body: formData
             });
             
+            // handle response
             setErrors({});
             if (response.status === 201) {
                 props.setShowLogin(true);
@@ -49,6 +52,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
         }
     };
 
+    /** Function to validate form input */
     const validateForm = () => {
         let isValid = true;
         const newErrors: { [key: string]: string } = {};
@@ -82,15 +86,19 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
         return isValid;
     };
 
+    /** Registration page */
     return (
         <div className={styles.formContainer}>
+            {/** Alert warning for request errors */}
             {registerMessage && (
                 <div className="alert alert-warning" role="alert">
                     {registerMessage}
                 </div>
             )}
+            {/** Form */}
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicEmail" className={styles.formGroup}>
+                    {/** Username input */}
                     <Form.Label className={styles.formLabel}>Username</Form.Label>
                     <Form.Control
                         type="text"
@@ -105,6 +113,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                     </Form.Control.Feedback>
                 </Form.Group>
 
+                {/** Email input */}
                 <Form.Group controlId="formBasicEmail" className={styles.formGroup}>
                     <Form.Label className={styles.formLabel}>Email</Form.Label>
                     <Form.Control
@@ -120,6 +129,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                     </Form.Control.Feedback>
                 </Form.Group>
 
+                {/** Password input */}
                 <Form.Group controlId="formBasicPassword" className={styles.formGroup}>
                     <Form.Label className={styles.formLabel}>Password</Form.Label>
                     <Form.Control
@@ -134,6 +144,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                         {errors.password}
                     </Form.Control.Feedback>
                 </Form.Group>
+                {/** Confirm password input */}
                 <Form.Group controlId="formConfirmPassword" className={styles.formGroup}>
                     <Form.Label className={styles.formLabel}>Confirm Password</Form.Label>
                     <Form.Control
@@ -149,6 +160,7 @@ const RegisterForm: React.FC<RegisterProps> = (props: RegisterProps) => {
                     </Form.Control.Feedback>
                 </Form.Group>
  
+                {/** Sign up button */}
                 <Button variant="primary" type="submit"
                     className={styles.btnPrimary}
                 >

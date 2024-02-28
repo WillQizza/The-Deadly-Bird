@@ -22,12 +22,15 @@ const FormTextbox: React.FC<FormTextboxProps> = (props: FormTextboxProps) => {
         textarea = false
     } = props;
 
+    /** Form textbox */
     return (
         <>
             <Form.Group className={styles.formGroup}>
+                {/** Label */}
                 <Form.Label className={styles.formLabel}>
                     {label}
                 </Form.Label>
+                {/** Input */}
                 <Form.Control
                     type='text'
                     as={ textarea ? 'textarea' : 'input' }
@@ -37,6 +40,7 @@ const FormTextbox: React.FC<FormTextboxProps> = (props: FormTextboxProps) => {
                     isInvalid={!!formErrors[formErrorKey]}
                     className={styles.formControl}
                 />
+                {/** Error message */}
                 <Form.Control.Feedback type='invalid'>
                     {formErrors[formErrorKey]}
                 </Form.Control.Feedback>

@@ -47,10 +47,12 @@ const Post: React.FC<PostResponse> = (props: PostResponse) => {
             break;
     }
 
+    /** Function handling post like */
     const handleLike = async () => {
         console.log("Liked!");
     }
 
+    /** Post */
     return (
         <div className={styles.postContainer}>
             {/* Header */}
