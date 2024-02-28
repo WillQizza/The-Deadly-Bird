@@ -5,6 +5,7 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Author, InboxMessage
+from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
@@ -34,16 +35,13 @@ def authors(request: HttpRequest):
   serializer = AuthorSerializer(page, many=True, context={ "id": our_user_id })
   return paginator.get_paginated_response(serializer.data)
 
-AuthorsFailResponseSerializer = inline_serializer("AuthorsFailResponse", fields={
-  "message": serializers.CharField()
-})
 @extend_schema(
     methods=["GET", "PUT"],
     responses={
       200: AuthorSerializer(),
-      401: AuthorsFailResponseSerializer,
-      404: AuthorsFailResponseSerializer,
-      403: AuthorsFailResponseSerializer
+      401: GenericErrorSerializer,
+      404: GenericErrorSerializer,
+      403: GenericErrorSerializer
     },
     parameters=[
       OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id to interact with")
@@ -71,6 +69,7 @@ def author(request: HttpRequest, author_id: str):
       author = Author.objects.get(id=author_id)
     except Author.DoesNotExist:
       return Response({
+        "error": True,
         "message": "No author found"
       }, status=404)
 
@@ -83,6 +82,7 @@ def author(request: HttpRequest, author_id: str):
     logged_in = validate_login_session(request)
     if not logged_in:
       return Response({
+        "error": True,
         "message": "Not Authenticated"
       }, status=401)
 
@@ -91,11 +91,13 @@ def author(request: HttpRequest, author_id: str):
       author = Author.objects.get(id=author_id)
     except Author.DoesNotExist:
       return Response({
+        "error": True,
         "message": "No author found"
       }, status=404)
     
     if author.id != request.session["id"]:
       return Response({
+        "error": True,
         "message": "Cannot modify a different author"
       }, status=403)
 
@@ -223,10 +225,6 @@ def login(request: HttpRequest):
     "id": request.session["id"]
   })
 
-RegistrationResponseErrorSerializer = inline_serializer("RegistrationError", fields={
-  "error": serializers.BooleanField(),
-  "message": serializers.CharField()
-})
 @extend_schema(
     request=inline_serializer("RegistrationDetails", fields={
       "username": serializers.CharField(),
@@ -238,8 +236,8 @@ RegistrationResponseErrorSerializer = inline_serializer("RegistrationError", fie
         "error": serializers.BooleanField(default=False),
         "message": serializers.CharField()
       }),
-      400: RegistrationResponseErrorSerializer,
-      409: RegistrationResponseErrorSerializer
+      400: GenericErrorSerializer,
+      409: GenericErrorSerializer
     }
 )
 @api_view(["POST"])
@@ -303,14 +301,6 @@ def register(request: HttpRequest):
   }, status=201)
 
 
-InboxFailureResponseSerializer = inline_serializer("InboxDeleteFailureResponse", fields={
-  "error": serializers.BooleanField(default=True),
-  "message": serializers.CharField()
-})
-InboxSuccessResponseSerializer = inline_serializer("InboxDeleteSuccessResponse", fields={
-  "error": serializers.BooleanField(default=False),
-  "message": serializers.CharField()
-})
 @extend_schema(
   methods=["GET"],
   responses=generate_inbox_pagination_schema(),
@@ -329,8 +319,8 @@ InboxSuccessResponseSerializer = inline_serializer("InboxDeleteSuccessResponse",
     "content_id": serializers.CharField()
   }),
   responses={
-    400: InboxFailureResponseSerializer,
-    201: InboxSuccessResponseSerializer
+    400: GenericErrorSerializer,
+    201: GenericSuccessSerializer
   }
 )
 @extend_schema(
@@ -339,8 +329,8 @@ InboxSuccessResponseSerializer = inline_serializer("InboxDeleteSuccessResponse",
     OpenApiParameter(name="author_id", location=OpenApiParameter.PATH, description="The author id of the inbox to interact with")
   ],
   responses={
-    204: InboxSuccessResponseSerializer,
-    404: InboxFailureResponseSerializer
+    204: GenericSuccessSerializer,
+    404: GenericErrorSerializer
   }
 )
 @api_view(["GET", "POST", "DELETE"])

@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import serializers
+from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
 from following.util import is_friends
@@ -12,14 +13,6 @@ from .models import Post, Author, Following
 from django.db.models import Q
 from .util import send_post_to_inboxes
 
-PostCreationErrorSerializer = inline_serializer("PostCreationError", fields={
-  "error": serializers.BooleanField(default=True),
-  "message": serializers.CharField()
-})
-PostCreationSuccessSerializer = inline_serializer("PostCreationSuccess", fields={
-  "error": serializers.BooleanField(default=False),
-  "message": serializers.CharField()
-})
 PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields={
   "title": serializers.CharField(),
   "description": serializers.CharField(),
@@ -45,9 +38,9 @@ PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields=
   methods=["POST"],
   request=PostCreationPayloadSerializer,
   responses={
-    201: PostCreationSuccessSerializer,
-    400: PostCreationErrorSerializer,
-    401: PostCreationErrorSerializer
+    201: GenericSuccessSerializer,
+    400: GenericErrorSerializer,
+    401: GenericErrorSerializer
   }
 )
 @api_view(["GET", "POST"])
@@ -133,14 +126,6 @@ def posts(request: HttpRequest, author_id: str):
       "message": "Post created successfully."
     }, status=201)
 
-PostActionErrorSerializer = inline_serializer("PostError", fields={
-  "error": serializers.BooleanField(default=True),
-  "message": serializers.CharField()
-})
-PostActionSuccessSerializer = inline_serializer("PostSuccess", fields={
-  "error": serializers.BooleanField(default=False),
-  "message": serializers.CharField()
-})
 @extend_schema(
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
@@ -150,25 +135,25 @@ PostActionSuccessSerializer = inline_serializer("PostSuccess", fields={
 @extend_schema(
     methods=["GET"],
     responses={
-      404: PostActionErrorSerializer,
+      404: GenericErrorSerializer,
       200: PostSerializer()
     }
 )
 @extend_schema(
   methods=["DELETE"],
   responses={
-    404: PostActionErrorSerializer,
-    500: PostActionErrorSerializer,
-    204: PostActionSuccessSerializer
+    404: GenericErrorSerializer,
+    500: GenericErrorSerializer,
+    204: GenericSuccessSerializer
   }
 )
 @extend_schema(
   methods=["PUT"],
   request=PostCreationPayloadSerializer,
   responses={
-    200: PostCreationSuccessSerializer,
-    400: PostCreationErrorSerializer,
-    401: PostCreationErrorSerializer
+    200: GenericSuccessSerializer,
+    400: GenericErrorSerializer,
+    401: GenericErrorSerializer
   }
 )
 @api_view(["GET", "DELETE", "PUT"])
@@ -274,10 +259,6 @@ def post(request: HttpRequest, author_id: str, post_id: str):
       "message": "Post updated successfully."
     }, status=200)
 
-PostImageFetchFailureSerializer = inline_serializer("PostImageFetchFail", fields={
-  "error": serializers.BooleanField(default=True),
-  "message": serializers.CharField()
-})
 @extend_schema(
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
@@ -285,8 +266,8 @@ PostImageFetchFailureSerializer = inline_serializer("PostImageFetchFail", fields
     ],
     responses={
       (200, "image/*"): OpenApiTypes.BINARY,
-      404: PostImageFetchFailureSerializer,
-      400: PostImageFetchFailureSerializer
+      404: GenericErrorSerializer,
+      400: GenericErrorSerializer
     }
 )
 @api_view(["GET"])
@@ -317,10 +298,7 @@ def post_image(_: HttpRequest, author_id: str, post_id: str):
     ],
     responses={
       200: generate_pagination_schema("posts", PostSerializer(many=True)),
-      404: inline_serializer("InvalidStreamType", fields={ 
-        "error": serializers.BooleanField(default=True),
-        "message": serializers.CharField()
-      })
+      404: GenericErrorSerializer
     }
 )
 @api_view(["GET"])

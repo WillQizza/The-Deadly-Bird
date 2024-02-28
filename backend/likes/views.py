@@ -6,13 +6,14 @@ from posts.models import Post, Comment
 from rest_framework.response import Response
 from rest_framework import serializers
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .serializers import LikeSerializer
 from identity.models import InboxMessage
 
 @extend_schema(
         responses={
-            404: inline_serializer("CommentLikes404", fields={ "message": serializers.CharField() }),
+            404: GenericErrorSerializer,
             200: generate_pagination_schema("likes", LikeSerializer(many=True))
         },
         parameters=[
@@ -36,6 +37,7 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     
     if author_post is None:
         return Response({
+            "error": True,
             "message": "Author post not Found"
         }, 404)
     
@@ -55,10 +57,6 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
 
     return paginator.get_paginated_response(serialized_likes.data)
 
-LikePostErrorSerializer = inline_serializer("LikePostError", fields={ 
-            "error": serializers.BooleanField(default=True), 
-            "message": serializers.CharField() 
-        })
 @extend_schema(
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
@@ -78,13 +76,10 @@ LikePostErrorSerializer = inline_serializer("LikePostError", fields={
     methods=["POST"],
     request=None,
     responses={
-        200: inline_serializer("LikePostSuccess", fields={ 
-            "error": serializers.BooleanField(default=False), 
-            "message": serializers.CharField() 
-        }),
-        404: LikePostErrorSerializer,
-        409: LikePostErrorSerializer,
-        500: LikePostErrorSerializer,
+        200: GenericSuccessSerializer,
+        404: GenericErrorSerializer,
+        409: GenericErrorSerializer,
+        500: GenericErrorSerializer,
     }
 )
 @api_view(["GET", "POST"])
@@ -102,6 +97,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
 
         if author_post is None:
             return Response({
+                "error": True,
                 "message": "author post not Found"
             }, 404)
         
