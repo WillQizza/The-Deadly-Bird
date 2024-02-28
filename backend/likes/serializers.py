@@ -33,15 +33,15 @@ class LikeSerializer(serializers.ModelSerializer):
 
 APIDocsLikeSerializer = inline_serializer("APILike", fields={
     "type": serializers.CharField(default="Like", read_only=True),
-    "@context":  serializers.SerializerMethodField(),
-    "summary":  serializers.SerializerMethodField(),
+    "@context":  serializers.CharField(),
+    "summary":  serializers.CharField(),
     "author": AuthorSerializer(),
     "object": serializers.CharField()
 })
 APIDocsLikeManySerializer = inline_serializer("APILike", fields={
     "type": serializers.CharField(default="Like", read_only=True),
-    "@context":  serializers.SerializerMethodField(),
-    "summary":  serializers.SerializerMethodField(),
+    "@context":  serializers.CharField(),
+    "summary":  serializers.CharField(),
     "author": AuthorSerializer(),
     "object": serializers.CharField()
 })
