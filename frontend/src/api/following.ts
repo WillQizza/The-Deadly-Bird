@@ -48,7 +48,7 @@ export const apiGetFollowing = async (
     }
     url.search = params.toString();
 
-    const response = await fetch(url.toString());
+    const response = await apiRequest(url.toString());
     const data = await response.json();
 
     return data; 
@@ -81,7 +81,7 @@ export const apiFollowRequest = async(
  */
 export const apiDeleteFollower = async (authorId: string, foreignAuthorId: string )
 : Promise<number> => {
-    const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "DELETE",
     });
     
@@ -95,7 +95,7 @@ export const apiDeleteFollower = async (authorId: string, foreignAuthorId: strin
  */
 export const apiPutFollower = async (authorId: string, foreignAuthorId: string)
 : Promise<number> => {
-    const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "PUT",
     });
     return response.status;
@@ -103,7 +103,7 @@ export const apiPutFollower = async (authorId: string, foreignAuthorId: string)
 
 export const apiGetFollower = async (authorId: string, foreignAuthorId: string)
 : Promise<any> => {
-    const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "GET",
     });
     if (!response.ok) {
@@ -115,7 +115,7 @@ export const apiGetFollower = async (authorId: string, foreignAuthorId: string)
 
 export const apiGetFollowRequest = async (authorId: string, foreignAuthorId: string)
 : Promise<any> => {
-    const response = await fetch(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "GET",
     });
     if (!response.ok) {

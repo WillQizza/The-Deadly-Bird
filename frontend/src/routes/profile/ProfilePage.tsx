@@ -92,6 +92,7 @@ const ProfilePage: React.FC = () => {
                         await apiDeleteFollower(authorId, curAuthorId)
                             .then(status => {
                                 if (status && status === 204) {
+                                    setFollowerCount(followerCount - 1);
                                     setFollowState(FollowState.NOT_FOLLOWING);
                                 }
                             });
