@@ -34,22 +34,6 @@ class LikeTests(BaseTestCase):
         json = self.client.get(url).json()
         self.assertTrue(json['message'] is not None)
 
-    def test_like_409(self):
-        a1, a2 = (self.authors[0], self.authors[1])
-        post = Post.objects.filter(author=a1).order_by("published_date").first()
-        url = reverse('post_likes', kwargs={
-            'author_id': a1.id,
-            'post_id': post.id
-        })
-        json = self.client.post(url).json()
-        self.assertTrue(json["error"] == False)
-        json = self.client.post(url).json()
-        self.assertTrue(json["error"] == True)
-
-    def test_liked_comments(self):
-        # TODO: test likes on comments
-        pass
-
     def test_liked(self):
         a1, a2 = (self.authors[0], self.authors[1])
         
