@@ -14,14 +14,16 @@ from .util import send_post_to_inboxes
 def posts(request: HttpRequest, author_id: str):
   if request.method == "GET":
     # Retrieve author posts
+    # Create paginator
     paginator = Pagination("posts")
 
+    # Check if the person has access to friend posts
     can_see_friends = False
     if "id" in request.session:
       can_see_friends = (author_id == request.session["id"]) or \
                           is_friends(author_id, request.session["id"])
       
-    # Retrieve and serialize posts that should be shown
+    # Retrieve ordered posts that should be shown
     if can_see_friends:
       posts = Post.objects.all().filter(author=author_id)
 
@@ -34,7 +36,8 @@ def posts(request: HttpRequest, author_id: str):
       posts = Post.objects.all() \
                 .filter(author=author_id, visibility=Post.Visibility.PUBLIC) \
                 .order_by("-published_date")
-      
+    
+    # Paginate and serialize results
     posts_on_page = paginator.paginate_queryset(posts, request)
     serialized_posts = PostSerializer(posts_on_page, many=True)
 
@@ -82,6 +85,7 @@ def posts(request: HttpRequest, author_id: str):
       visibility=request.POST["visibility"]
     )
     
+    # Add post creation notification to relevant inboxes
     send_post_to_inboxes(post.id, author_id)
 
     return Response({
@@ -92,12 +96,13 @@ def posts(request: HttpRequest, author_id: str):
 @api_view(["GET", "DELETE", "PUT"])
 def post(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
+    # Check if the person has access to friend posts
     can_see_friends = False
     if "id" in request.session:
       can_see_friends = (author_id == request.session["id"]) or \
                           is_friends(author_id, request.session["id"])
       
-    # Retrieve and serialize post that should be shown
+    # Retrieve posts that should be shown
     try:
       if can_see_friends:
         post = Post.objects.get(id=post_id, author=author_id)
@@ -111,16 +116,20 @@ def post(request: HttpRequest, author_id: str, post_id: str):
         "error": True,
         "message": "Post not found."
       }, status=404)
-      
+    
+    # Return serialized result
     serialized_post = PostSerializer(post)
 
     return Response(serialized_post.data)
   elif request.method == "DELETE":
     # Delete a single post. Can be initiated by local or remote host.
     print("recieved delete:", author_id, post_id)
+    # Get post
     post = Post.objects.filter(id=post_id).first()
+    # Check if post exists
     if post is None:
       return Response({"error": True, "message": "post not found"}, status=404)
+    # Delete post
     try: 
       post.delete()
       return Response({"error": False, "message": "post deleted"}, status=204)
@@ -195,6 +204,7 @@ def post_image(_: HttpRequest, author_id: str, post_id: str):
 
 @api_view(["GET"])
 def post_stream(request: HttpRequest, stream_type: str):
+  # Public stream
   if stream_type == "public":
     paginator = Pagination("posts")
 
@@ -202,11 +212,14 @@ def post_stream(request: HttpRequest, stream_type: str):
     posts = Post.objects.all() \
       .filter(visibility=Post.Visibility.PUBLIC) \
       .order_by("-published_date")
-
+    
+    # Paginate and return serialized result
     posts_on_page = paginator.paginate_queryset(posts, request)
     serialized_posts = PostSerializer(posts_on_page, many=True)
 
     return paginator.get_paginated_response(serialized_posts.data)
+  
+  # Following stream
   elif stream_type == 'following':
     paginator = Pagination("posts")
 
@@ -224,11 +237,14 @@ def post_stream(request: HttpRequest, stream_type: str):
         .exclude(visibility=Post.Visibility.UNLISTED) \
         .exclude(visibility=Post.Visibility.FRIENDS, author__in=not_friends) \
         .order_by("-published_date")
-
+    
+    # Paginate and return serialized result
     posts_on_page = paginator.paginate_queryset(posts, request)
     serialized_posts = PostSerializer(posts_on_page, many=True)
 
     return paginator.get_paginated_response(serialized_posts.data)
+  
+  # Invalid stream
   else:
     return Response({
       "error": True,
