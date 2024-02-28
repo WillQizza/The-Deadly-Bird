@@ -289,7 +289,7 @@ def register(request: HttpRequest):
     id=id,
     user=created_user,
     display_name=created_user.username,
-    host=settings.SITE_HOST_URL,
+    host=generate_full_api_url(view="api"),
     profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })
   )
     

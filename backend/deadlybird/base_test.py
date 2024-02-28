@@ -11,6 +11,7 @@ from posts.models import Post, Comment
 from following.models import Following, FollowingRequest
 from django.contrib.auth.models import User
 from likes.models import Like
+from deadlybird.util import generate_full_api_url
 
 class BaseTestCase(TestCase):
 
@@ -35,7 +36,7 @@ class BaseTestCase(TestCase):
         authors = []
         for i in range(1, 11):
             user = User.objects.create_user(username=f'user{i}', password='password123')
-            author = Author.objects.create(user=user, display_name=f'user{i}', host=settings.SITE_HOST_URL)
+            author = Author.objects.create(user=user, display_name=f'user{i}', host=generate_full_api_url(view="api"))
             authors.append(author)
         return authors
 
@@ -117,7 +118,7 @@ class BaseTestCase(TestCase):
         default_password = password if password is not None else f"user{i}"
         
         user = User.objects.create_user(username=default_username, password=default_password)
-        author = Author.objects.create(user=user, display_name=default_username, host=settings.SITE_HOST_URL)
+        author = Author.objects.create(user=user, display_name=default_username, host=generate_full_api_url(view="api"),)
         self.authors.append(author)
 
         return author 
