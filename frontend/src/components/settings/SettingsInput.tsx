@@ -14,12 +14,14 @@ type SettingsInputOptions = {
 };
 
 const SettingsInput: React.FC<SettingsInputOptions> = options => {
+  /** Function for handling a change in the input */
   function onChange(event: React.ChangeEvent<HTMLInputElement>) {
     if (options.valueSetter) {
       options.valueSetter(event.target.value);
     }
   }
 
+  /** Settings input */
   return (
     <Form.Group className={styles.container}>
       <Form.Label className={styles.label}>

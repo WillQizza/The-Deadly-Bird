@@ -9,12 +9,14 @@ const HomePage: React.FC = () => {
     const tabContent = useRef<HTMLDivElement>(null);
     const [activeKey, setActiveKey] = useState('Following');
 
+    /** Function to reset the scrollbar */
     const resetScroll = () => {
         if (tabContent.current) {
             tabContent.current.scrollTop = 0;
         }
     }
-
+    
+    /** Function to handle tab navigation */
     const handleSelect = (eventKey: string | null) => {
         resetScroll();
         if (eventKey) {
@@ -22,9 +24,11 @@ const HomePage: React.FC = () => {
         }
     }
     
+    /** Home Page */
     return ( 
         <Page selected="Home" overflowScrollOff={true}>
             <div className={styles.tabs}>
+                {/** Tab navigation for stream type */}
                 <Tab.Container defaultActiveKey="Following">
                     <Nav variant="pills" justify={true} onSelect={handleSelect}>
                         <Nav.Item>
@@ -34,6 +38,7 @@ const HomePage: React.FC = () => {
                             <Nav.Link eventKey="Public" className={`${styles.tab} ${activeKey === 'Public' ? styles.tabActive : styles.tabInactive}`}>Public</Nav.Link>
                         </Nav.Item>
                     </Nav>
+                    {/** Tab content containing post streams */}
                     <Tab.Content className={styles.tabContent} ref={tabContent}>
                         <Tab.Pane eventKey="Following">
                             <PostStream type={PostStreamTy.Following} id={null} />

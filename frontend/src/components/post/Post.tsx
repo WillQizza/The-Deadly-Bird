@@ -57,12 +57,14 @@ const Post: React.FC<PostOptions> = props => {
             break;
     }
 
+    /** Function handling post like */
     const handleLike = async () => {
         setIsLiked(true);
         setLikeCount(likeCount + 1);
         await apiCreateLike(props.author.id, props.id);
     }
 
+    /** Post */
     return (
         <div className={styles.postContainer}>
             {/* Header */}

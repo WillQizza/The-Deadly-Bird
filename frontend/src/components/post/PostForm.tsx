@@ -30,9 +30,11 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
 
     const navigate = useNavigate();
 
-    /** fill the post fields with existing values if a post id is given  */
+    /** Fills the post fields with existing values on mount if a post id is given  */
     useEffect(() => {
+        /** Function for fetching the post's data */
         const fetchPostData = async () => {
+            // Request post data
             const response = await apiRequest(
                 `${baseURL}/api/authors/${getUserId()}/posts/${postId}`, {
                     method: 'GET',
@@ -41,6 +43,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                     },
                 }
             );
+            // Handle response
             const data = await response.json();
             if (response.ok) {
                 setTitle(data.title);
@@ -57,15 +60,17 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
             }
         };
 
+        // Fetch the post's data
         if (postId) {
             fetchPostData();
         }
     }, []);
 
-    /** function for handling form submission */
+    /** Function for handling form submission */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (validateForm()) {
+            // Send post update (if editing) or creation (if creating) request
             const formData = new URLSearchParams({
                 title: title,
                 description: description,
@@ -85,6 +90,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 body: formData
             });
 
+            // Handle response
             if (response.ok) {
                 navigate('/home');
             } else {
@@ -94,7 +100,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         }
     };
 
-    /** function for validating form elements */
+    /** Function for validating form input */
     const validateForm = () => {
         let isValid = true;
         const newFormErrors: { [key: string]: string } = {};
@@ -124,6 +130,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         return isValid;
     };
    
+    /** Function rendering confirmation dialog upon post deletion */
     const ConfirmDialog = ({}) => {
         return (
             <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}}>
@@ -143,12 +150,12 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         );
     };
     
-    
+    /** Function handling the delete button being clicked */
     const handleDeleteClick = () => {
         setShowConfirm(true);
     };
 
-    /** called from delete button to remove the local post*/
+    /** Function called from delete button to remove the local post*/
     const handleDeletePost = async () => {
      
         console.log("delete post:", postId);
@@ -158,7 +165,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
 
                     navigate("/home")
                 } else if (response.status == 404) {
-                    // alert("post not ound")
+                    // alert("post not found")
                 } else if (response.status == 500) {
                     alert("Failed to delete: Internal server errror");
                 }
@@ -166,9 +173,10 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         setShowConfirm(false);
     }
 
+    /** Post form */
     return (
         <>
-            {/** Alert for Request Errors */}
+            {/** Alert for request errors */}
             {!!responseMessage ? (
                 <Alert variant='danger' data-bs-theme='dark' dismissible>
                     <Alert.Heading>An Error Occured When Sending Your Request To The Server</Alert.Heading>
@@ -179,7 +187,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
             {/** Form */}
             <Form onSubmit={handleSubmit} data-bs-theme='dark'>
                 <div className={`${styles.selectToolbar} ${styles.formGroup}`}>
-                    {/** Visibility Select */}
+                    {/** Visibility select */}
                     <RadioButtonGroup
                         name={`visibility-select/image=${isImage}`}
                         options={[
@@ -190,7 +198,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         value={visibility}
                         setValue={setVisibility}
                     />
-                    {/** Content Type Select (only for text posts) */}
+                    {/** Content type select (only for text posts) */}
                     {isImage ? null : (
                         <RadioButtonGroup
                             name='ctype-select'
@@ -203,7 +211,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         />
                     )}
                 </div>
-                {/** Title Field */}
+                {/** Title field */}
                 <FormTextbox
                     label='Title'
                     placeholder='Enter a Title for Your Post'
@@ -212,7 +220,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                     value={title}
                     setValue={setTitle}
                 />
-                {/** Description Field */}
+                {/** Description field */}
                 <FormTextbox
                     label='Description'
                     placeholder='Enter a Description for Your Post'
@@ -221,7 +229,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                     value={description}
                     setValue={setDescription}
                 />
-                {/** Content Field */}
+                {/** Content field */}
                 {isImage ? (
                     <ImageUpload
                         formErrors={formErrors}
@@ -242,10 +250,11 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         textarea={true}
                     />
                 )}
-                {/** Post Button */}
+                {/** Submit button */}
                 <Button type='submit' className={styles.submitButton}>
                     Submit
                 </Button>
+                {/** Delete button */}
                 { props.edit ?
                     <> 
                     <Button className={styles.deleteButton} onClick={handleDeleteClick}>

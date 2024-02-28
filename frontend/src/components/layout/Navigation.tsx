@@ -17,12 +17,15 @@ const Navigation = ({ items, selected }: { items: NavItem[], selected?: Selected
     // return <Fragment>
     const navigate = useNavigate();
 
+    /** Navigation bar */
     return (
         <div id={styles.navigationContainer}>
+            {/** Logo */}
             <div id={styles.logoContainer}>
                 <img src={`${publicDir}/static/small-logo.png`} alt="Description" />
             </div>
 
+            {/** Navigation buttons */}
             <div id={styles.buttons}>
                 {items.map((item, index) => (
                     <a className={styles.buttonLink} href={item.path} key={index}>
@@ -38,7 +41,7 @@ const Navigation = ({ items, selected }: { items: NavItem[], selected?: Selected
                 ))}
             </div>
             
-
+            {/** Create post button */}
             <div id={styles.createPost}
                 onClick={() => {navigate("/post")}}>
                 <div id={styles.createPostIcon}>

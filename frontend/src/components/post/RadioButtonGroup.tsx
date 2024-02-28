@@ -16,13 +16,16 @@ interface RadioButtonGroupProps {
 const RadioButtonGroup: React.FC<RadioButtonGroupProps> = (props: RadioButtonGroupProps) => {
     const { name, options, value, setValue } = props;
 
+    /** Radio button group */
     return (
         <>
+            {/** Button group */}
             <ToggleButtonGroup
                 name={name}
                 type='radio'
                 value={value}
             >
+                {/** Toggle buttons for each radio option */}
                 {options.map((option, index) => (
                     <ToggleButton
                         key={index}

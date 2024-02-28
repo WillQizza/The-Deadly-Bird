@@ -23,7 +23,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const currentPage = useRef(1);
     const pageSize = 5;
 
-    // function to add posts to current posts
+    /** Function to add posts to current posts */
     const addPosts = (newPosts: React.ReactElement[]) => {
         setPosts([...posts, ...newPosts]);
     };
@@ -31,11 +31,11 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = async () => {
         let response: PostsResponse;
-        if (props.type === PostStreamTy.Author && props.id) {
+        if (props.type === PostStreamTy.Author && props.id) {   // Get profile posts
             response = await apiGetAuthorPosts(props.id, currentPage.current, pageSize);
-        } else if (props.type === PostStreamTy.Public) {
+        } else if (props.type === PostStreamTy.Public) {    // Get public posts
             response = await apiGetPosts(APIPostStreamTy.Public, currentPage.current, pageSize);
-        } else if (props.type === PostStreamTy.Following) {
+        } else if (props.type === PostStreamTy.Following) { // Get following posts
             response = await apiGetPosts(APIPostStreamTy.Following, currentPage.current, pageSize);
         } else {
             console.error(`Unknown post stream type: ${props.type}`);
@@ -91,6 +91,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
         }
     }, [posts])
 
+    /** Post stream */
     return (
         <div className={styles.postStream}>
             {posts.map((post, index) => (

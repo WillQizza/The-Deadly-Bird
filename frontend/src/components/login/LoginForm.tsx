@@ -15,10 +15,11 @@ const LoginForm: React.FC = () => {
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const navigate = useNavigate();
  
+    /** Function for handling form submission */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (validateForm()) {
-            
+            // send login request
             const formData = new URLSearchParams({
                 username: username,
                 password: password
@@ -32,6 +33,7 @@ const LoginForm: React.FC = () => {
                 body: formData
             });
             
+            // handle response
             if (response.ok) {
                 const userId = (await response.json()).id;
                 setUserId(userId);
@@ -44,6 +46,7 @@ const LoginForm: React.FC = () => {
         }
     };
 
+    /** Function for validating form input */
     const validateForm = () => {
         let isValid = true;
         const newErrors: { [key: string]: string } = {};
@@ -60,15 +63,19 @@ const LoginForm: React.FC = () => {
         return isValid;
     };
 
+    /** Login form */
     return (
         <div className={styles.loginFormContainer}>
+            {/** Alert warning for request errors */}
             {loginMessage && (
                 <div className="alert alert-warning" role="alert">
                     {loginMessage}
                 </div>
             )}
+            {/** Form */}
             <Form onSubmit={handleSubmit}>
                 <Form.Group controlId="formBasicEmail" className={styles.formGroup}>
+                    {/** Username input */}
                     <Form.Label className={styles.formLabel}>Username</Form.Label>
                     <Form.Control
                         type="text"
@@ -83,6 +90,7 @@ const LoginForm: React.FC = () => {
                     </Form.Control.Feedback>
                 </Form.Group>
 
+                {/** Password input */}
                 <Form.Group controlId="formBasicPassword"
                     style={{marginTop: '10px'}}
                     className={styles.formGroup}
@@ -101,6 +109,7 @@ const LoginForm: React.FC = () => {
                     </Form.Control.Feedback>
                 </Form.Group>
 
+                {/** Login button */}
                 <Button variant="primary" type="submit"
                     style={{marginTop: '20px'}}
                     className={styles.btnPrimary}

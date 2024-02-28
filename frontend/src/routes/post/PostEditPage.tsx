@@ -7,6 +7,7 @@ const PostEditPage: React.FC = () => {
     const params = useParams();
     const postId = params['id'] || '';
 
+    /** Post edit page */
     return (
         <Page>
             <div className={styles.postEditContentContainer}>

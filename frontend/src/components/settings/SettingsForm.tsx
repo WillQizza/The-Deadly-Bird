@@ -24,6 +24,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   const [showingAvatarModal, setShowingAvatarModal] = useState(false);
   const [avatarURL, setAvatarURL] = useState("");
 
+  /** Get's the user's profile information */
   useEffect(() => {
     if (author) {
       setEmail(author.email!);
@@ -38,9 +39,11 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
     }
   }, [author]);
 
+  /** Function to handle profile save */
   async function onSaveClicked(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    // Send request to update profile
     const formData = new URLSearchParams({
       email,
       bio,
@@ -59,30 +62,34 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
         body: formData.toString()
     });
 
+    // Return to profile page
     window.location.href = "/profile";
   }
 
-
+  /** Function to handle avatar prompt opened */
   function onAvatarPromptOpen() {
     setShowingAvatarModal(true);
     setAvatarURL("");
   }
 
-
+  /** Function to handle avatar url upload */
   function onAvatarURLUploaded() {
     setProfileImage(avatarURL);
     setShowingAvatarModal(false);
   }
 
+  /** Settings form */
   return (
     <Fragment>
       <div id={styles.container}>
+        {/** Form */}
         <form method="POST" onSubmit={onSaveClicked}>
           <div className={styles.row}>
-            {/* Avatar + Modifiable Information */}
+            {/* Avatar */}
             <div id={styles.avatarContainer} onClick={onAvatarPromptOpen}>
               <img alt="Profile Avatar" src={profileImage} />
             </div>
+            {/** Modifiable information */}
             <div style={{ flexGrow: 1 }}>
               <div className={styles.row}>  
                 <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
@@ -94,11 +101,11 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
               </div>
             </div>
           </div>
+          {/** Bio */}
           <div className={styles.row}>
-            {/* Bio */}
             <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
           </div>
-
+          {/** Save changes button */}
           <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
             <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
                 Save Changes
@@ -106,7 +113,8 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
           </div>
         </form>
       </div>
-
+      
+      {/** Avatar upload modal */}
       <Modal show={showingAvatarModal} centered={true} size="xl" style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}>
         <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>
           <Modal.Title>Avatar Upload</Modal.Title>
