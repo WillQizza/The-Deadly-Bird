@@ -3,13 +3,51 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import serializers
+from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
 from following.util import is_friends
-from deadlybird.pagination import Pagination
 from .serializers import PostSerializer
 from .models import Post, Author, Following
 from django.db.models import Q
 from .util import send_post_to_inboxes
 
+PostCreationErrorSerializer = inline_serializer("PostCreationError", fields={
+  "error": serializers.BooleanField(default=True),
+  "message": serializers.CharField()
+})
+PostCreationSuccessSerializer = inline_serializer("PostCreationSuccess", fields={
+  "error": serializers.BooleanField(default=False),
+  "message": serializers.CharField()
+})
+PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields={
+  "title": serializers.CharField(),
+  "description": serializers.CharField(),
+  "contentType": serializers.CharField(),
+  "content": serializers.CharField(),
+  "visibility": serializers.CharField(),
+})
+@extend_schema(
+    parameters=[
+        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with")
+    ]
+)
+@extend_schema(
+    methods=["GET"],
+    parameters=[
+      *generate_pagination_query_schema()
+    ],
+    responses=generate_pagination_schema("posts", PostSerializer(many=True))
+)
+@extend_schema(
+  methods=["POST"],
+  request=PostCreationPayloadSerializer,
+  responses={
+    201: PostCreationSuccessSerializer,
+    400: PostCreationErrorSerializer,
+    401: PostCreationErrorSerializer
+  }
+)
 @api_view(["GET", "POST"])
 def posts(request: HttpRequest, author_id: str):
   if request.method == "GET":
@@ -93,6 +131,44 @@ def posts(request: HttpRequest, author_id: str):
       "message": "Post created successfully."
     }, status=201)
 
+PostActionErrorSerializer = inline_serializer("PostError", fields={
+  "error": serializers.BooleanField(default=True),
+  "message": serializers.CharField()
+})
+PostActionSuccessSerializer = inline_serializer("PostSuccess", fields={
+  "error": serializers.BooleanField(default=False),
+  "message": serializers.CharField()
+})
+@extend_schema(
+    parameters=[
+        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
+        OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id to interact with")
+    ]
+)
+@extend_schema(
+    methods=["GET"],
+    responses={
+      404: PostActionErrorSerializer,
+      200: PostSerializer()
+    }
+)
+@extend_schema(
+  methods=["DELETE"],
+  responses={
+    404: PostActionErrorSerializer,
+    500: PostActionErrorSerializer,
+    204: PostActionSuccessSerializer
+  }
+)
+@extend_schema(
+  methods=["PUT"],
+  request=PostCreationPayloadSerializer,
+  responses={
+    200: PostCreationSuccessSerializer,
+    400: PostCreationErrorSerializer,
+    401: PostCreationErrorSerializer
+  }
+)
 @api_view(["GET", "DELETE", "PUT"])
 def post(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
@@ -196,12 +272,55 @@ def post(request: HttpRequest, author_id: str, post_id: str):
       "message": "Post updated successfully."
     }, status=200)
 
+PostImageFetchFailureSerializer = inline_serializer("PostImageFetchFail", fields={
+  "error": serializers.BooleanField(default=True),
+  "message": serializers.CharField()
+})
+@extend_schema(
+    parameters=[
+        OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
+        OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id to retrieve image of")
+    ],
+    responses={
+      (200, "image/*"): OpenApiTypes.BINARY,
+      404: PostImageFetchFailureSerializer,
+      400: PostImageFetchFailureSerializer
+    }
+)
 @api_view(["GET"])
 def post_image(_: HttpRequest, author_id: str, post_id: str):
   # Retrieve post image
-  post = get_object_or_404(Post, id=post_id)
+  try:
+    post = Post.objects.get(id=post_id)
+  except Post.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Post could not be found."
+    }, status=404)
+
+  if (post.content_type != Post.ContentType.APPLICATION_BASE64) \
+    and (post.content_type != Post.ContentType.JPEG_BASE64) \
+    and (post.content_type != Post.ContentType.PNG_BASE64):
+      return Response({
+        "error": True,
+        "message": "This post is not an image post."
+      }, status=400)
+
   return HttpResponse(base64.b64decode(post.content), content_type="image/*")
 
+@extend_schema(
+    parameters=[
+        OpenApiParameter("stream_type", type=str, location=OpenApiParameter.PATH, required=True, description="Either \"following\" or \"public\""),
+        *generate_pagination_query_schema()
+    ],
+    responses={
+      200: generate_pagination_schema("posts", PostSerializer(many=True)),
+      404: inline_serializer("InvalidStreamType", fields={ 
+        "error": serializers.BooleanField(default=True),
+        "message": serializers.CharField()
+      })
+    }
+)
 @api_view(["GET"])
 def post_stream(request: HttpRequest, stream_type: str):
   # Public stream

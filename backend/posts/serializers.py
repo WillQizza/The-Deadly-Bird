@@ -1,5 +1,7 @@
 from rest_framework import serializers
+from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
+from typing import List
 from .models import Post, Comment
 
 class PostSerializer(serializers.ModelSerializer):
@@ -17,11 +19,11 @@ class PostSerializer(serializers.ModelSerializer):
   def get_count(self, object: Post) -> int:
     return Comment.objects.filter(post=object).count()
   
-  def get_comments(self, object: Post):
+  def get_comments(self, object: Post) -> str:
     return None # TODO: (currently sets null)
     # TODO: URL to comments
   
-  def get_commentsSrc(self, object: Post):
+  def get_commentsSrc(self, object: Post) -> None:
     return None # TODO: (currently sets null)
     # TODO: 5 comments sorted newest to oldest in the api spec format
     return {
