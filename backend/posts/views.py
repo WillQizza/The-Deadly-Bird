@@ -330,7 +330,7 @@ def post_stream(request: HttpRequest, stream_type: str):
         .values_list('target_author', flat=True)
 
     # Get all not friends from those following
-    not_friends = [follow for follow in following if not is_friends(int(follow), int(request.session["id"]))]
+    not_friends = [follow for follow in following if not is_friends(follow, request.session["id"])]
 
     # Get all posts all posts from authors following
     posts = Post.objects.all() \
