@@ -26,5 +26,7 @@ jobs:
           heroku_email: "wqi3@ualberta.ca"
           stack: "container"
           usedocker: true
+          docker_build_args: |
+            LIVE_HOST_URL
         env:
-          HOST_URL: https://thedeadlybird-123769211974.herokuapp.com/
+          LIVE_HOST_URL: https://thedeadlybird-123769211974.herokuapp.com/

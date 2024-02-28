@@ -24,10 +24,11 @@ RUN pnpm install
 COPY . /app
 RUN pnpm run build
 
-
-
 FROM python:3 AS backend
 ENV PORT 8000
+
+ARG LIVE_HOST_URL "http://localhost:8000/"
+ENV HOST_URL ${LIVE_HOST_URL}
 
 # Install Python dependencies
 WORKDIR /app
