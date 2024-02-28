@@ -10,7 +10,7 @@ export const apiGetPostLikes = async (
     authorID: string,
     postID: string,
 ): Promise<LikesResponse> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/likes/`);    
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/likes`);    
     const data: LikesResponse = await response.json(); 
     return data;
 }
@@ -26,7 +26,7 @@ export const apiGetCommentLikes = async (
     postID: string,
     commentID: string,
 ): Promise<LikesResponse> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}/likes/`);    
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}/likes`);    
     const data: LikesResponse = await response.json(); 
     return data;
 }
@@ -40,7 +40,7 @@ export const apiCreateLike = async (
     authorID: string,
     postId: string
 ): Promise<any> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postId}/likes/`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postId}/likes`, {
         method: "POST"
     });    
     const data: any = await response.json(); 
