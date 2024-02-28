@@ -148,7 +148,7 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
 
     # TODO: determine if authentication for PUT but not for others is right
     if request.method == 'PUT':
-        session_valid, _ = validate_login_session(request)
+        session_valid = validate_login_session(request)
         if not session_valid:
             return Response({"error": True, "message": "Authentication required"}, status=403)
     
@@ -242,7 +242,7 @@ def request_follower(request: HttpRequest, local_author_id: str, foreign_author_
         return Response(serializer.data)
          
     elif request.method == "POST":
-        session_valid, _ = validate_login_session(request)
+        session_valid = validate_login_session(request)
         if not session_valid:
             return Response({
                 "error": True,

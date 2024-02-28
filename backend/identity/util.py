@@ -12,19 +12,15 @@ def check_authors_exist(*author_ids: int) -> bool:
             return False
     return True
 
-def validate_login_session(request: HttpRequest) -> Union[bool, Response]:
+def validate_login_session(request: HttpRequest) -> bool:
     """
-    Validate a login session, return a forbidden response if unauthenticated, otherwise True 
+    Validate a login session, return True if the session is valid.
     """
     try:
         author_id = request.session.get("id")
         if author_id and check_authors_exist(author_id):
-            return True, None
+            return True
         else:
-            return Response({
-                "message": "Forbidden: Unauthorized request or session expired."
-            }, status=403)
+            return False
     except KeyError:
-        return Response({
-            "message": "Forbidden: Unauthorized request."
-        }, status=403) 
+        return False

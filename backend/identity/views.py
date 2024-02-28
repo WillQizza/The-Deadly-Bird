@@ -41,6 +41,7 @@ AuthorsFailResponseSerializer = inline_serializer("AuthorsFailResponse", fields=
     methods=["GET", "PUT"],
     responses={
       200: AuthorSerializer(),
+      401: AuthorsFailResponseSerializer,
       404: AuthorsFailResponseSerializer,
       403: AuthorsFailResponseSerializer
     },
@@ -79,9 +80,11 @@ def author(request: HttpRequest, author_id: str):
     return Response(serializer.data)
   else:
     # Ensure that we are logged in while attempting to edit a user
-    logged_in, response = validate_login_session(request)
+    logged_in = validate_login_session(request)
     if not logged_in:
-      return response
+      return Response({
+        "message": "Not Authenticated"
+      }, status=401)
 
     # Retrieve author to edit
     try:

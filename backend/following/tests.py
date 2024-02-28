@@ -51,6 +51,8 @@ class FollowersTestCase(BaseTestCase):
         
         author1 = self.create_author() 
         author2 = self.create_author() 
+
+        self.edit_session(id=author1.id)
         
         response = self.client.put(reverse('modify_follower', kwargs={
             'author_id': author1.id, 'foreign_author_id': author2.id
@@ -83,6 +85,8 @@ class FollowersTestCase(BaseTestCase):
         author1 = self.create_author()
         author2 = self.create_author()
 
+        self.edit_session(id=author1.id)
+
         url = reverse('request_follower', kwargs={
             'local_author_id': author1.id, 'foreign_author_id': author2.id
         })
@@ -100,6 +104,8 @@ class FollowersTestCase(BaseTestCase):
         existing_follow = self.following[0]
         author1 = existing_follow.author
         author2 = existing_follow.target_author
+
+        self.edit_session(id=author1.id)
         
         url = reverse('request_follower', kwargs={
             'local_author_id': author1.id, 'foreign_author_id': author2.id
@@ -109,9 +115,10 @@ class FollowersTestCase(BaseTestCase):
         self.assertEqual(response.status_code, 409)
 
     def test_follow_request_inbox_redirect(self):
-
         author1 = self.create_author()
         author2 = self.create_author()
+
+        self.edit_session(id=author1.id)
 
         url = reverse('request_follower', kwargs={
             'local_author_id': author1.id, 'foreign_author_id': author2.id
@@ -122,9 +129,9 @@ class FollowersTestCase(BaseTestCase):
             target_author=author2.id
         )
 
-        self.assertTrue(len(follow_reqs) == 0)  
+        self.assertEquals(len(follow_reqs), 0)  
         response = self.client.post(url)
-        self.assertTrue(response.status_code == 201)
+        self.assertEquals(response.status_code, 201)
          
         follow_req = FollowingRequest.objects.filter(
             author=author1.id,
