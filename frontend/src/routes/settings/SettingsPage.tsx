@@ -10,6 +10,7 @@ import styles from "./SettingsPage.module.css";
 const SettingsPage: React.FC = () => {
   const [author, setAuthor] = useState<Author>();
 
+  /** Gets user's profile information */
   useEffect(() => {
     getAuthor(getUserId()).then(author => {
       if (author) {
@@ -18,6 +19,7 @@ const SettingsPage: React.FC = () => {
     });
   }, []);
 
+  /** Settings page */
   return <Page selected="Settings">
     <div id={styles.container}>
       <div id={styles.content}>

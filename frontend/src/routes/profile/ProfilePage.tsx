@@ -30,7 +30,7 @@ const ProfilePage: React.FC = () => {
     const params = useParams();
     const userId = params["id"]!;
 
-
+    /** Function to update the user's following */
     const updateFollowingState = (userId: string) => {
 
         apiGetFollower(userId, curAuthorId)
@@ -47,6 +47,7 @@ const ProfilePage: React.FC = () => {
             });
     }
 
+    /** Gets user profile */
     useEffect(() => {
         getAuthor(userId)
             .then(async author => {
@@ -76,12 +77,15 @@ const ProfilePage: React.FC = () => {
          
     }, [params]);
 
+    /** Function to render the follow button based on following state */
     const renderButton = () => {
-        
+        // Check that the user's profile is not the current user's
         if (userId === curAuthorId) {
             return;
         }
+
         switch (followState) {
+            // Show unfollow button if already following this user
             case FollowState.FOLLOWING:
                 return (
                     <button className="btn btn-danger" onClick={async () => {
@@ -95,6 +99,7 @@ const ProfilePage: React.FC = () => {
                         Unfollow
                     </button>
                 );
+            // Show pending button if a follow request was already sent
             case FollowState.PENDING:
                 return (
                     <button className="btn btn-warning" onClick={() => {
@@ -103,6 +108,7 @@ const ProfilePage: React.FC = () => {
                         Pending
                     </button>
                 );
+            // Show follow button if not following
             case FollowState.NOT_FOLLOWING:
                 return (
                     <button className="btn btn-primary" onClick={async () => {
@@ -119,16 +125,20 @@ const ProfilePage: React.FC = () => {
         }
     };
     
+    /** Profile page */
     return <Page selected="Profile">
         <div id={styles.container}>
             <div id={styles.header} style={{ position: "relative" }}>
+                {/** Avatar */}
                 <div id={styles.avatarContainer}>
                     <img alt="Profile Avatar" src={avatarURL} />
                 </div>
+                {/** About the user */}
                 <div id={styles.identityContainer}>
                     <h1 id={styles.username}>{username}</h1>
                     <h5 id={styles.bio}>{bio}</h5>
                 </div>
+                {/** Following and post statistics */}
                 <div id={styles.statsAndFollow}> 
                     <div className={styles.item}>
                         {renderButton()}
@@ -149,6 +159,7 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                {/** Github section (if applicable) */}
                 {githubUsername ? (
                     <a href={`https://github.com/${githubUsername}`} target="_blank" rel="noreferrer">
                         <div id={styles.githubContainer}>
@@ -157,6 +168,7 @@ const ProfilePage: React.FC = () => {
                     </a>
                 ) : null}
             </div>
+            {/** Users feed */}
             <div id={styles.feed}>
                 {authorId && <PostStream type={PostStreamTy.Author} id={authorId} />}
             </div>

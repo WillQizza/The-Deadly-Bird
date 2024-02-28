@@ -5,10 +5,13 @@ import PostForm from '../../components/post/PostForm';
 import Page from '../../components/layout/Page';
 
 const PostCreationPage: React.FC = () => {
+    /** Post creation page */
     return (
         <Page>
             <div className={styles.postCreationContentContainer}>
+                {/** Title */}
                 <h1 className={styles.pageTitle}>Create a Post</h1>
+                {/** Tabs for text and image post */}
                 <Tabs
                     defaultActiveKey='text'
                     justify
