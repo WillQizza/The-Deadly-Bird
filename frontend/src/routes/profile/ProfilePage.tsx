@@ -39,6 +39,7 @@ const ProfilePage: React.FC = () => {
                     setFollowState(FollowState.FOLLOWING);
                 } 
             });
+        // TODO: handle follow state accross localhosts
         // apiFollowRequest(curAuthorId, userId)
         //     .then(response => {
         //         if (response.request_id) {
@@ -113,13 +114,12 @@ const ProfilePage: React.FC = () => {
             case FollowState.NOT_FOLLOWING:
                 return (
                     <button className="btn btn-primary" onClick={async () => {
-                        apiFollowRequest(curAuthorId, authorId);
-                        // await apiFollowRequest(curAuthorId, authorId, "POST")
-                        //     .then(res => {
-                        //         if (res && !res["error"]) {
-                        //             setFollowState(FollowState.PENDING);
-                        //         }
-                        //     }); 
+                        apiFollowRequest(curAuthorId, authorId)
+                            // .then(res => {
+                            //     if (res && !res["error"]) {
+                            //         setFollowState(FollowState.PENDING);
+                            //     }
+                            // }); 
                     }}>
                         Follow
                     </button>
