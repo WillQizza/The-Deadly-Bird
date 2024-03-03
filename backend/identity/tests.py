@@ -159,6 +159,27 @@ class InboxMessageTests(BaseTestCase):
     response = self.client.post(url, data=json.dumps(request_body), content_type='application/json')
     self.assertEquals(response.status_code, 201)
 
+  def test_inbox_follow(self):
+    """
+    Emulate a Follow Request message. 
+    """
+    url = reverse('inbox', kwargs={
+      "author_id": self.authors[0].id 
+    })
+    
+    target_author = self.create_author()
+    author = self.create_author()
+
+    request_body = {
+      "summary": "Summary",
+      "type": "Follow",
+      "actor": AuthorSerializer(author).data,
+      "object": AuthorSerializer(target_author).data
+    }
+    
+    response = self.client.post(url, data=json.dumps(request_body), content_type='application/json')
+    self.assertEquals(response.status_code, 201)
+
   def test_inbox_delete(self):
     """
     Get the contents of Author0's delete and assert nothing remains.
