@@ -1,7 +1,7 @@
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
 import { InboxResponse } from "./types";
-
+import { apiGetAuthor } from "./authors";
 /**
  * @description function to retreive inbox mesages for an author
  * @param id author id to retrieve

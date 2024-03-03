@@ -166,8 +166,10 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
                         target_author_id=author_id
                     ).first()
                     # Remove follow request
-                    InboxMessage.objects.filter(content_id=follow_req.id).delete()
-                    follow_req.delete() #delete after inbox message because of dependancy
+                    inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id)
+                    if inbox_msg:
+                        inbox_msg.delete()
+                    follow_req.delete()
                     return Response({"error": False, "message": "Follower added successfully."}, status=201)
                 except:
                     return Response({"error": True, "message": "Follower already added."}, status=409) 

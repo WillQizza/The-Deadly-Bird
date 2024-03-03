@@ -8,6 +8,7 @@ import { ReactComponent as Deny } from 'bootstrap-icons/icons/x-lg.svg';
 import styles from './Inbox.module.css';
 import { apiDeleteFollower, apiPutFollower } from '../../api/following';
 import { apiClearInbox } from '../../api/inbox';
+import { Author } from '../../api/types';
 
 const Inbox = () => {
 
@@ -47,8 +48,9 @@ const Inbox = () => {
     const renderRequestCard = (message: any, idx: number) => {
 
         /** Function for handling acceptance of follow request */
-        const followAccept = (author_id: string, target_author_id: string) => {
-            apiPutFollower(target_author_id, author_id);
+        const followAccept = (author: Author, target_author: Author) => {
+            apiPutFollower(author.id, target_author.id, target_author.host); // put follower on remote 
+            apiPutFollower(author.id, target_author.id, author.host);        // put follower on local
             setInboxMessages(prevMessages => prevMessages.filter((_, index) => index !== idx)); 
         }
 
@@ -71,7 +73,7 @@ const Inbox = () => {
                     <div className={styles.postButtons}>
                         <Allow 
                             className={`${styles.postButton} ${styles.postShare}`} 
-                            onClick={() => {followAccept(message.author.id, message.target_author.id)}} 
+                            onClick={() => {followAccept(message.author, message.target_author)}} 
                         />
                         <Deny className={`${styles.postButton} ${styles.postLike}`}
                             onClick={() => {followReject(message.author.id, message.target_author.id)}} 
@@ -133,14 +135,15 @@ const Inbox = () => {
                     renderCard(message, idx)
                 ))}
             </div>
-            {(inboxMessages.length === 0) ? "Empty ": ""}
-            {/** Clear inbox button */}
-            <button className="btn btn-warning" onClick={async () => {
-                apiClearInbox(curAuthorId);
-                setInboxMessages([]);
-            }}>
-                Clear Inbox
-            </button>
+            {(inboxMessages.length === 0)
+                ? "Empty..."
+                : <button className="btn btn-warning" onClick={async () => {
+                    apiClearInbox(curAuthorId);
+                    setInboxMessages([]);
+                }}>
+                    Clear Inbox
+                </button>
+            } 
         </div>
     );
 };

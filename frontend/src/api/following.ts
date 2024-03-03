@@ -1,6 +1,8 @@
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
 import { FollowersResponse } from "./types";
+import { Author } from "./types";
+import { apiGetAuthor } from "./authors";
 
 /**
  * @description function to retreive the followers for an author
@@ -54,6 +56,38 @@ export const apiGetFollowing = async (
     return data; 
 }
 
+/**
+ * @description POST inbox message of type "Follow" to node in fromAuthors host field.
+ * @param fromAuthorID Author on local who pushes "Follow" button 
+ * @param toAuthorID Receiving Author, may be local or remote
+ */   
+export const apiFollowRequest = async (
+    fromAuthorID: string,
+    toAuthorID: string,
+) 
+: Promise<any> => { 
+    const fromAuthor = (await apiGetAuthor(fromAuthorID))!;
+    const toAuthor = (await apiGetAuthor(toAuthorID))!;
+    
+    console.log("from author: ", fromAuthor);
+    console.log("to author: ", toAuthor);
+
+    const response = await apiRequest(`${toAuthor.host}authors/${toAuthor.id}/inbox/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "type": "Follow",
+            "summary": `${fromAuthor.displayName} wants to follow ${toAuthor.displayName}`,
+            "actor": fromAuthor,
+            "object": toAuthor
+        })
+    });    
+    const data: any = await response.json(); 
+    return data;
+}
+/*** Old Follow Request API for local node. 
 export const apiFollowRequest = async(
     localAuthorId: string, 
     foreignAuthorId: string,
@@ -73,6 +107,7 @@ export const apiFollowRequest = async(
     const data = await response.json();
     return data;
 }
+ */
 
 /**
  * @description remove foreign author as a follower of author id.   
@@ -89,13 +124,15 @@ export const apiDeleteFollower = async (authorId: string, foreignAuthorId: strin
 }
 
 /**
- * @description idempontent PUT to add foreign author as a follower of author id.   
+ * @description PUT to add author as a follower of target author.   
  * @param authorId author that following
  * @param foreignAuthorId author that is being followed
  */
-export const apiPutFollower = async (authorId: string, foreignAuthorId: string)
+export const apiPutFollower = async (authorId: string, targetAuthorId: string, host: string)
 : Promise<number> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+
+    console.log("target host: ", host);
+    const response = await apiRequest(`${host}authors/${targetAuthorId}/followers/${authorId}`, {
         method: "PUT",
     });
     return response.status;

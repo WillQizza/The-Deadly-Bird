@@ -39,12 +39,12 @@ const ProfilePage: React.FC = () => {
                     setFollowState(FollowState.FOLLOWING);
                 } 
             });
-        apiFollowRequest(curAuthorId, userId, "GET")
-            .then(response => {
-                if (response.request_id) {
-                    setFollowState(FollowState.PENDING);
-                }
-            });
+        // apiFollowRequest(curAuthorId, userId)
+        //     .then(response => {
+        //         if (response.request_id) {
+        //             setFollowState(FollowState.PENDING);
+        //         }
+        //     });
     }
 
     /** Gets user profile */
@@ -113,12 +113,13 @@ const ProfilePage: React.FC = () => {
             case FollowState.NOT_FOLLOWING:
                 return (
                     <button className="btn btn-primary" onClick={async () => {
-                        await apiFollowRequest(curAuthorId, authorId, "POST")
-                            .then(res => {
-                                if (res && !res["error"]) {
-                                    setFollowState(FollowState.PENDING);
-                                }
-                            }); 
+                        apiFollowRequest(curAuthorId, authorId);
+                        // await apiFollowRequest(curAuthorId, authorId, "POST")
+                        //     .then(res => {
+                        //         if (res && !res["error"]) {
+                        //             setFollowState(FollowState.PENDING);
+                        //         }
+                        //     }); 
                     }}>
                         Follow
                     </button>
