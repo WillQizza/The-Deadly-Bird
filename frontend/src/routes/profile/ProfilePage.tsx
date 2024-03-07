@@ -5,7 +5,7 @@ import styles from './ProfilePage.module.css';
 import { useParams } from 'react-router-dom';
 import { apiGetAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
-import { apiDeleteFollower, apiFollowRequest, apiGetFollower} from '../../api/following';
+import { apiDeleteFollower, apiInboxFollowRequest, apiGetFollower, apiGetFollowRequest} from '../../api/following';
 import PostStream, { PostStreamTy } from '../../components/post/PostStream';
 
 enum FollowState {
@@ -39,13 +39,12 @@ const ProfilePage: React.FC = () => {
                     setFollowState(FollowState.FOLLOWING);
                 } 
             });
-        // TODO: handle follow state accross localhosts
-        // apiFollowRequest(curAuthorId, userId)
-        //     .then(response => {
-        //         if (response.request_id) {
-        //             setFollowState(FollowState.PENDING);
-        //         }
-        //     });
+        apiGetFollowRequest(curAuthorId, userId)
+            .then(response => {
+                if (response.request_id) {
+                    setFollowState(FollowState.PENDING);
+                }
+            });
     }
 
     /** Gets user profile */
@@ -114,12 +113,15 @@ const ProfilePage: React.FC = () => {
             case FollowState.NOT_FOLLOWING:
                 return (
                     <button className="btn btn-primary" onClick={async () => {
-                        apiFollowRequest(curAuthorId, authorId)
-                            // .then(res => {
-                            //     if (res && !res["error"]) {
-                            //         setFollowState(FollowState.PENDING);
-                            //     }
-                            // }); 
+                        const followRequestRes = await apiInboxFollowRequest(curAuthorId, authorId); 
+                        if (followRequestRes === null) {
+                            alert(`Failed to connect to remote host`);
+                        } else {
+                            console.log(followRequestRes);
+                            if (!followRequestRes["error"]) {
+                                setFollowState(FollowState.PENDING);
+                            }
+                        }
                     }}>
                         Follow
                     </button>

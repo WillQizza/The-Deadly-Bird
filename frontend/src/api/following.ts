@@ -61,53 +61,50 @@ export const apiGetFollowing = async (
  * @param fromAuthorID Author on local who pushes "Follow" button 
  * @param toAuthorID Receiving Author, may be local or remote
  */   
-export const apiFollowRequest = async (
+export const apiInboxFollowRequest = async (
     fromAuthorID: string,
     toAuthorID: string,
 ) 
 : Promise<any> => { 
-    const fromAuthor = (await apiGetAuthor(fromAuthorID))!;
-    const toAuthor = (await apiGetAuthor(toAuthorID))!;
-    
-    console.log("from author: ", fromAuthor);
-    console.log("to author: ", toAuthor);
+    try {
+        const fromAuthor = (await apiGetAuthor(fromAuthorID))!;
+        const toAuthor = (await apiGetAuthor(toAuthorID))!;
+        
+        console.log("from author: ", fromAuthor);
+        console.log("to author: ", toAuthor);
 
-    const response = await apiRequest(`${toAuthor.host}authors/${toAuthor.id}/inbox/`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            "type": "Follow",
-            "summary": `${fromAuthor.displayName} wants to follow ${toAuthor.displayName}`,
-            "actor": fromAuthor,
-            "object": toAuthor
-        })
-    });    
-    const data: any = await response.json(); 
-    return data;
+        const response = await apiRequest(`${toAuthor.host}authors/${toAuthor.id}/inbox/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "type": "Follow",
+                "summary": `${fromAuthor.displayName} wants to follow ${toAuthor.displayName}`,
+                "actor": fromAuthor,
+                "object": toAuthor
+            })
+        });    
+        const data: any = await response.json(); 
+        return data;
+    } catch(e) {
+        return null;
+    }    
 }
-/*** Old Follow Request API for local node. 
-export const apiFollowRequest = async(
+
+export const apiGetFollowRequest = async(
     localAuthorId: string, 
     foreignAuthorId: string,
-    method: string
 )
-: Promise<any> => {
-    
-    const init: RequestInit = {
-        method: method,
-    }
-
+: Promise<any> => { 
+    const init: RequestInit = {method: "GET",}
     const response = await apiRequest(
         `${baseURL}/api/authors/request-follower/${localAuthorId}/${foreignAuthorId}`,
         init
     );
-    
     const data = await response.json();
     return data;
 }
- */
 
 /**
  * @description remove foreign author as a follower of author id.   
@@ -139,18 +136,6 @@ export const apiPutFollower = async (authorId: string, targetAuthorId: string, h
 }
 
 export const apiGetFollower = async (authorId: string, foreignAuthorId: string)
-: Promise<any> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
-        method: "GET",
-    });
-    if (!response.ok) {
-        return {"status": response.status};
-    }
-    const data = await response.json();
-    return data; 
-}
-
-export const apiGetFollowRequest = async (authorId: string, foreignAuthorId: string)
 : Promise<any> => {
     const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
         method: "GET",

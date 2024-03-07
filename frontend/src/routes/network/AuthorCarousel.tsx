@@ -4,7 +4,7 @@ import { Carousel, Card, Row, Col, Button } from 'react-bootstrap';
 import { Author } from '../../api/types';
 import styles from './AuthorCarousel.module.css';
 import { getUserId } from '../../utils/auth';
-import { apiFollowRequest } from '../../api/following';
+import { apiInboxFollowRequest } from '../../api/following';
 
 const AuthorCarousel = ({authors}: {authors: Author[]}) => {
     const userId: string = getUserId().toString();

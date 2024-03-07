@@ -49,8 +49,10 @@ const Inbox = () => {
 
         /** Function for handling acceptance of follow request */
         const followAccept = (author: Author, target_author: Author) => {
-            apiPutFollower(author.id, target_author.id, target_author.host); // put follower on remote 
-            apiPutFollower(author.id, target_author.id, author.host);        // put follower on local
+            apiPutFollower(author.id, target_author.id, target_author.host) // put follower on remote 
+                .then(() => {
+                    apiPutFollower(author.id, target_author.id, author.host);  // put follower on local
+                }); 
             setInboxMessages(prevMessages => prevMessages.filter((_, index) => index !== idx)); 
         }
 

@@ -12,11 +12,11 @@ export const getInboxMessages = async (
     size: number
 ): Promise<InboxResponse> => {
     
+    const inboxAuthor = (await apiGetAuthor(authorID))!;
     const response = await fetch(
-        `${baseURL}/api/authors/${authorID}/inbox?page=${page}&size=${size}`
+        `${inboxAuthor.host}authors/${authorID}/inbox?page=${page}&size=${size}`
     );   
-    const data: InboxResponse = await response.json();
-    
+    const data: InboxResponse = await response.json(); 
     return data;
 }
 
@@ -25,11 +25,12 @@ export const getInboxMessages = async (
  * @param id author id whose inbox to clear
  */
 export const apiClearInbox = async (authorID: string): Promise<any> => {
+    const inboxAuthor = (await apiGetAuthor(authorID))!;
     const init: RequestInit = {
         method: "DELETE"
     }; 
     const response = await apiRequest(
-        `${baseURL}/api/authors/${authorID}/inbox`, init
+        `${inboxAuthor.host}authors/${authorID}/inbox`, init
     );   
     return response; 
 }
