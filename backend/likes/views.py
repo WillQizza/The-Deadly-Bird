@@ -1,14 +1,14 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpRequest
 from .models import Like
 from posts.models import Post, Comment
 from rest_framework.response import Response
 from rest_framework import serializers
-from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
+from deadlybird.serializers import GenericErrorSerializer
+from deadlybird.permissions import RemoteOrSessionAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .serializers import LikeSerializer, APIDocsLikeManySerializer
-from identity.models import InboxMessage
 
 @extend_schema(
         responses={
@@ -22,6 +22,7 @@ from identity.models import InboxMessage
         ]
 )
 @api_view(["GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id: str):
     """
     author_id:   author of post_id
@@ -61,6 +62,7 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     ]
 )
 @api_view(["GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def post_likes(request: HttpRequest, author_id: str, post_id: str):
     """
     author_id:   author of post_id
@@ -99,6 +101,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
         ]
 )
 @api_view(["GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def liked(request: HttpRequest, author_id: int):
     """
     author_id: author to get all likes originating from

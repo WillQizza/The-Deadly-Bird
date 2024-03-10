@@ -1,11 +1,12 @@
 import base64
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import serializers
 from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.util import generate_full_api_url
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
 from following.util import is_friends
@@ -45,6 +46,7 @@ PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields=
   }
 )
 @api_view(["GET", "POST"])
+@permission_classes([(IsGetRequest & RemoteOrSessionAuthenticated) | (IsPostRequest & SessionAuthenticated)])
 def posts(request: HttpRequest, author_id: str):
   if request.method == "GET":
     # Retrieve author posts
@@ -159,6 +161,7 @@ def posts(request: HttpRequest, author_id: str):
   }
 )
 @api_view(["GET", "DELETE", "PUT"])
+@permission_classes([ RemoteOrSessionAuthenticated ])
 def post(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
     # Check if the person has access to friend posts
@@ -304,6 +307,7 @@ def post_image(_: HttpRequest, author_id: str, post_id: str):
     }
 )
 @api_view(["GET"])
+@permission_classes([ SessionAuthenticated ])
 def post_stream(request: HttpRequest, stream_type: str):
   # Public stream
   if stream_type == "public":

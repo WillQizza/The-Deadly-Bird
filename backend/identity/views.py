@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import Author, InboxMessage
-from deadlybird.authentication import RemoteOrSessionAuthenticated
+from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
@@ -65,6 +65,7 @@ def authors(request: HttpRequest):
   })
 )
 @api_view(["GET", "PUT"])
+@permission_classes([ (IsGetRequest & RemoteOrSessionAuthenticated) | (IsPutRequest & SessionAuthenticated) ])
 def author(request: HttpRequest, author_id: str):
   """
   Retrieve or edit a single author
@@ -338,6 +339,7 @@ def register(request: HttpRequest):
   }
 )
 @api_view(["GET", "POST", "DELETE"])
+@permission_classes([ (IsGetRequest & SessionAuthenticated) | (IsPostRequest & RemoteOrSessionAuthenticated) | (IsDeleteRequest & SessionAuthenticated) ])
 def inbox(request: HttpRequest, author_id: str):
   """
   URL: ://service/authors/{AUTHOR_ID}/inbox

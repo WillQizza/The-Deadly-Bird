@@ -1,12 +1,13 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import serializers
 from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
 from .serializers import FollowRequestSerializer, FollowingSerializer
 from identity.models import Author, InboxMessage
+from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.pagination import Pagination, generate_pagination_query_schema
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
@@ -20,6 +21,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serial
     responses=FollowingSerializer
 )
 @api_view(["GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def following(request, author_id: str):
     """
     URL: ://service/authors/{AUTHOR_ID}/following
@@ -69,6 +71,7 @@ def following(request, author_id: str):
     responses=FollowingSerializer
 )
 @api_view(["GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def followers(request, author_id: str):
     """
     URL: ://service/authors/{AUTHOR_ID}/followers
@@ -125,6 +128,7 @@ def followers(request, author_id: str):
     }
 )
 @api_view(['DELETE', 'PUT', 'GET'])
+@permission_classes([(IsGetRequest & RemoteOrSessionAuthenticated) | ((IsDeleteRequest | IsPutRequest) & SessionAuthenticated)])
 def modify_follower(request, author_id: str, foreign_author_id: str): 
     """ 
     URL: ://service/authors/{AUTHOR_ID}/followers/{FOREIGN_AUTHOR_ID}
@@ -214,6 +218,7 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     }
 )
 @api_view(["POST", "GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def request_follower(request: HttpRequest, local_author_id: str, foreign_author_id: str):
     """
     Request a follower on local or foreign host.
