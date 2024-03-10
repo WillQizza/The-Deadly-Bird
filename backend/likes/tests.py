@@ -9,6 +9,8 @@ class LikeTests(BaseTestCase):
         super().setUp()
     
     def test_likes_posts(self):
+        self.edit_session(id=self.authors[0].id)
+        
         a1, a2 = (self.authors[0], self.authors[1])
         post = Post.objects.filter(author=a1).order_by("published_date").first()
         
@@ -35,6 +37,8 @@ class LikeTests(BaseTestCase):
         self.assertTrue(json['message'] is not None)
 
     def test_liked(self):
+        self.edit_session(id=self.authors[0].id)
+
         a1, a2 = (self.authors[0], self.authors[1])
         
         self.create_likes()  

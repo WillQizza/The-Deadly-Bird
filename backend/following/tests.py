@@ -17,6 +17,8 @@ class FollowersTestCase(BaseTestCase):
     def test_get_followers(self):
         
         author2 = self.authors[1]
+        self.edit_session(id=author2.id)
+
         url = reverse('followers', kwargs={'author_id': author2.user.id})
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -39,6 +41,8 @@ class FollowersTestCase(BaseTestCase):
         existing_follow = self.following[0]
         author1 = existing_follow.author
         author2 = existing_follow.target_author
+
+        self.edit_session(id=author1.id)
 
         self.assertTrue(Following.objects.filter(author=author2, target_author=author1).exists())
         response = self.client.delete(reverse('modify_follower', kwargs={
@@ -65,6 +69,8 @@ class FollowersTestCase(BaseTestCase):
         existing_follow = self.following[0]
         author1 = existing_follow.author
         author2 = existing_follow.target_author
+
+        self.edit_session(id=author1.id)
         
         response = self.client.get(reverse('modify_follower', kwargs={
             'author_id': author1.id, 'foreign_author_id': author2.id
@@ -76,6 +82,8 @@ class FollowersTestCase(BaseTestCase):
         author1 = self.create_author()
         author2 = self.create_author()
 
+        self.edit_session(id=author1.id)
+
         response = self.client.get(reverse('modify_follower', kwargs={
             'author_id': author1.id, 'foreign_author_id': author2.id
             }))
@@ -85,6 +93,8 @@ class FollowersTestCase(BaseTestCase):
         req : FollowingRequest = self.follow_requests[0] 
         from_author_id = req.author.id
         to_author_id = req.target_author.id
+
+        self.edit_session(id=from_author_id)
 
         url = reverse('request_follower', kwargs={
             'local_author_id': from_author_id, 

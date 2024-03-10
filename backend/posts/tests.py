@@ -13,6 +13,8 @@ class AuthorPostTest(BaseTestCase):
     """
     Check the list of posts retrieved is valid.
     """
+    self.edit_session(id=self.authors[0].id)
+
     Post.objects.create(
         title=f"Another Post",
         description="A sample post.",
@@ -44,6 +46,8 @@ class AuthorPostTest(BaseTestCase):
     """
     Check that friends posts are only shown to friends or ourselves.
     """
+    self.edit_session(id=self.authors[1].id)
+
     # Create a friend post
     Post.objects.create(
         title=f"FRIEND",
@@ -78,6 +82,8 @@ class AuthorPostTest(BaseTestCase):
     """
     Check that unlisted posts are not publicly listed unless it is from us.
     """
+    self.edit_session(id=self.authors[1].id)
+
     # Create a unlisted post
     Post.objects.create(
         title=f"UNLISTED",
@@ -104,6 +110,8 @@ class AuthorPostTest(BaseTestCase):
     """
     Checks that a specific post can be accessed and is valid.
     """
+    self.edit_session(id=self.authors[1].id)
+
     post = Post.objects.create(
         title=f"Another Post",
         description="A sample post.",
@@ -119,10 +127,12 @@ class AuthorPostTest(BaseTestCase):
     self.assertEquals(post.author.id, response1["author"]["id"])
     self.assertTrue(self._is_post_object(response1))
 
-  def test_getting_single_frient_post(self):
+  def test_getting_single_friend_post(self):
     """
     Check that a specific post can't be accessed when not friend, but is otherwise valid.
     """
+    self.edit_session(id=self.authors[1].id)
+
     post = Post.objects.create(
         title=f"Another Post",
         description="A sample post.",
@@ -155,6 +165,8 @@ class AuthorPostTest(BaseTestCase):
     """
     Check that a specific unlisted post can be accessed and is valid.
     """
+    self.edit_session(id=self.authors[0].id)
+
     post = Post.objects.create(
         title=f"Another Post",
         description="A sample post.",
@@ -240,6 +252,8 @@ class AuthorPostTest(BaseTestCase):
     Test delete on 1) non existent post and 2) existing post.
     """ 
     a1 = self.create_author()
+    self.edit_session(id=a1.id)
+
     payload = {
       "post_id": "non-existent-id",
       "author_id": a1.id

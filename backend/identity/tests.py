@@ -85,6 +85,8 @@ class AuthorTests(BaseTestCase):
     """
     Check the list of authors retrieved is valid.
     """
+    self.edit_session(id=self.authors[0].id)
+
     # Check that we only extract 5 authors from page 1
     response1 = self.client.get(reverse("authors"), { "size": 5 }).json()
     self.assertEquals(len(response1["items"]), 5)
@@ -108,6 +110,8 @@ class AuthorTests(BaseTestCase):
     """
     Check that details are accurate when retrieving a specific author
     """
+    self.edit_session(id=self.authors[0].id)
+
     response = self.client.get(reverse("author", kwargs={ "author_id": self.authors[1].id })).json()
     self.assertEquals(response["id"], self.authors[1].id)
     self.assertEquals(response["displayName"], self.authors[1].display_name)
@@ -131,6 +135,8 @@ class InboxMessageTests(BaseTestCase):
     """
     Get the contents of Author0's inbox and make some assertions.
     """
+    self.edit_session(id=self.authors[0].id)
+
     url = reverse('inbox', kwargs={
       "author_id": self.authors[0].id 
     })
@@ -142,6 +148,8 @@ class InboxMessageTests(BaseTestCase):
     """
     Emulate adding sending a random like to Author0's inbox
     """
+    self.edit_session(id=self.authors[0].id)
+
     url = reverse('inbox', kwargs={
       "author_id": self.authors[0].id 
     })
@@ -163,6 +171,8 @@ class InboxMessageTests(BaseTestCase):
     """
     Emulate a Follow Request message. 
     """
+    self.edit_session(id=self.authors[0].id)
+
     url = reverse('inbox', kwargs={
       "author_id": self.authors[0].id 
     })
@@ -184,6 +194,8 @@ class InboxMessageTests(BaseTestCase):
     """
     Get the contents of Author0's delete and assert nothing remains.
     """
+    self.edit_session(id=self.authors[0].id)
+    
     url = reverse('inbox', kwargs={
       "author_id": self.authors[0].id 
     })
