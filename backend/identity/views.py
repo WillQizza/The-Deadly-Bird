@@ -1,14 +1,14 @@
 from django.contrib.auth.models import User
 from django.http import HttpRequest
-from django.conf import settings
 from rest_framework import serializers
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from .models import Author, InboxMessage
+from deadlybird.authentication import RemoteOrSessionAuthenticated
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
-from likes.serializers import LikeSerializer, APIDocsLikeSerializer
+from likes.serializers import APIDocsLikeSerializer
 from likes.models import Like
 from posts.models import Post
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
@@ -24,6 +24,7 @@ from identity.util import check_authors_exist
     parameters=generate_pagination_query_schema()
 )
 @api_view(["GET"])
+@permission_classes([RemoteOrSessionAuthenticated])
 def authors(request: HttpRequest):
   """
   Retrieve list of authors

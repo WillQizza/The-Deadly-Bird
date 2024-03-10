@@ -174,8 +174,14 @@ APPEND_SLASH = True
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'deadlybird.authentication.RemoteNodeAuthentication'
+    ]
 }
 
 # Used for internode communication
 SITE_HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000/")
+SITE_REMOTE_AUTH_USERNAME = os.environ.get("REMOTE_AUTH_USERNAME", "username")
+SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")

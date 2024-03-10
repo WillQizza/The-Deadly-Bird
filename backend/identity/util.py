@@ -1,7 +1,5 @@
-from typing import Union
 from .models import Author
 from django.http import HttpRequest
-from rest_framework.response import Response
 
 def check_authors_exist(*author_ids: int) -> bool:
     """
