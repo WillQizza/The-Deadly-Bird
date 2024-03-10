@@ -7,5 +7,6 @@ urlpatterns = [
   path("authors/<str:author_id>/", view=views.author, name="author"),
   path("login/", view=views.login, name="login"),
   path("register/", view=views.register),
+  path("logout/", view=views.logout, name="logout"),
   path("authors/<str:author_id>/inbox/", view=views.inbox, name="inbox")
 ]

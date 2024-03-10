@@ -9,18 +9,20 @@ import { ReactComponent as House } from 'bootstrap-icons/icons/house.svg';
 import { ReactComponent as Person } from 'bootstrap-icons/icons/person.svg';
 import { ReactComponent as Globe } from 'bootstrap-icons/icons/globe.svg';
 import { ReactComponent as Gear } from 'bootstrap-icons/icons/gear.svg';
-import { getUserId } from "../../utils/auth";
+import { setUserId } from "../../utils/auth";
+import { apiRequest } from "../../utils/request";
+import { baseURL } from "../../constants";
 
 const Page = ({ children, selected, overflowScrollOff } : { children: React.ReactNode, selected?: SelectedNavigation, overflowScrollOff?: Boolean }) => {
      
     const [showSidebar, setShowSidebar] = useState(false);
     const toggleSidebar = () => setShowSidebar(!showSidebar);
-    const curAuthorId : string = getUserId()!; 
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     /** Function handling logout */
     const logOut = () => {
-        // TODO: Handle logout
+        setUserId(null);
+        apiRequest(`${baseURL}/api/logout/`, { method: "POST" });
         navigate("/");
     };
 

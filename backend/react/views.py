@@ -6,7 +6,8 @@ from identity.models import Author
 # Route prefixes that require authorization
 _PROTECTED_ROUTE_PREFIXES = [
     "/profile",
-    "/home"
+    "/home",
+    "/network"
 ]
 
 # Route to redirect to if unauthorized

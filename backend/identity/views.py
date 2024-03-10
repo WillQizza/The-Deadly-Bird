@@ -247,6 +247,14 @@ def login(request: HttpRequest):
       409: GenericErrorSerializer
     }
 )
+
+@api_view(["POST"])
+def logout(request: HttpRequest):
+  request.session.flush()
+  return Response({
+    "success": True
+  })
+
 @api_view(["POST"])
 def register(request: HttpRequest):
   # Check for required credentials
