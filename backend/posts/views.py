@@ -114,7 +114,7 @@ def posts(request: HttpRequest, author_id: str):
 
     post = Post.objects.create(
       title=request.POST["title"],
-      origin=generate_full_api_url("api"),
+      origin=generate_full_api_url("api", force_no_slash=True),
       description=request.POST["description"],
       content_type=request.POST["contentType"],
       content=request.POST["content"],

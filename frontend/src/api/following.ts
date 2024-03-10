@@ -73,7 +73,7 @@ export const apiInboxFollowRequest = async (
         console.log("from author: ", fromAuthor);
         console.log("to author: ", toAuthor);
 
-        const response = await apiRequest(`${toAuthor.host}authors/${toAuthor.id}/inbox/`, {
+        const response = await apiRequest(`${toAuthor.host}/authors/${toAuthor.id}/inbox/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -129,7 +129,7 @@ export const apiPutFollower = async (authorId: string, targetAuthorId: string, h
 : Promise<number> => {
 
     console.log("target host: ", host);
-    const response = await apiRequest(`${host}authors/${targetAuthorId}/followers/${authorId}`, {
+    const response = await apiRequest(`${host}/authors/${targetAuthorId}/followers/${authorId}`, {
         method: "PUT",
     });
     return response.status;

@@ -43,7 +43,7 @@ class PostSerializer(serializers.ModelSerializer):
   def get_source(self, object: Post) -> str:
     if object.source is None:
       # Source is not external, therefore it must be our API
-      return generate_full_api_url("api")
+      return generate_full_api_url("api", force_no_slash=True)
     else:
       return object.source.host
   
