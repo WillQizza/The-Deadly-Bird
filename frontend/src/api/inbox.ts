@@ -13,12 +13,11 @@ export const getInboxMessages = async (
 ): Promise<InboxResponse> => {
     
     const inboxAuthor = (await apiGetAuthor(authorID))!;
-    const response = await fetch(
-        `${inboxAuthor.host}/authors/${authorID}/inbox?page=${page}&size=${size}`
+    const response = await apiRequest(
+        `${inboxAuthor.host}/authors/${authorID}/inbox?page=${page}&size=${size}`,
+        {method: "GET"}
     );   
-    console.log("response:", response);
     const data: InboxResponse = await response.json(); 
-    console.log("response json:", data);
     return data;
 }
 
