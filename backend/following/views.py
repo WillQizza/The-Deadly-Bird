@@ -3,7 +3,6 @@ from django.http import HttpRequest
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import serializers
-from identity.util import check_authors_exist, validate_login_session
 from .models import Following, FollowingRequest
 from .serializers import FollowRequestSerializer, FollowingSerializer
 from identity.models import Author, InboxMessage
@@ -143,12 +142,6 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             "message": "Can not request to self"
         }, status=400)
 
-    # TODO: determine if authentication for PUT but not for others is right
-    if request.method == 'PUT':
-        session_valid = validate_login_session(request)
-        if not session_valid:
-            return Response({"error": True, "message": "Authentication required"}, status=403)
-    
     try:
         if request.method == 'DELETE':
             # Delete follower

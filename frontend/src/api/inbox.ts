@@ -16,7 +16,9 @@ export const getInboxMessages = async (
     const response = await fetch(
         `${inboxAuthor.host}/authors/${authorID}/inbox?page=${page}&size=${size}`
     );   
+    console.log("response:", response);
     const data: InboxResponse = await response.json(); 
+    console.log("response json:", data);
     return data;
 }
 

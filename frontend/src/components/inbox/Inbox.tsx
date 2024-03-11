@@ -133,11 +133,11 @@ const Inbox = () => {
         <div className={styles.cardContainer}>
             {/** Render inbox cards */}
             <div className={styles.cardContainer}>
-                {inboxMessages.map((message, idx) => (
+                {inboxMessages && inboxMessages.map((message, idx) => (
                     renderCard(message, idx)
                 ))}
             </div>
-            {(inboxMessages.length === 0)
+            {(inboxMessages && inboxMessages.length === 0)
                 ? "Empty..."
                 : <button className="btn btn-warning" onClick={async () => {
                     apiClearInbox(curAuthorId);

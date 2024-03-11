@@ -12,7 +12,6 @@ from likes.serializers import APIDocsLikeSerializer
 from likes.models import Like
 from posts.models import Post
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
-from .util import validate_login_session
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
 from .serializers import AuthorSerializer, InboxMessageSerializer
 from following.models import Following, FollowingRequest 
@@ -84,15 +83,7 @@ def author(request: HttpRequest, author_id: str):
     our_user_id = request.session["id"] if (request.session.has_key("id")) else None
     serializer = AuthorSerializer(author, context={ "id": our_user_id })
     return Response(serializer.data)
-  else:
-    # Ensure that we are logged in while attempting to edit a user
-    logged_in = validate_login_session(request)
-    if not logged_in:
-      return Response({
-        "error": True,
-        "message": "Not Authenticated"
-      }, status=401)
-
+  else: 
     # Retrieve author to edit
     try:
       author = Author.objects.get(id=author_id)
