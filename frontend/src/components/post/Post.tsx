@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Markdown from 'react-markdown';
 import styles from './Post.module.css';
 import { ContentType, Post as PostTy } from '../../api/types'
@@ -7,8 +7,10 @@ import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repea
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
+import { ReactComponent as Link} from 'bootstrap-icons/icons/link-45deg.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreateLike } from '../../api/likes';
+import { Overlay, Tooltip } from 'react-bootstrap';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -16,6 +18,9 @@ type PostOptions = PostTy & {
 };
 
 const Post: React.FC<PostOptions> = props => {
+    const linkButton = useRef(null);
+    const [linkTooltipShow, setLinkTooltipShow] = useState(false);
+
     // Set profile picture src
     let profileImgSrc: string = '';
     // Make sure profile image field exists and is not null or empty
@@ -95,6 +100,24 @@ const Post: React.FC<PostOptions> = props => {
                 <div className={styles.postButtons}>
                     {/* Share */}
                     <ArrowRepeat className={`${styles.postButton} ${styles.postShare}`}/>
+                    {/* Copy Link */}
+                    <Link
+                        ref={linkButton}
+                        className={`${styles.postButton} ${styles.postLink}`}
+                        onClick={() => {
+                            // Copy post link to user clipboard
+                            if (navigator.clipboard) {
+                                navigator.clipboard.writeText(`${baseURL}/profile/${props.author.id}/posts/${props.id}`);
+                                setLinkTooltipShow(true);
+                            }
+                        }}
+                        onMouseLeave={() => setLinkTooltipShow(false)}
+                    />
+                    <Overlay target={linkButton.current} show={linkTooltipShow} placement="bottom">
+                        <Tooltip id="link-tooltip">
+                            Link copied!
+                        </Tooltip>
+                    </Overlay>
                     {/* Like */}
                     <div>
                         {isLiked

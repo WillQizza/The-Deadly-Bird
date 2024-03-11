@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './PostStream.module.css';
 import Post from './Post';
-import { apiGetAuthorPosts, apiGetPosts, APIPostStreamTy } from '../../api/posts';
+import { apiGetAuthorPosts, apiGetPost, apiGetPosts, APIPostStreamTy } from '../../api/posts';
 import { apiGetPostLikes } from '../../api/likes';
 import { getUserId } from '../../utils/auth';
 import { LikedResponse, PostsResponse } from '../../api/types';
@@ -10,11 +10,13 @@ export enum PostStreamTy {
     Public,
     Author,
     Following,
+    Single,
 }
 
 export type PostStreamArgs = {
     type: PostStreamTy,
-    id: string | null,
+    authorID: string | null,
+    postID: string | null,
 }
 
 const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
@@ -31,12 +33,31 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = async () => {
         let response: PostsResponse;
-        if (props.type === PostStreamTy.Author && props.id) {   // Get profile posts
-            response = await apiGetAuthorPosts(props.id, currentPage.current, pageSize);
+        if (props.type === PostStreamTy.Author && props.authorID) {   // Get profile posts
+            response = await apiGetAuthorPosts(props.authorID, currentPage.current, pageSize);
         } else if (props.type === PostStreamTy.Public) {    // Get public posts
             response = await apiGetPosts(APIPostStreamTy.Public, currentPage.current, pageSize);
         } else if (props.type === PostStreamTy.Following) { // Get following posts
             response = await apiGetPosts(APIPostStreamTy.Following, currentPage.current, pageSize);
+        } else if (props.type === PostStreamTy.Single && props.authorID && props.postID) { // Get single post
+            let singleResponse = await apiGetPost(props.authorID, props.postID);
+            if (singleResponse !== null) {
+                response = {
+                    type: "posts",
+                    next: "",
+                    prev: "",
+                    items: [
+                        singleResponse
+                    ],
+                }
+            } else {
+                response = {
+                    type: "posts",
+                    next: "",
+                    prev: "",
+                    items: [],
+                }
+            }
         } else {
             console.error(`Unknown post stream type: ${props.type}`);
             return;

@@ -1,6 +1,6 @@
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
-import { PostsResponse } from "./types";
+import { PostResponse, PostsResponse } from "./types";
 
 /**
  * @description function to retreive the posts from an author
@@ -36,6 +36,21 @@ export const apiGetPosts = async (
     );    
     const data: PostsResponse = await response.json(); 
     return data;
+}
+
+export const apiGetPost = async (
+    authorID: string,
+    postID: string,
+): Promise<PostResponse | null> => {
+    const response = await apiRequest(
+        `${baseURL}/api/authors/${authorID}/posts/${postID}`
+    );
+    if (!response.ok) {
+        return null;
+    } else {
+        const data: PostResponse = await response.json();
+        return data;
+    }
 }
 
 /**

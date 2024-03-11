@@ -174,7 +174,7 @@ const ProfilePage: React.FC = () => {
             </div>
             {/** Users feed */}
             <div id={styles.feed}>
-                {authorId && <PostStream type={PostStreamTy.Author} id={authorId} />}
+                {authorId && <PostStream type={PostStreamTy.Author} authorID={authorId} postID={null} />}
             </div>
         </div>
     </Page>;

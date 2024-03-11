@@ -74,8 +74,16 @@
     margin: 10px;
 }
 
+.postButton:hover {
+    cursor: pointer;
+}
+
 .postShare:hover {
     color: limegreen;
+}
+
+.postLink:hover {
+    color: dodgerblue;
 }
 
 .postLike:hover {

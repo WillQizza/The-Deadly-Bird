@@ -41,10 +41,10 @@ const HomePage: React.FC = () => {
                     {/** Tab content containing post streams */}
                     <Tab.Content className={styles.tabContent} ref={tabContent}>
                         <Tab.Pane eventKey="Following">
-                            <PostStream type={PostStreamTy.Following} id={null} />
+                            <PostStream type={PostStreamTy.Following} authorID={null} postID={null} />
                         </Tab.Pane>
                         <Tab.Pane eventKey="Public">
-                            <PostStream type={PostStreamTy.Public} id={null} />
+                            <PostStream type={PostStreamTy.Public} authorID={null} postID={null} />
                         </Tab.Pane>
                     </Tab.Content>
                 </Tab.Container>

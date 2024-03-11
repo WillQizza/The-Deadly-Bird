@@ -11,6 +11,7 @@ import NetworkPage from './routes/network/NetworkPage';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import ProfilePage from './routes/profile/ProfilePage';
+import PostPage from './routes/post/PostPage';
 import PostCreationPage from './routes/post/PostCreationPage';
 import { getUserId } from './utils/auth';
 import SettingsPage from './routes/settings/SettingsPage';
@@ -29,6 +30,7 @@ root.render(
       <Route path="/profile" element={<Navigate to={`/profile/${getUserId()}`} />} />
       <Route path="/profile/settings" Component={SettingsPage} />
       <Route path="/profile/:id" Component={ProfilePage} />
+      <Route path="/profile/:author/posts/:post" Component={PostPage} />
       <Route path="/post" Component={PostCreationPage} />
       <Route path="/post/:id" Component={PostEditPage} />
     </Routes>
