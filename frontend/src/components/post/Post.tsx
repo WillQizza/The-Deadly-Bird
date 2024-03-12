@@ -7,10 +7,11 @@ import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repea
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
-import { ReactComponent as Link} from 'bootstrap-icons/icons/link-45deg.svg';
+import { ReactComponent as LinkIcon} from 'bootstrap-icons/icons/link-45deg.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreateLike } from '../../api/likes';
 import { Overlay, Tooltip } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -18,6 +19,7 @@ type PostOptions = PostTy & {
 };
 
 const Post: React.FC<PostOptions> = props => {
+    // Handle link button tooltip popup
     const linkButton = useRef(null);
     const [linkTooltipShow, setLinkTooltipShow] = useState(false);
 
@@ -75,11 +77,13 @@ const Post: React.FC<PostOptions> = props => {
             {/* Header */}
             <div className={styles.postHeader}>
                 {/* Profile picture */}
-                <img className={styles.postProfilePicture} src={profileImgSrc}></img>
+                <Link to={`/profile/${props.author.id}`}>
+                    <img className={styles.postProfilePicture} src={profileImgSrc}/>
+                </Link>
                 {/* Post info */}
                 <div className={styles.postInfo}>
                     {/* Author */}
-                    <div className={styles.postAuthor}>@{props.author.displayName}</div>
+                    <Link to={`/profile/${props.author.id}`} className={styles.postAuthor}>@{props.author.displayName}</Link>
                     {/* Sub info */}
                     <div className={styles.postSubInfo}>
                         {/* Date */}
@@ -101,13 +105,13 @@ const Post: React.FC<PostOptions> = props => {
                     {/* Share */}
                     <ArrowRepeat className={`${styles.postButton} ${styles.postShare}`}/>
                     {/* Copy Link */}
-                    <Link
+                    <LinkIcon
                         ref={linkButton}
                         className={`${styles.postButton} ${styles.postLink}`}
                         onClick={() => {
                             // Copy post link to user clipboard
                             if (navigator.clipboard) {
-                                navigator.clipboard.writeText(`${baseURL}/profile/${props.author.id}/posts/${props.id}`);
+                                navigator.clipboard.writeText(`${window.location.origin}/profile/${props.author.id}/posts/${props.id}`);
                                 setLinkTooltipShow(true);
                             }
                         }}
