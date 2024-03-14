@@ -5,6 +5,7 @@ import styles from "./ExploreView.module.css";
 import AuthorCarousel from "./AuthorCarousel";
 import { apiGetFollowing } from "../../api/following";
 import { getUserId } from "../../utils/auth";
+import { baseURL } from "../../constants";
 
 interface ExploreViewProps {
     viewType: string
@@ -18,8 +19,8 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
     const [pageSize, setPageSize] = useState<number>(5);
 
     /** Function to fetch authors for a specified page number */
-    const fetchSetAuthors = async (page: number) => {
-        const response = await apiGetAuthors(page, pageSize);
+    const fetchSetAuthors = async (page: number, includeHost?: string, excludeHost?:string) => {
+        const response = await apiGetAuthors(page, pageSize, includeHost, excludeHost);
         setExploreAuthors(response.items);
         setIsNextPageAvailable(response.items.length === pageSize);
     };
@@ -27,9 +28,9 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
     /** Gets authors based on view type */
     useEffect(() => {
         if (viewType === "local") {
-            fetchSetAuthors(curPage);
+            fetchSetAuthors(curPage, baseURL, undefined);
         } else if (viewType == "remote") {
-            setExploreAuthors([]);
+            fetchSetAuthors(curPage, undefined, baseURL);
         }
     }, [curPage]);
 

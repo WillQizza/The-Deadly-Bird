@@ -1,5 +1,5 @@
 # Utility file to factor out the large inbox view in views.py
-import os
+import requests
 from django.http import HttpRequest
 from rest_framework.response import Response
 from .models import Author, InboxMessage
@@ -46,6 +46,12 @@ def handle_follow_inbox(request: HttpRequest):
       if SITE_HOST_URL not in str(to_author.host):
         print("to_author is a foreign author")
         print(request.data)
+
+        # forward payload to receiving author. 
+        requests.post(to_author.host, data=request.data, headers={
+
+        })
+
       else:
         print("to_author is a local author")
         follow_req = FollowingRequest.objects.create(

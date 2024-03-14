@@ -9,10 +9,19 @@ import {
 /**
  * @description function to access the /authors view API.
  */
-export const apiGetAuthors = async (page: number, size: number) 
+export const apiGetAuthors = async (page: number, size: number, includeHost?: string, excludeHost?:string) 
     : Promise<AuthorsResponse> => 
-{    
-    const response = await apiRequest(`${baseURL}/api/authors/?page=${page}&size=${size}`);
+{   
+    let query: string = `page=${page}&size=${size}`;
+
+    if (includeHost) {
+        query += `&include_host=${encodeURIComponent(includeHost)}`;
+    }
+    if (excludeHost) {
+        query += `&exclude_host=${encodeURIComponent(excludeHost)}`;
+    }
+
+    const response = await apiRequest(`${baseURL}/api/authors/?${query}`);
     const data: AuthorsResponse = await response.json();
 
     return data;

@@ -28,8 +28,18 @@ def authors(request: HttpRequest):
   """
   Retrieve list of authors
   """
+ 
   # Get author queryset ordered by their id
   authors = Author.objects.all().order_by("id")
+
+  # Get query parameter filter if exists
+  include_host_filter = request.query_params.get('include_host', None)
+  exclude_host_filter = request.query_params.get('exclude_host', None)
+  if include_host_filter:
+    # authors = authors.filter(host=include_host_filter)
+    authors = authors.filter(host__icontains=include_host_filter)
+  elif exclude_host_filter:
+    authors = authors.exclude(host__icontains=exclude_host_filter)
 
   # Paginate the queryset
   paginator = Pagination("authors")
