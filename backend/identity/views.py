@@ -403,50 +403,9 @@ def inbox(request: HttpRequest, author_id: str):
       return Response({ "error": True, "message": "Not implemented yet." }, status=500)
 
     elif content_type == "Follow": 
-      to_author = request.data.get('object')
-      from_author = request.data.get('actor')
-      if not check_authors_exist(to_author["id"], from_author["id"]):
-        return Response({
-          "error": True,
-          "message": "An author provided does not exist"
-        }, status=404) 
+      from .inbox import handle_follow_inbox
+      return handle_follow_inbox(request)
 
-      local_author = Author.objects.get(id=from_author["id"])
-      foreign_author = Author.objects.get(id=to_author["id"])
-
-      if Following.objects.filter(author__id=local_author.id,
-                                  target_author__id=foreign_author.id).exists(): 
-          return Response({
-              "error": True,
-              "message": "Conflict: Author is already following"
-          }, status=409)
-
-      elif FollowingRequest.objects.filter(author__id=local_author.id, 
-          target_author__id=foreign_author.id).exists():
-              return Response({
-                  "error": True,
-                  "message": "Conflict: Outstanding request in existence"
-              }, status=409) 
-      try:
-        follow_req = FollowingRequest.objects.create(
-            target_author_id=foreign_author.id,
-            author_id=local_author.id
-        )
-        InboxMessage.objects.create(
-          author_id=foreign_author.id,
-          content_id=follow_req.id,
-          content_type=InboxMessage.ContentType.FOLLOW
-        ) 
-        return Response({
-          "error": False,
-          "message": "Successfuly created follow request and inbox message."
-        }, status=201)   
-      except:
-        return Response({
-            "error": True,
-            "message": "Failed to create FollowRequest or InboxMessage"
-        }, status=500) 
-      
     elif content_type == "comment":
       return Response({ "error": True, "message": "Not implemented yet." }, status=500)
     
