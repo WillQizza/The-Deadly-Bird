@@ -45,12 +45,34 @@ def handle_follow_inbox(request: HttpRequest):
       print("host in env: ", SITE_HOST_URL)
       if SITE_HOST_URL not in str(to_author.host):
         print("to_author is a foreign author")
-        print(request.data)
 
-        # forward payload to receiving author. 
-        requests.post(to_author.host, data=request.data, headers={
+        from nodes.util import get_auth_from_host
+        from django.urls import reverse
+        import json
 
-        })
+        url = reverse("inbox", kwargs={
+          "author_id": to_author.id
+        }) 
+        remote_host = to_author.host
+        base_host = remote_host.split('/api')[0]
+        
+        # print("url:", url)
+        # print("host:", remote_host)
+        # print("url:", base_host+url)
+        # print("auth:", get_auth_from_host(remote_host))
+        # print("data:", request.data)
+
+        res = requests.post(
+           url=base_host+url,
+           headers={'Content-Type': 'application/json'}, 
+           data=json.dumps(request.data), 
+           auth=get_auth_from_host(remote_host)
+        )
+
+        if res.status_code == 200: 
+          return Response({"error": False, "message": "Remote post OK"}, status=200)
+        else:
+          return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)
 
       else:
         print("to_author is a local author")
