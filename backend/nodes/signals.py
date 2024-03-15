@@ -17,11 +17,21 @@ def create_author_if_not_exists(data: dict[str, any]):
     Author.objects.get(id=data["id"])
   except Author.DoesNotExist:
     # TODO: RETHINK THIS OUT LATER: Problem is what if two nodes have an author with the same username?
-    User.objects.create(
-
+   
+    # Note: The remote user should never have to log in on our frontend, avoiding filling out these details for now.. 
+    created_user = User.objects.create_user(
+      username= str(data["host"]) + str(data["displayName"]), #just concat for now
+      email=None,
+      password=None
     )
-    Author.objects.create(
 
+    # Create author object from user object
+    Author.objects.create(
+      id=data["id"], #same id as remote object          
+      user=created_user,
+      display_name=data["displayName"],
+      host=data["host"],
+      profile_url=data["url"]
     )
 
 def create_post_if_not_exists(data: dict[str, any]):
@@ -30,10 +40,11 @@ def create_post_if_not_exists(data: dict[str, any]):
 @receiver(post_save, sender=Node)
 def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
   page = 1
-  auth = (instance.outgoing_username, instance.outgoing_username)
+  auth = (instance.outgoing_username, instance.outgoing_password)
   
   while True:
-    r = requests.get(format_node_api_url(instance, f"/authors/?page={page}"), auth=auth)
+    url = format_node_api_url(instance, f"/authors/?page={page}")
+    r = requests.get(url=url, auth=auth)
     if r.status_code != 200:
       # External node error
       print(f"An exception occurred while attempting to fetch authors from {instance.host} (status code = {r.status_code})")
@@ -54,4 +65,4 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
       create_author_if_not_exists(member)
 
       # Retrieve all of their posts (both friends and public)
-      fetch_all_posts()
+      # TODO: fetch_all_posts()
