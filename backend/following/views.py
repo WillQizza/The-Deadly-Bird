@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.http import HttpRequest
+from django.urls import reverse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import serializers
@@ -10,6 +11,9 @@ from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenti
 from deadlybird.pagination import Pagination, generate_pagination_query_schema
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
+from deadlybird.settings import SITE_HOST_URL
+from nodes.util import get_auth_from_host
+import requests
 
 @extend_schema(
     parameters=[
@@ -126,6 +130,7 @@ def followers(request, author_id: str):
         201: GenericSuccessSerializer
     }
 )
+
 @api_view(['DELETE', 'PUT', 'GET'])
 @permission_classes([(IsGetRequest & RemoteOrSessionAuthenticated) | ((IsDeleteRequest | IsPutRequest) & SessionAuthenticated)])
 def modify_follower(request, author_id: str, foreign_author_id: str): 
@@ -142,49 +147,68 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             "message": "Can not request to self"
         }, status=400)
 
-    try:
-        if request.method == 'DELETE':
-            # Delete follower
-            obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
-            obj.delete()
-            return Response({"error": False, "message": "Follower removed successfully."}, status=204)
+    following_author = Author.objects.filter(id=foreign_author_id).first()
+    followed_author = Author.objects.filter(id=author_id).first()
 
-        elif request.method == 'PUT':
-            try: 
-                # Get following relation or create one if none exist
-                Following.objects.get_or_create(
-                    author_id=foreign_author_id,
-                    target_author_id=author_id
-                )
-                try:
-                    # Accept follow request
-                    follow_req = FollowingRequest.objects.filter(
-                        author_id=foreign_author_id, 
-                        target_author_id=author_id
-                    ).first()
-                    # Remove follow request
-                    inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id)
-                    if inbox_msg:
-                        inbox_msg.delete()
-                    follow_req.delete()
-                    return Response({"error": False, "message": "Follower added successfully."}, status=201)
-                except:
-                    return Response({"error": True, "message": "Follower already added."}, status=409) 
-            except: 
-                return Response({"error": True, "message": "Failed to create follower."}, status=400)
+    if not following_author or not followed_author:
+        return Response({
+            "error": True,
+            "message": "Can not indentify one or both provided authors"
+        }, status=404)
+    
+    remote_request = True if SITE_HOST_URL not in str(following_author.host) else False
+    if remote_request:
+        remote_host = following_author.host
+        base_host = remote_host.split('/api')[0]
+        url = base_host + reverse("modify_follower", kwargs={
+            "author_id": author_id,
+            "foreign_author_id": foreign_author_id 
+        }) 
+        auth = get_auth_from_host(remote_host) 
+        
+    if request.method == "DELETE":
+        obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
+        obj.delete()
+        if remote_request: 
+            remote_res = requests.delete(url=url, auth=auth) 
+            if remote_res.status_code == 200:
+                print("success! unfollowed remote author: ", following_author.display_name)
+            else:
+                print("failed to unfollow remote author")
 
-        elif request.method == 'GET':
-            # Get serialized following relation
-            obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
-            serializer = FollowingSerializer(obj)
-            return Response(serializer.data)
+        return Response({"error": False, "message": "Follower removed successfully."}, status=204)
 
-    except Following.DoesNotExist:
-        # Return the appropriate error message and status
-        if request.method == 'GET':
-            return Response({"error": True, "message": "Follower does not exist."}, status=404)
-        return Response({"error": True, "message": "Unexpected error occurred."}, status=400)
+    elif request.method == "PUT": 
+        Following.objects.get_or_create(
+            author_id=foreign_author_id,
+            target_author_id=author_id
+        )
+        follow_req = FollowingRequest.objects.filter(
+            author_id=foreign_author_id, 
+            target_author_id=author_id
+        ).first()
 
+        if follow_req:
+            inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
+            if inbox_msg:
+                inbox_msg.delete()
+            follow_req.delete()
+
+        if remote_request:
+            # duplicate PUT on remote server
+            remote_res = requests.put(url=url, auth=auth)
+            if remote_res.status_code == 200:
+                print("sucess! local author now following remote author: ", following_author.display_name)
+            else:
+                print("failed to put remote author")
+
+        return Response({"error": False, "message": "Follower added successfully."}, status=201)
+    
+    elif request.method == 'GET':
+        obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
+        serializer = FollowingSerializer(obj)
+        return Response(serializer.data)
+    
 @extend_schema(
     parameters=[
         OpenApiParameter("local_author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with"),

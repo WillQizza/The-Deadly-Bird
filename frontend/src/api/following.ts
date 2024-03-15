@@ -122,11 +122,10 @@ export const apiDeleteFollower = async (authorId: string, foreignAuthorId: strin
  * @param authorId author that following
  * @param foreignAuthorId author that is being followed
  */
-export const apiPutFollower = async (authorId: string, targetAuthorId: string, host: string)
+export const apiPutFollower = async (authorId: string, targetAuthorId: string)
 : Promise<number> => {
 
-    console.log("target host: ", host);
-    const response = await apiRequest(`${host}/authors/${targetAuthorId}/followers/${authorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${targetAuthorId}/followers/${authorId}`, {
         method: "PUT",
     });
     return response.status;

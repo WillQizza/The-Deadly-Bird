@@ -48,11 +48,8 @@ const Inbox = () => {
     const renderRequestCard = (message: any, idx: number) => {
 
         /** Function for handling acceptance of follow request */
-        const followAccept = (author: Author, target_author: Author) => {
-            apiPutFollower(author.id, target_author.id, target_author.host) // put follower on remote 
-                .then(() => {
-                    apiPutFollower(author.id, target_author.id, author.host);  // put follower on local
-                }); 
+        const followAccept = (author: Author, target_author: Author) => { 
+            apiPutFollower(author.id, target_author.id);  
             setInboxMessages(prevMessages => prevMessages.filter((_, index) => index !== idx)); 
         }
 
