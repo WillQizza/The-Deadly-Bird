@@ -7,9 +7,11 @@ services:
       - database:/app/data
     ports:
       - 8000:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - DOCKER=1
-      - HOST_URL=http://localhost:8000
+      - HOST_URL=http://localhost:8000/
   node2:
     image: deadly-bird
     restart: always
@@ -17,11 +19,12 @@ services:
       - database2:/app/data
     ports:
       - 8001:8000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - DOCKER=1
-      - HOST_URL=http://localhost:8001
+      - HOST_URL=http://localhost:8001/
       - COOKIE_NAME=sessionid2
-
 volumes:
   database:
   database2:

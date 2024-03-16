@@ -35,6 +35,7 @@ ALLOWED_HOSTS = [
   'http://127.0.0.1:8000',
   'localhost',
   '127.0.0.1',
+  'host.docker.internal'
 ]
 CSRF_TRUSTED_ORIGINS = [
   'https://thedeadlybird-123769211974.herokuapp.com',
@@ -42,7 +43,9 @@ CSRF_TRUSTED_ORIGINS = [
   'http://localhost:3001',
   'http://localhost:8000',
   'http://127.0.0.1:3000',
-  'http://127.0.0.1:8000'
+  'http://127.0.0.1:8000',
+  'http://host.docker.internal:8000',
+  'http://host.docker.internal:8001'
 ]
 
 CORS_ALLOWED_ORIGINS  = ALLOWED_HOSTS
