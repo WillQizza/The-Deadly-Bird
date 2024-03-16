@@ -116,12 +116,23 @@ if IS_HEROKU_APP:
         )
     }
 else:
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db.sqlite3",
+    IS_DOCKER_APP = "DOCKER" in os.environ
+    if IS_DOCKER_APP:
+        print("[Docker Detected]")
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "data" / "db.sqlite3",
+            }
         }
-    }
+    else:
+        # Not docker
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
 
 
 # Password validation
@@ -185,3 +196,6 @@ REST_FRAMEWORK = {
 SITE_HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000/")
 SITE_REMOTE_AUTH_USERNAME = os.environ.get("REMOTE_AUTH_USERNAME", "username")
 SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")
+
+# In the case scenario of localhost testing, we can override the cookie name
+SESSION_COOKIE_NAME = os.environ.get("COOKIE_NAME", "sessionid")

@@ -20,8 +20,10 @@ WORKDIR /app/frontend
 COPY frontend/*.json .
 RUN pnpm install
 
-# Copy entire app so that postbuild.js can find the backend path to move static files to
-COPY . /app
+# Compile frontend
+COPY ./frontend/ /app/frontend/
+RUN mkdir -p /app/backend/react/static
+RUN mkdir -p /app/backend/react/templates
 RUN pnpm run build
 
 FROM python:3 AS backend
@@ -30,6 +32,7 @@ ENV PORT 8000
 ARG LIVE_HOST_URL "http://localhost:8000/"
 ARG AUTH_USERNAME "username"
 ARG AUTH_PASSWORD "password"
+ENV DOCKER 1
 
 ENV HOST_URL ${LIVE_HOST_URL}
 ENV REMOTE_AUTH_USERNAME ${AUTH_USERNAME}

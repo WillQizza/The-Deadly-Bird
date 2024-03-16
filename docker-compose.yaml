@@ -1,0 +1,27 @@
+version: "3"
+services:
+  node1:
+    image: deadly-bird
+    restart: always
+    volumes:
+      - database:/app/data
+    ports:
+      - 8000:8000
+    environment:
+      - DOCKER=1
+      - HOST_URL=http://localhost:8000
+  node2:
+    image: deadly-bird
+    restart: always
+    volumes:
+      - database2:/app/data
+    ports:
+      - 8001:8000
+    environment:
+      - DOCKER=1
+      - HOST_URL=http://localhost:8001
+      - COOKIE_NAME=sessionid2
+
+volumes:
+  database:
+  database2:
