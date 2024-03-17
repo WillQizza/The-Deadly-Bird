@@ -17,7 +17,9 @@
 }
 
 .imgPreviewContainer img {
-    max-width: 350px;
-    max-height: 350px;
+    min-width: 80%;
+    min-height: 80%;
+    max-width: 300px;
+    max-height: 300px;
     object-fit: contain;
 }
