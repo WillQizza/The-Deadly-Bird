@@ -1,7 +1,7 @@
 from django.urls import reverse
 from deadlybird.base_test import BaseTestCase
 from following.models import Following
-from .models import Post
+from .models import Comment, Post
 
 # Create your tests here.
 
@@ -268,3 +268,130 @@ class AuthorPostTest(BaseTestCase):
     }
     res = self.client.delete(reverse("post", kwargs=payload)) 
     self.assertTrue(res.status_code == 204)
+  
+  def _is_comment_object(self, obj):
+    """
+    Assert that the JSON comment object provided matches the API spec.
+    """
+    properties = ["type", "author", "comment", "contentType", "published", 
+                  "id"]
+    for property in properties:
+      if not property in obj:
+        return False
+    return True
+  
+  def test_getting_post_comments(self):
+    """
+    Check the list of comments retrieved for a post is valid.
+    """
+    self.edit_session(id=self.authors[0].id)
+
+    # Create comments on a post
+    post = Post.objects.create(
+        title=f"Sample Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.PUBLIC
+    )
+
+    Comment.objects.create(
+      post=post,
+      author=self.authors[1],
+      content="This is the first test comment.",
+      content_type=Comment.ContentType.PLAIN
+    )
+
+    Comment.objects.create(
+      post=post,
+      author=self.authors[0],
+      content="This is the second test comment.",
+      content_type=Comment.ContentType.MARKDOWN
+    )
+
+    # Check that the number of comments on each page is correct
+    response1 = self.client.get(reverse("comments", kwargs={ "post_id": post.id, "author_id": self.authors[0].id }), { "size": 1, "page": 1 }).json()
+    response2 = self.client.get(reverse("comments", kwargs={ "post_id": post.id, "author_id": self.authors[0].id }), { "size": 1, "page": 2 }).json()
+    self.assertEquals(len(response1["comments"]), 1)
+    self.assertEquals(len(response2["comments"]), 1)
+
+    # Check that each comment object is a valid comment
+    self.assertTrue(self._is_comment_object(response1["comments"][0]))
+    self.assertTrue(self._is_comment_object(response2["comments"][0]))
+  
+  def test_getting_comments_nopost(self):
+    """
+    Check that we handle trying to get comments for a post that does not exist.
+    """
+    self.edit_session(id=self.authors[0].id)
+    response = self.client.get(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": "random_nonexistent_post_id" }))
+    self.assertEquals(response.status_code, 404)
+
+  def test_invalid_comment_payload(self):
+    """
+    Check that not providing all valid comment form properties is handled.
+    """
+    self.edit_session(id=self.authors[0].id)
+    post = Post.objects.create(
+        title=f"Sample Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.PUBLIC
+    )
+    response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": post.id }))
+    self.assertEquals(response.status_code, 400)
+  
+  def test_invalid_comment_body_payload(self):
+    """
+    Check that providing comment form properties with invalid values is handled.
+    """
+    self.edit_session(id=self.authors[0].id)
+    post = Post.objects.create(
+        title=f"Sample Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.PUBLIC
+    )
+    response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": post.id }), {
+      "contentType": "text/",
+      "comment": ""
+    })
+    self.assertEquals(response.status_code, 400)
+
+  def test_valid_comment_payload(self):
+    """
+    Check that we can comment on a post.
+    """
+    self.edit_session(id=self.authors[1].id)
+    post = Post.objects.create(
+        title=f"Sample Post",
+        description="A sample post.",
+        content_type=Post.ContentType.PLAIN,
+        content="This is a test post.",
+        author=self.authors[0],
+        visibility=Post.Visibility.PUBLIC
+    )
+    response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": post.id }), {
+      "contentType": "text/plain",
+      "comment": "Hello World"
+    })
+    self.assertEquals(response.status_code, 201)
+
+    comment_exists = Comment.objects.all().filter(content="Hello World").exists()
+    self.assertTrue(comment_exists)
+  
+  def test_getting_comments_nopost(self):
+    """
+    Check that we cannot comment on a post that does not exist.
+    """
+    self.edit_session(id=self.authors[0].id)
+    response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": "random_nonexistent_post_id" }), {
+      "contentType": "text/plain",
+      "comment": "Hello World"
+    })
+    self.assertEquals(response.status_code, 404)
