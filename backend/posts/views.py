@@ -1,17 +1,19 @@
 import base64
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import serializers
 from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
+from .pagination import CommentsPagination
 from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.util import generate_full_api_url
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
 from following.util import is_friends
-from .serializers import PostSerializer
-from .models import Post, Author, Following
+from .serializers import CommentSerializer, PostSerializer
+from .models import Post, Author, Following, Comment
 from django.db.models import Q
 from .util import send_post_to_inboxes
 
@@ -189,6 +191,7 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     serialized_post = PostSerializer(post)
 
     return Response(serialized_post.data)
+  
   elif request.method == "DELETE":
     # Delete a single post. Can be initiated by local or remote host.
     print("recieved delete:", author_id, post_id)
@@ -355,3 +358,82 @@ def post_stream(request: HttpRequest, stream_type: str):
       "error": True,
       "message": "Invalid stream type."
     }, status=404)
+
+@api_view(["GET", "POST"])
+@permission_classes([ RemoteOrSessionAuthenticated ])
+def comments(request: HttpRequest, author_id: str, post_id: str):
+  # Check if the person has access to friend posts
+  can_see_friends = False
+  if "id" in request.session:
+    can_see_friends = (author_id == request.session["id"]) or \
+                        is_friends(author_id, request.session["id"])
+  
+  # Retrieve post, if allowed
+  try:
+    if can_see_friends:
+      post = Post.objects.get(id=post_id, author=author_id)
+    else:
+      post = Post.objects.get(
+          Q(id=post_id, author=author_id, visibility=Post.Visibility.PUBLIC) |
+          Q(id=post_id, author=author_id, visibility=Post.Visibility.UNLISTED)
+      )
+  except:
+    return Response({
+      "error": True,
+      "message": "Post not found."
+    }, status=404)
+  
+  if request.method == "GET":
+    # Get the comments on the post
+    comments = Comment.objects.all() \
+          .filter(post=post) \
+          .order_by("-published_date")
+    
+    # Paginate the comments
+    paginator = CommentsPagination()
+    comments_on_page = paginator.paginate_queryset(comments, request)
+    serialized_comments = CommentSerializer(comments_on_page, many=True)
+
+    # Return the serialized comments
+    url = request.build_absolute_uri(reverse("comments", kwargs={ "post_id": post_id, "author_id": author_id }))
+    return paginator.get_paginated_response(url, post_id, serialized_comments.data)
+  
+  else:
+    # Add a comment to post
+    # Check the request body for all the required fields
+    if (not "comment" in request.POST) \
+      or (not "contentType" in request.POST):
+      return Response({
+        "error": True,
+        "message": "Required field missing."
+      }, status=400)
+    
+    # Check that the request body contains valid data
+    if not (request.POST["contentType"] in Comment.ContentType.values) \
+      or not (len(request.POST["comment"]) > 0):
+      return Response({
+        "error": True,
+        "message": "Request body does not match required schema."
+      }, status=400)
+    
+    # Check that we are who we say we are
+    if (not "id" in request.session):
+      return Response({
+        "error": True,
+        "message": "You do not have permission to comment as this user."
+      }, status=401)
+
+    # Create the comment
+    author = get_object_or_404(Author, id=request.session["id"])
+
+    Comment.objects.create(
+      post=post,
+      author=author,
+      content_type=request.POST["contentType"],
+      content=request.POST["comment"]
+    )
+
+    return Response({
+      "error": False,
+      "message": "Comment created successfully."
+    }, status=201)

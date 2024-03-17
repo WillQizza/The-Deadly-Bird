@@ -32,9 +32,6 @@ class Comment(models.Model):
   class ContentType(models.TextChoices):
     MARKDOWN = "text/markdown"
     PLAIN = "text/plain"
-    APPLICATION_BASE64 = "application/base64"
-    PNG_BASE64 = "image/png;base64"
-    JPEG_BASE64 = "image/jpeg;base64"
     
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
   post = models.ForeignKey(Post, blank=False, null=False, on_delete=models.CASCADE)

@@ -4,20 +4,20 @@ from rest_framework import serializers
 from drf_spectacular.utils import inline_serializer, OpenApiParameter
 
 class CommentsPagination(PageNumberPagination):
-    page_size = 10                  # default page size
+    page_size = 5                  # default page size
     page_size_query_param = 'size'  # allow client to override the page size using this query parameter
     max_page_size = 100             # maximum limit of the page size
 
-    def get_paginated_response(self, data):
+    def get_paginated_response(self, url, post_id, data):
         return Response({
             "type": "comments",
-            "post": "", # TODO: Replace with site host of post
-            "id": "",   # TODO: Replace with site host of comments
+            "post": post_id,
+            "id": url,
             "next": self.get_next_link(),
             "prev": self.get_previous_link(),
             "comments": data,
-            "page": 0,  # TODO: Replace with page
-            "size": 0   # TODO: Replace with size
+            "page": self.page.number,
+            "size": self.page_size
         })
     
 def generate_comments_pagination_schema():
