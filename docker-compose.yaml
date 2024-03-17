@@ -1,7 +1,12 @@
 version: "3"
 services:
   node1:
-    image: deadly-bird
+    # image: deadly-bird
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BASE_URL: "http://localhost:8000"
     restart: always
     volumes:
       - database:/app/data
@@ -15,7 +20,12 @@ services:
       - REMOTE_AUTH_USERNAME=username
       - REMOTE_AUTH_PASSWORD=password
   node2:
-    image: deadly-bird
+    # image: deadly-bird
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BASE_URL: "http://localhost:8001"
     restart: always
     volumes:
       - database2:/app/data
