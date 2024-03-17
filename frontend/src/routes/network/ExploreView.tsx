@@ -27,6 +27,7 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
 
     /** Gets authors based on view type */
     useEffect(() => {
+        console.log("baseURL:", baseURL);
         if (viewType === "local") {
             fetchSetAuthors(curPage, baseURL, undefined);
         } else if (viewType == "remote") {

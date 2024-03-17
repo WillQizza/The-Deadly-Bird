@@ -6,6 +6,9 @@ from .models import Author, InboxMessage
 from following.models import Following, FollowingRequest 
 from identity.util import check_authors_exist
 from deadlybird.settings import SITE_HOST_URL
+from nodes.util import get_auth_from_host
+from django.urls import reverse
+import json
 
 def handle_follow_inbox(request: HttpRequest):
     """
@@ -46,32 +49,26 @@ def handle_follow_inbox(request: HttpRequest):
 
       if SITE_HOST_URL not in str(to_author.host):
         print("to_author is a foreign author")
-
-        from nodes.util import get_auth_from_host
-        from django.urls import reverse
-        import json
-
-        url = reverse("inbox", kwargs={
-          "author_id": to_author.id
-        }) 
-        remote_host = to_author.host
-        base_host = remote_host.split('/api')[0]
+        # url = reverse("inbox", kwargs={
+        #   "author_id": to_author.id
+        # }) 
+        # remote_host = to_author.host
         
-        res = requests.post(
-           url=base_host+url,
-           headers={'Content-Type': 'application/json'}, 
-           data=json.dumps(request.data), 
-           auth=get_auth_from_host(remote_host)
-        )
+        # res = requests.post(
+        #    url=remote_host+url,
+        #    headers={'Content-Type': 'application/json'}, 
+        #    data=json.dumps(request.data), 
+        #    auth=get_auth_from_host(remote_host)
+        # )
         
-        if res.status_code == 200: 
-          FollowingRequest.objects.create(
-            target_author_id=to_author.id,
-            author_id=from_author.id
-          )
-          return Response({"error": False, "message": "Remote post OK"}, status=200)
-        else:
-          return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)
+        # if res.status_code == 200: 
+        #   FollowingRequest.objects.create(
+        #     target_author_id=to_author.id,
+        #     author_id=from_author.id
+        #   )
+        #   return Response({"error": False, "message": "Remote post OK"}, status=200)
+        # else:
+        return Response({"error": True, "message": "Remote post Failed"}, status=500)
 
       else:
         print("to_author is a local author")
@@ -88,7 +85,8 @@ def handle_follow_inbox(request: HttpRequest):
         "error": False,
         "message": "Successfuly created follow request and inbox message."
       }, status=201)   
-    except:
+    except Exception as e:
+      print(f"exception: {e}")
       return Response({
           "error": True,
           "message": "Failed to create FollowRequest or InboxMessage"

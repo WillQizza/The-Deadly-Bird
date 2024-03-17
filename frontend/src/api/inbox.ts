@@ -14,7 +14,7 @@ export const getInboxMessages = async (
     
     const inboxAuthor = (await apiGetAuthor(authorID))!;
     const response = await apiRequest(
-        `${inboxAuthor.host}/authors/${authorID}/inbox?page=${page}&size=${size}`,
+        `${baseURL}/api/authors/${authorID}/inbox?page=${page}&size=${size}`,
         {method: "GET"}
     );   
     const data: InboxResponse = await response.json(); 
@@ -31,7 +31,7 @@ export const apiClearInbox = async (authorID: string): Promise<any> => {
         method: "DELETE"
     }; 
     const response = await apiRequest(
-        `${inboxAuthor.host}/authors/${authorID}/inbox`, init
+        `${baseURL}/api/authors/${authorID}/inbox`, init
     );   
     return response; 
 }
