@@ -16,6 +16,7 @@ from .pagination import InboxPagination, generate_inbox_pagination_query_schema,
 from .serializers import AuthorSerializer, InboxMessageSerializer
 from following.models import Following, FollowingRequest 
 from identity.util import check_authors_exist
+from deadlybird.settings import SITE_HOST_URL
 
 @extend_schema(
     operation_id="api_authors_retrieve_all",
@@ -44,6 +45,9 @@ def authors(request: HttpRequest):
   # Paginate the queryset
   paginator = Pagination("authors")
   page = paginator.paginate_queryset(authors, request)
+
+  # LOGGING
+  print("get authors: ", include_host_filter, exclude_host_filter)
 
   # Return serialized result
   our_user_id = request.session["id"] if (request.session.has_key("id")) else None
@@ -306,7 +310,7 @@ def register(request: HttpRequest):
     id=id,
     user=created_user,
     display_name=created_user.username,
-    host=generate_full_api_url(view="api", force_no_slash=True),
+    host=SITE_HOST_URL,
     profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })
   )
     
