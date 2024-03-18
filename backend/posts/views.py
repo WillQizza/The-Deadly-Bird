@@ -296,7 +296,7 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     methods=["POST"],
     request=None,
     responses={
-      200: GenericSuccessSerializer,
+      200: PostSerializer,
       400: GenericErrorSerializer,
       401: GenericErrorSerializer,
       404: GenericErrorSerializer
@@ -318,7 +318,7 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
   
   if post.origin_post != None:
     # We're sharing a shared post
-    Post.objects.create(
+    shared_post = Post.objects.create(
       title=post.title,
       origin=post.origin,
       source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
@@ -332,7 +332,7 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
     )
   else:
     # We're sharing a post that has never been shared before
-    Post.objects.create(
+    shared_post = Post.objects.create(
       title=post.title,
       origin=post.origin,
       source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
@@ -345,10 +345,7 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
       visibility=post.visibility
     )
 
-  return Response({
-    "error": False,
-    "message": "Shared"
-  }, status=201)
+  return Response(PostSerializer(shared_post).data, status=201)
 
 @extend_schema(
     parameters=[

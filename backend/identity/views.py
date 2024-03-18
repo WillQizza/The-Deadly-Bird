@@ -382,9 +382,6 @@ def inbox(request: HttpRequest, author_id: str):
           "message": "Incomplete like payload"
         }, status=400)
       
-
-      # TODO: For part two, we need a way to actually see if we're liking a post or a comment
-      # Assume it's a post we're liking (since that's all the support we have rn)
       like_type, id = like_object.split("/")[-2:]
       like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
 
