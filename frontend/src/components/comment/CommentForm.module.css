@@ -1,0 +1,25 @@
+.formContainer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding: 1rem;
+}
+
+.commentInputContainer {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.commentInput {
+    height: 100% !important;
+}
+
+.commentFormToolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0 1rem;
+}
