@@ -79,8 +79,9 @@ const Post: React.FC<PostOptions> = props => {
         const post = await apiSharePost(props.author.id, props.id);
     };
 
-    // Handle whether comments are shown or not
+    // Handle comment section and commenting
     const [showComments, setShowComments] = useState(false);
+    const [updateCount, setUpdateCount] = useState(0);  // for indicating to the comment section that it needs to refresh
 
     /** Post */
     return (
@@ -157,9 +158,18 @@ const Post: React.FC<PostOptions> = props => {
                         <Offcanvas.Title>Comment Section</Offcanvas.Title>
                         </Offcanvas.Header>
                         <Offcanvas.Body>
-                            <CommentSection postId={props.id} authorId={props.author.id}/>
+                            <CommentSection
+                                postId={props.id}
+                                authorId={props.author.id}
+                                updateCount={updateCount}
+                            />
                         </Offcanvas.Body>
-                        <CommentForm postId={props.id} authorId={props.author.id}/>
+                        <CommentForm
+                            postId={props.id}
+                            authorId={props.author.id}
+                            updateCount={updateCount}
+                            setUpdateCount={setUpdateCount}
+                        />
                     </Offcanvas>
                     {/* Edit */}
                     {

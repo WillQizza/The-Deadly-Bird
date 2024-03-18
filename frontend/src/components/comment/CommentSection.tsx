@@ -9,7 +9,8 @@ import { apiRequest } from "../../utils/request";
 
 interface CommentSectionProps {
     postId: string,
-    authorId: string
+    authorId: string,
+    updateCount: number  // indicates if the comment section needs to be updated
 }
 
 interface CommentProps {
@@ -25,7 +26,7 @@ interface CommentProps {
 }
 
 const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProps) => {
-    const { postId, authorId } = props;
+    const { postId, authorId, updateCount } = props;
     const [comments, setComments] = useState<CommentProps[]>([]);
     const [responseMessage, setResponseMessage] = useState<string>("");
     const commentRef = useRef<HTMLAnchorElement>(null);
@@ -33,7 +34,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
     const currentPage = useRef(1);
 
     /** Function for fetching more comments */
-    const fetchComments = async () => {
+    const fetchComments = async (reset?: boolean) => {
         // Request comments data
         const response = await apiRequest(
             `${baseURL}/api/authors/${authorId}/posts/${postId}/comments/?page=${currentPage.current}&size=${pageSize}`, {
@@ -60,7 +61,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
                     isLiked: false
                 });
             }
-            setComments([...comments, ...newComments]);
+            reset ? setComments(newComments) : setComments([...comments, ...newComments]);
         } else {
             setResponseMessage(data.message);
         }
@@ -104,6 +105,12 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
         }
     }, [comments])
 
+    /** Retrieves comments while scrolling */
+    useEffect(() => {
+        currentPage.current = 1;
+        fetchComments(true);
+    }, [updateCount])
+
     /** Comment section */
     return (
         <>
@@ -119,20 +126,20 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
             <ListGroup>
                 {comments.map((comment, index) => (
                     <ListGroup.Item key={comment.id} ref={index === comments.length - 1 ? commentRef : null}>
-                        <Row>
-                            <Col className={styles.commentImageContainer}>
+                        <div className={styles.commentContainer}>
+                            <div className={styles.commentImageContainer}>
                                 <Image src={comment.profileImg} roundedCircle width={50} height={50} />
-                            </Col>
-                            <Col className={styles.commentInfoContainer}>
-                                <a href={comment.authorUrl} className={styles.author}>{comment.authorName}</a>
+                            </div>
+                            <div className={styles.commentInfoContainer}>
+                                <a href={comment.authorUrl} className={styles.author}>@{comment.authorName}</a>
                                 <p className={styles.date}>{comment.date}</p>
                                 {comment.contentType == "text/markdown"? (
                                     <Markdown className={styles.comment}>{comment.comment}</Markdown>
                                 ) : (
                                     <p className={styles.comment}>{comment.comment}</p>
                                 )}
-                            </Col>
-                        </Row>
+                            </div>
+                        </div>
                     </ListGroup.Item>
                 ))}
             </ListGroup>

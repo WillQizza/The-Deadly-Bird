@@ -8,16 +8,17 @@ import { apiRequest } from "../../utils/request";
 
 interface CommentFormProps {
     postId: string,
-    authorId: string
+    authorId: string,
+    updateCount: number,
+    setUpdateCount: React.Dispatch<React.SetStateAction<number>>  // for signaling to the comment section to update its contents
 }
 
 const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
-    const { postId, authorId } = props;
+    const { postId, authorId, updateCount, setUpdateCount } = props;
     const [comment, setComment] = useState("");
     const [type, setType] = useState("text/plain");
     const [error, setError] = useState("");
     const [responseMessage, setResponseMessage] = useState("");
-    const navigate = useNavigate();
 
     /** Function for handling form submission */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -40,7 +41,8 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
 
             // Handle response
             if (response.ok) {
-                navigate(`/comments/${postId}`);
+                setComment("");
+                setUpdateCount(updateCount + 1);
             } else {
                 const data = await response.json();
                 setResponseMessage(data.message);
