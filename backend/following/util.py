@@ -1,6 +1,6 @@
 from .models import Following
 
-def is_friends(author_id: int, other_author_id: int):
+def is_friends(author_id: str, other_author_id: str):
   """
     If two authors are friends, then they should both be following one another.
 

@@ -345,6 +345,7 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
       visibility=post.visibility
     )
 
+  send_post_to_inboxes(shared_post.id, author.id)
   return Response(PostSerializer(shared_post).data, status=201)
 
 @extend_schema(
