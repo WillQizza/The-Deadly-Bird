@@ -3,6 +3,7 @@ from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
 from deadlybird.util import generate_full_api_url
 from .models import Post, Comment
+from identity.serializers import InboxAuthorSerializer
 from .pagination import generate_comments_pagination_schema
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -69,16 +70,18 @@ class PostSerializer(serializers.ModelSerializer):
     model = Post
     fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility', 'originAuthor', 'originId']
 
-class InboxPostDataSerializer(serializers.Serializer):
+class InboxPostSerializer(serializers.Serializer):
+  """
+  Validates a payload is a inbox post payload without the
+  unique constraints of the models getting in the way
+  """
   type = serializers.CharField(read_only=True, default="post")
+  id = serializers.CharField()
   title = serializers.CharField()
-  source = serializers.CharField()
-  origin = serializers.CharField()
-  
+  source = serializers.URLField()
+  origin = serializers.URLField()
+  content = serializers.CharField()
   contentType = serializers.CharField(source="content_type")
-  author = serializers.SerializerMethodField()
-  count = serializers.SerializerMethodField()
-  comments = serializers.SerializerMethodField()
-  commentsSrc = serializers.SerializerMethodField()
-  source = serializers.SerializerMethodField()
+  author = InboxAuthorSerializer()
   published = serializers.DateTimeField(source="published_date")
+  visibility = serializers.ChoiceField(choices=Post.Visibility.values)

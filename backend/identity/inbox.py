@@ -9,6 +9,7 @@ from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from posts.models import Post, Comment
 from likes.models import Like
+from posts.serializers import InboxPostSerializer
 import json
 from deadlybird.util import resolve_remote_route
   
@@ -152,4 +153,21 @@ def handle_post_inbox(request: HttpRequest):
   """
   This will only be called when a remote node is sending us a post
   """
+  print("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+  print(request.data)
+  serializer = InboxPostSerializer(data=request.data)
+  if not serializer.is_valid():
+    print(serializer.errors)
+    return Response({ "error": True, "message": "Invalid post payload" }, status=400)
   
+  print(serializer.data)
+
+  # Create the remote author if they do not exist in our system
+
+  # Check the source URL to extract the original poster to register in our system
+  # If original poster does not exist, register in our system
+
+  # Create the post if it does not exist in our system
+  # The post is considered shared if the original poster does not match the remote author it is assigned with
+
+  # Create inbox message

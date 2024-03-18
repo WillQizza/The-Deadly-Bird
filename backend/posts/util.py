@@ -4,7 +4,7 @@ from identity.models import InboxMessage
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from deadlybird.util import resolve_remote_route
-from .serializers import PostSerializer
+from .serializers import InboxPostSerializer
 from .models import Post
 import requests
 import json
@@ -26,7 +26,14 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       })
       auth = get_auth_from_host(follower.author.host)
 
-      payload = PostSerializer(post).data
+      if post.origin_post != None:
+        # This is a shared post, we need to make some modifications prior to sending
+        post.title = post.origin_post.title
+        post.content = post.origin_post.content
+        post.content_type = post.origin_post.content_type
+        post.author = post.origin_post.author
+
+      payload = InboxPostSerializer(post).data
       response = requests.post(
         url=url,
         headers={'Content-Type': 'application/json'}, 

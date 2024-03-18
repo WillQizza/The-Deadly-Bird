@@ -71,3 +71,33 @@ class InboxMessageSerializer(serializers.Serializer):
       pass
 
     return super().to_representation(instance)
+  
+class InboxAuthorSerializer(serializers.Serializer):
+  """
+  Validates a payload is a inbox author payload without the
+  unique constraints of the models getting in the way
+  """
+  type = serializers.CharField(read_only=True, default="author")
+  id = serializers.CharField()
+  host = serializers.URLField()
+  displayName = serializers.CharField(source="display_name")
+  url = serializers.URLField(source="profile_url")
+  github = serializers.URLField(allow_null=True)
+  profileImage = serializers.SerializerMethodField()
+
+  def get_profileImage(self, obj) -> str:
+    if isinstance(obj, Author):
+      profile_picture = obj.profile_picture
+    elif "profile_picture" in obj:
+      profile_picture = obj["profile_picture"]    
+
+    if profile_picture is not None and len(profile_picture) > 0:
+      return profile_picture
+    else:
+      # Return default avatar
+      return settings.SITE_HOST_URL + "static/default-avatar.png"
+
+  def to_internal_value(self, data):
+    return_data = super().to_internal_value(data)
+    return_data["profile_picture"] = data["profileImage"]
+    return return_data
