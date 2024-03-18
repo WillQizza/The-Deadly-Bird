@@ -53,7 +53,9 @@ class BaseTestCase(TestCase):
                 content_type=Post.ContentType.PLAIN,
                 content="This is a test post.",
                 author=author,
-                visibility=Post.Visibility.PUBLIC
+                visibility=Post.Visibility.PUBLIC,
+                source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+                origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
             )
             posts.append(post)
         return posts
@@ -130,7 +132,9 @@ class BaseTestCase(TestCase):
             content_type=Post.ContentType.PLAIN,
             content="This is a test post.",
             author=Author.objects.get(id=author_id),
-            visibility=Post.Visibility.PUBLIC    
+            visibility=Post.Visibility.PUBLIC,
+            source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+            origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }) 
         )
         self.posts.append(post)
         return post

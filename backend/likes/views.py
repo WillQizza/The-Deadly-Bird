@@ -81,6 +81,10 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
                 "message": "author post not Found"
             }, 404)
         
+        # If we shared a post, instead return the original post
+        if author_post.origin_post != None:
+            author_post = author_post.origin_post
+        
         # Get the likes for the post
         likes = Like.objects.all()\
             .filter(content_type=Like.ContentType.POST)\

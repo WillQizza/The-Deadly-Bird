@@ -12,6 +12,7 @@ import { getUserId } from '../../utils/auth';
 import { apiCreateLike } from '../../api/likes';
 import { Overlay, Tooltip } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { apiSharePost } from '../../api/posts';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -23,13 +24,13 @@ const Post: React.FC<PostOptions> = props => {
     const linkButton = useRef(null);
     const [linkTooltipShow, setLinkTooltipShow] = useState(false);
 
+    const postAuthor = props.originAuthor || props.author;
+
     // Set profile picture src
-    let profileImgSrc: string = '';
     // Make sure profile image field exists and is not null or empty
-    if ('profileImage' in props.author && props.author.profileImage && props.author.profileImage.trim() !== '') {
-        profileImgSrc = props.author.profileImage;
-    } else {
-        profileImgSrc = `${publicDir}/static/default-avatar.png`;
+    let profileImgSrc: string = `${publicDir}/static/default-avatar.png`;
+    if ('profileImage' in postAuthor && postAuthor.profileImage && postAuthor.profileImage.trim() !== '') {
+        profileImgSrc = postAuthor.profileImage;
     }
 
     // Format post date
@@ -57,7 +58,7 @@ const Post: React.FC<PostOptions> = props => {
         case ContentType.APPLICATION_BASE64:
         case ContentType.PNG_BASE64:
         case ContentType.JPEG_BASE64:
-            content = <img style={{ maxWidth: "100%" }} src={`${baseURL}/api/authors/${props.author.id}/posts/${props.id}/image`} alt="Image Post" />;
+            content = <img style={{ maxWidth: "100%" }} src={`${baseURL}/api/authors/${postAuthor.id}/posts/${props.id}/image`} alt="Image Post" />;
             break;
         default:
             content = <span>{props.content}</span>;
@@ -71,25 +72,27 @@ const Post: React.FC<PostOptions> = props => {
         await apiCreateLike(props.author.id, props.id);
     }
 
+    const handleShare = async () => {
+        const post = await apiSharePost(props.author.id, props.id);
+    };
+
     /** Post */
     return (
         <div className={styles.postContainer}>
             {/* Header */}
             <div className={styles.postHeader}>
                 {/* Profile picture */}
-                <Link to={`/profile/${props.author.id}`}>
+                <Link to={`/profile/${postAuthor.id}`}>
                     <img className={styles.postProfilePicture} src={profileImgSrc}/>
                 </Link>
                 {/* Post info */}
                 <div className={styles.postInfo}>
                     {/* Author */}
-                    <Link to={`/profile/${props.author.id}`} className={styles.postAuthor}>@{props.author.displayName}</Link>
+                    <Link to={`/profile/${postAuthor.id}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
                     {/* Sub info */}
                     <div className={styles.postSubInfo}>
                         {/* Date */}
                         <div className={styles.postSubInfoItem}>{postDate}</div>
-                        {/* Origin */}
-                        <div className={styles.postSubInfoItem}>{props.origin}</div>
                     </div>
                 </div>
             </div>
@@ -103,7 +106,9 @@ const Post: React.FC<PostOptions> = props => {
                 {/* Buttons */}
                 <div className={styles.postButtons}>
                     {/* Share */}
-                    <ArrowRepeat className={`${styles.postButton} ${styles.postShare}`}/>
+                    <ArrowRepeat 
+                        className={`${styles.postButton} ${styles.postShare}`}
+                        onClick={handleShare}/>
                     {/* Copy Link */}
                     <LinkIcon
                         ref={linkButton}
@@ -131,11 +136,11 @@ const Post: React.FC<PostOptions> = props => {
                     </div>
                     {/* Edit */}
                     {
-                        (props.author.id === getUserId()) ? (
+                        (postAuthor.id === getUserId()) ? (
                             <PencilSquare
                                 className={`${styles.postButton} ${styles.postEdit}`}
                                 onClick={(e) => {
-                                    document.location.href = `/post/${props.id}`;
+                                    document.location.href = `/post/${props.originId || props.id}`;
                                 }}
                             />
                         ) : null

@@ -10,11 +10,10 @@ from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from likes.serializers import APIDocsLikeSerializer
 from likes.models import Like
-from posts.models import Post
+from posts.models import Post, Comment
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
-from .serializers import AuthorSerializer, InboxMessageSerializer
-from following.models import Following, FollowingRequest 
+from .serializers import AuthorSerializer, InboxMessageSerializer 
 from identity.util import check_authors_exist
 from deadlybird.settings import SITE_HOST_URL
 
@@ -374,22 +373,37 @@ def inbox(request: HttpRequest, author_id: str):
     if content_type == "Like":
       # Ensure like data is valid data
       author_payload = request.data.get("author")
-      like_object_id = request.data.get("object")
+      like_object = request.data.get("object")
 
       # Ensure data exists
-      if (author_payload is None) or (like_object_id is None) or not ("id" in author_payload):
+      if (author_payload is None) or (like_object is None) or not ("id" in author_payload):
         return Response({
           "error": True,
           "message": "Incomplete like payload"
         }, status=400)
       
+
       # TODO: For part two, we need a way to actually see if we're liking a post or a comment
       # Assume it's a post we're liking (since that's all the support we have rn)
+      like_type, id = like_object.split("/")[-2:]
+      like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
+
+      try:
+        source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
+
+        # Special case in the scenario we are liking a shared post
+        if like_type == Like.ContentType.POST and source.origin_post != None:
+          source = source.origin_post
+      except (Post.DoesNotExist, Comment.DoesNotExist):
+        return Response({
+          "error": True,
+          "message": "Object does not exist"
+        }, status=404)
       
       # Check if like already exists
-      existing_like = Like.objects.filter(content_type=Like.ContentType.POST, 
+      existing_like = Like.objects.filter(content_type=like_type, 
                           send_author=author_payload["id"], 
-                          content_id=like_object_id).first()
+                          content_id=source.id).first()
       
       if existing_like is not None:
         return Response({
@@ -397,24 +411,26 @@ def inbox(request: HttpRequest, author_id: str):
           "message": "Like already exists"
         }, status=409)
       
-      try:
-        post = Post.objects.get(id=like_object_id)
-      except Post.DoesNotExist:
-        return Response({
-          "error": True,
-          "message": "Post does not exist"
-        }, status=404)
-      
       like = Like.objects.create(
           send_author_id=author_payload["id"],
-          receive_author_id=post.author.id,
-          content_id=post.id,
-          content_type=Like.ContentType.POST
+          receive_author_id=source.author.id,
+          content_id=source.id,
+          content_type=like_type
       )
       content_id = like.id
 
+      # Create inbox message
+      InboxMessage.objects.create(
+        author=source.author,
+        content_id=content_id,
+        content_type=InboxMessage.ContentType.LIKE
+      )
+
+      return Response({ "error": False, "message": "Success" })
+
     elif content_type == "post":
-      return Response({ "error": True, "message": "Not implemented yet." }, status=500)
+      from .inbox import handle_post_inbox
+      return handle_post_inbox(request)
 
     elif content_type == "Follow": 
       from .inbox import handle_follow_inbox
@@ -423,22 +439,8 @@ def inbox(request: HttpRequest, author_id: str):
     elif content_type == "comment":
       return Response({ "error": True, "message": "Not implemented yet." }, status=500)
     
-    # Add a new inbox message item
-    try:
-      InboxMessage.objects.create(
-        author_id=post.author.id,
-        content_id=content_id,
-        content_type=content_type
-      )
-      return Response({
-        "error": False,
-        "message": "Created inbox message"
-      }, status=201)
-    except:
-      return Response({
-        "error": True,
-        "message": "Failed to create inbox message"
-      }, status=400)
+    else:
+      return Response({ "error": True, "message": "Unknown inbox type" }, status=400)
   
   if request.method == "GET":
     # Return the list of inbox messages for the author   

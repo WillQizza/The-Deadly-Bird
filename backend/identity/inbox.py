@@ -92,3 +92,9 @@ def handle_follow_inbox(request: HttpRequest):
           "message": "Failed to create FollowRequest or InboxMessage"
       }, status=500) 
       
+
+def handle_post_inbox(request: HttpRequest):
+  """
+  This will only be called when a remote node is sending us a post
+  """
+  

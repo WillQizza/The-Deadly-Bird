@@ -18,13 +18,17 @@ class Post(models.Model):
     UNLISTED = "UNLISTED"
 
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
+  # Original post object (used only when sharing posts)
+  origin_post = models.ForeignKey("Post", blank=True, null=True, on_delete=models.CASCADE)
   title = models.CharField(max_length=255, blank=False, null=False)
-  source = models.ForeignKey(Node, blank=True, null=True, on_delete=models.CASCADE)
-  origin = models.CharField(max_length=255, blank=True, null=True)
+  source = models.URLField(blank=False, null=False)
+  origin = models.URLField(blank=False, null=False)
   description = models.CharField(max_length=255, blank=False, null=False)
   content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
   content = models.TextField(blank=False, null=False)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
+  # Original author (used only when sharing posts)
+  origin_author = models.ForeignKey(Author, blank=True, null=True, on_delete=models.CASCADE, related_name="origin_author")
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
   visibility = models.CharField(choices=Visibility.choices, max_length=8, blank=False, null=False)
 

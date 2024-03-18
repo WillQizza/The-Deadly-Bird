@@ -1,10 +1,7 @@
 version: "3"
 services:
   node1:
-    build:
-      context: .
-      args:
-        REACT_APP_BASE_URL: "http://localhost:8000"
+    image: deadly-bird:latest
     restart: always
     volumes:
       - database:/app/data
@@ -15,13 +12,11 @@ services:
     environment:
       - DOCKER=1
       - HOST_URL=http://localhost:8000/
+      - REACT_APP_BASE_URL=http://localhost:8000
       - REMOTE_AUTH_USERNAME=username
       - REMOTE_AUTH_PASSWORD=password
   node2:
-    build:
-      context: .
-      args:
-        REACT_APP_BASE_URL: "http://localhost:8001"
+    image: deadly-bird:latest
     restart: always
     volumes:
       - database2:/app/data
@@ -32,6 +27,7 @@ services:
     environment:
       - DOCKER=1
       - HOST_URL=http://localhost:8001/
+      - REACT_APP_BASE_URL=http://localhost:8001
       - COOKIE_NAME=sessionid2
       - REMOTE_AUTH_USERNAME=username
       - REMOTE_AUTH_PASSWORD=password
