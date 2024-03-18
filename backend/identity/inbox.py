@@ -108,15 +108,49 @@ def handle_like_inbox(request: HttpRequest):
       "message": "Incomplete like payload"
     }, status=400)
   
+  # Ensure the author sending the like exists
+  # In the case the author does not exist within our system, it's a remote author who's liking it.
+  author_who_created_like = create_remote_author_if_not_exists(author_payload)
+  
   like_type, id = like_object.split("/")[-2:]
   like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
 
   try:
-    source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
+    content_source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
 
     # Special case in the scenario we are liking a locally shared post
-    if like_type == Like.ContentType.POST and source.origin_post != None:
-      source = source.origin_post
+    if like_type == Like.ContentType.POST and content_source.origin_post != None:
+      content_source = content_source.origin_post
+
+    if like_type == Like.ContentType.POST and (SITE_HOST_URL not in content_source.source):
+      # We are liking a post that did not originate from this node, so forward the inbox there instead.
+      payload = {
+        "summary": request.data.get("summary"),
+        "type": "Like",
+        "author": InboxAuthorSerializer(author_who_created_like).data,
+        "object": content_source.source
+      }
+
+      url = resolve_remote_route(content_source.author.host, "inbox", {
+          "author_id": content_source.author.id
+      })
+
+      auth = get_auth_from_host(content_source.author.host)
+      response = requests.post(
+        url=url,
+        headers={'Content-Type': 'application/json'}, 
+        data=json.dumps(payload), 
+        auth=auth
+      )
+
+      if not response.ok:
+        print(f"An error occurred while propagating a remote like to \"{url}\" (status={response.status_code})")
+
+      return Response(response.json(), status=response.status_code)
+
+
+
+    # TODO: HOW TO HANDLE COMMENT LIKES THAT DON'T ORIGINATE FROM NODE?
   except (Post.DoesNotExist, Comment.DoesNotExist):
     return Response({
       "error": True,
@@ -126,7 +160,7 @@ def handle_like_inbox(request: HttpRequest):
   # Check if like already exists
   existing_like = Like.objects.filter(content_type=like_type, 
                       send_author=author_payload["id"], 
-                      content_id=source.id).first()
+                      content_id=content_source.id).first()
   
   if existing_like is not None:
     return Response({
@@ -136,15 +170,15 @@ def handle_like_inbox(request: HttpRequest):
   
   like = Like.objects.create(
       send_author_id=author_payload["id"],
-      receive_author_id=source.author.id,
-      content_id=source.id,
+      receive_author_id=content_source.author.id,
+      content_id=content_source.id,
       content_type=like_type
   )
   content_id = like.id
 
   # Create inbox message
   InboxMessage.objects.create(
-    author=source.author,
+    author=content_source.author,
     content_id=content_id,
     content_type=InboxMessage.ContentType.LIKE
   )
@@ -155,9 +189,12 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   """
   This will only be called when a remote node is sending us a post
   """
+  print("handling inbox post...")
+  print(request.data)
   serializer = InboxPostSerializer(data=request.data)
   if not serializer.is_valid():
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
+  print(serializer.data)
 
   # Create the remote author if they do not exist in our system
   author_data = serializer.data["author"]
@@ -232,6 +269,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
       )
     else:
       # This is a regular propagated post
+      print(f"propagating id {source_post_id}")
       post = Post.objects.create(
         id=source_post_id,
         title=serializer.data["title"],
@@ -253,3 +291,8 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
     content_id=post.id,
     content_type=InboxMessage.ContentType.POST
   )
+
+  return Response({
+    "error": False,
+    "message": "Sent"
+  })

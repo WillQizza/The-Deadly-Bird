@@ -117,6 +117,7 @@ def posts(request: HttpRequest, author_id: str):
 
     id = generate_next_id()
     post = Post.objects.create(
+      id=id,
       title=request.POST["title"],
       origin=generate_full_api_url("post", kwargs={ "author_id": author.id, "post_id": id }),
       source=generate_full_api_url("post", kwargs={ "author_id": author.id, "post_id": id }),

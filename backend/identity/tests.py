@@ -2,6 +2,7 @@ from rest_framework import status
 from django.urls import reverse
 from identity.models import InboxMessage
 from deadlybird.base_test import BaseTestCase
+from deadlybird.util import generate_full_api_url
 import json
 from identity.serializers import AuthorSerializer
 from likes.models import Like
@@ -161,7 +162,7 @@ class InboxMessageTests(BaseTestCase):
       "summary": "Summary",
       "type": "Like",
       "author": AuthorSerializer(self.authors[1]).data,
-      "object": post.id
+      "object": generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id })
     }
     
     response = self.client.post(url, data=json.dumps(request_body), content_type='application/json')

@@ -7,8 +7,13 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from deadlybird.serializers import GenericErrorSerializer
 from deadlybird.permissions import RemoteOrSessionAuthenticated
+from deadlybird.settings import SITE_HOST_URL
+from deadlybird.util import resolve_remote_route
+from nodes.util import get_auth_from_host
+from identity.models import Author
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .serializers import LikeSerializer, APIDocsLikeManySerializer
+import requests
 
 @extend_schema(
         responses={
@@ -81,6 +86,23 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
                 "message": "author post not Found"
             }, 404)
         
+        if SITE_HOST_URL not in author_post.source:
+            # This is a remote post! Fetch it from the source instead.
+            url = resolve_remote_route(author_post.author.host, "post_likes", {
+                "author_id": author_post.author.id,
+                "post_id": author_post.id
+            })
+            auth = get_auth_from_host(author_post.author.host)
+            response = requests.get(
+                url=url,
+                auth=auth
+            )
+
+            if not response.ok:
+                print(f"An error occurred while fetching remote likes of post {author_post.id} from {url}. (status_code={response.status_code})")
+            
+            return Response(response.json(), status=response.status_code)
+        
         # If we shared a post, instead return the original post
         if author_post.origin_post != None:
             author_post = author_post.origin_post
@@ -106,22 +128,42 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
 )
 @api_view(["GET"])
 @permission_classes([RemoteOrSessionAuthenticated])
-def liked(request: HttpRequest, author_id: int):
+def liked(request: HttpRequest, author_id: str):
     """
     author_id: author to get all likes originating from
     URL: ://service/authors/{AUTHOR_ID}/liked 
     """
-    if request.method == "GET":
-        # Get likes
-        liked = Like.objects.all()\
-            .filter(send_author_id=author_id)\
-            .order_by("id")
-        
-        # Paginate and return serialized results
-        serialized_liked = LikeSerializer(liked, many=True)
 
+    try:
+        author = Author.objects.get(id=author_id)
+    except Author.DoesNotExist:
         return Response({
             "type": "liked",
-            "items": serialized_liked.data
+            "items": []
         })
     
+    if SITE_HOST_URL not in author.host:
+        # Remote author. Forward request
+        url = resolve_remote_route(author.host, "liked", {
+            "author_id": author.id
+        })
+        auth = get_auth_from_host(author.host)
+        response = requests.get(
+            url=url,
+            auth=auth
+        )
+
+        return Response(response.json(), status=response.status_code)
+
+    # Get likes
+    liked = Like.objects.all()\
+        .filter(send_author_id=author_id)\
+        .order_by("id")
+    
+    # Paginate and return serialized results
+    serialized_liked = LikeSerializer(liked, many=True)
+
+    return Response({
+        "type": "liked",
+        "items": serialized_liked.data
+    })
