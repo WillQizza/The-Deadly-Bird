@@ -105,10 +105,7 @@ const ProfilePage: React.FC = () => {
                         if (followRequestRes === null) {
                             alert(`Failed to connect to remote host`);
                         } else {
-                            console.log(followRequestRes);
-                            if (!followRequestRes["error"]) {
-                                setFollowState(FollowState.PENDING);
-                            }
+                            alert(`Follow Request Sent!`);
                         }
                     }}>
                         Follow
