@@ -1,4 +1,4 @@
-import { ToggleButtonGroup, ToggleButton, Button, Form, FloatingLabel, Col, Row, Alert } from "react-bootstrap";
+import { Button, Form, FloatingLabel, Alert } from "react-bootstrap";
 import styles from "./CommentForm.module.css"
 import { useState } from "react";
 import { ReactComponent as SendIcon} from 'bootstrap-icons/icons/send.svg';
@@ -19,6 +19,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
     const [responseMessage, setResponseMessage] = useState("");
     const navigate = useNavigate();
 
+    /** Function for handling form submission */
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         // Handle comment input
@@ -49,6 +50,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
         }
     }
 
+    /** Comment form */
     return (
         <>
             {/** Alert for request errors */}
