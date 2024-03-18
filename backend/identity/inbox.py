@@ -7,9 +7,9 @@ from following.models import Following, FollowingRequest
 from identity.util import check_authors_exist
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
-from django.urls import reverse
+from posts.models import Post, Comment
+from likes.models import Like
 import json
-import os
 from deadlybird.util import resolve_remote_route
   
 
@@ -91,6 +91,62 @@ def handle_follow_inbox(request: HttpRequest):
           "message": "Failed to create FollowRequest or InboxMessage"
       }, status=500) 
       
+def handle_like_inbox(request: HttpRequest):
+  """
+  This will only be called when a local node likes a post/comment or a remote node liked one of our posts/comments
+  """
+  author_payload = request.data.get("author")
+  like_object = request.data.get("object")
+
+  # Ensure data exists
+  if (author_payload is None) or (like_object is None) or not ("id" in author_payload):
+    return Response({
+      "error": True,
+      "message": "Incomplete like payload"
+    }, status=400)
+  
+  like_type, id = like_object.split("/")[-2:]
+  like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
+
+  try:
+    source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
+
+    # Special case in the scenario we are liking a shared post
+    if like_type == Like.ContentType.POST and source.origin_post != None:
+      source = source.origin_post
+  except (Post.DoesNotExist, Comment.DoesNotExist):
+    return Response({
+      "error": True,
+      "message": "Object does not exist"
+    }, status=404)
+  
+  # Check if like already exists
+  existing_like = Like.objects.filter(content_type=like_type, 
+                      send_author=author_payload["id"], 
+                      content_id=source.id).first()
+  
+  if existing_like is not None:
+    return Response({
+      "error": True,
+      "message": "Like already exists"
+    }, status=409)
+  
+  like = Like.objects.create(
+      send_author_id=author_payload["id"],
+      receive_author_id=source.author.id,
+      content_id=source.id,
+      content_type=like_type
+  )
+  content_id = like.id
+
+  # Create inbox message
+  InboxMessage.objects.create(
+    author=source.author,
+    content_id=content_id,
+    content_type=InboxMessage.ContentType.LIKE
+  )
+
+  return Response({ "error": False, "message": "Success" })
 
 def handle_post_inbox(request: HttpRequest):
   """

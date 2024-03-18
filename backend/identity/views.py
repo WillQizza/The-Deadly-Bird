@@ -9,8 +9,6 @@ from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSeriali
 from deadlybird.util import generate_next_id, generate_full_api_url
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from likes.serializers import APIDocsLikeSerializer
-from likes.models import Like
-from posts.models import Post, Comment
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
 from .serializers import AuthorSerializer, InboxMessageSerializer 
@@ -372,59 +370,8 @@ def inbox(request: HttpRequest, author_id: str):
     content_id = None
     if content_type == "Like":
       # Ensure like data is valid data
-      author_payload = request.data.get("author")
-      like_object = request.data.get("object")
-
-      # Ensure data exists
-      if (author_payload is None) or (like_object is None) or not ("id" in author_payload):
-        return Response({
-          "error": True,
-          "message": "Incomplete like payload"
-        }, status=400)
-      
-      like_type, id = like_object.split("/")[-2:]
-      like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
-
-      try:
-        source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
-
-        # Special case in the scenario we are liking a shared post
-        if like_type == Like.ContentType.POST and source.origin_post != None:
-          source = source.origin_post
-      except (Post.DoesNotExist, Comment.DoesNotExist):
-        return Response({
-          "error": True,
-          "message": "Object does not exist"
-        }, status=404)
-      
-      # Check if like already exists
-      existing_like = Like.objects.filter(content_type=like_type, 
-                          send_author=author_payload["id"], 
-                          content_id=source.id).first()
-      
-      if existing_like is not None:
-        return Response({
-          "error": True,
-          "message": "Like already exists"
-        }, status=409)
-      
-      like = Like.objects.create(
-          send_author_id=author_payload["id"],
-          receive_author_id=source.author.id,
-          content_id=source.id,
-          content_type=like_type
-      )
-      content_id = like.id
-
-      # Create inbox message
-      InboxMessage.objects.create(
-        author=source.author,
-        content_id=content_id,
-        content_type=InboxMessage.ContentType.LIKE
-      )
-
-      return Response({ "error": False, "message": "Success" })
-
+      from .inbox import handle_like_inbox
+      return handle_like_inbox(request)
     elif content_type == "post":
       from .inbox import handle_post_inbox
       return handle_post_inbox(request)
