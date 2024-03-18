@@ -13,6 +13,7 @@ from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSeriali
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
+from deadlybird.util import resolve_remote_route
 import requests
 
 @extend_schema(
@@ -147,35 +148,18 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             "message": "Can not request to self"
         }, status=400)
 
-    following_author = Author.objects.filter(id=foreign_author_id).first()
-    followed_author = Author.objects.filter(id=author_id).first()
-
-    if not following_author or not followed_author:
+    foreign_author = Author.objects.filter(id=foreign_author_id).first()
+    author = Author.objects.filter(id=author_id).first()
+    
+    if not foreign_author or not author:
         return Response({
             "error": True,
             "message": "Can not indentify one or both provided authors"
         }, status=404)
-    
-    remote_request = True if SITE_HOST_URL not in str(following_author.host) else False
-    if remote_request:
-        remote_host = following_author.host
-        base_host = remote_host.split('/api')[0]
-        url = base_host + reverse("modify_follower", kwargs={
-            "author_id": author_id,
-            "foreign_author_id": foreign_author_id 
-        }) 
-        auth = get_auth_from_host(remote_host) 
-        
+   
     if request.method == "DELETE":
         obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
         obj.delete()
-        if remote_request: 
-            remote_res = requests.delete(url=url, auth=auth) 
-            if remote_res.status_code == 200:
-                print("success! unfollowed remote author: ", following_author.display_name)
-            else:
-                print("failed to unfollow remote author")
-
         return Response({"error": False, "message": "Follower removed successfully."}, status=204)
 
     elif request.method == "PUT": 
@@ -194,20 +178,28 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
                 inbox_msg.delete()
             follow_req.delete()
 
-        if remote_request:
-            # duplicate PUT on remote server
-            remote_res = requests.put(url=url, auth=auth)
-            if remote_res.status_code == 200:
-                print("sucess! local author now following remote author: ", following_author.display_name)
-            else:
-                print("failed to put remote author")
-
         return Response({"error": False, "message": "Follower added successfully."}, status=201)
     
     elif request.method == 'GET':
-        obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
-        serializer = FollowingSerializer(obj)
-        return Response(serializer.data)
+
+        if SITE_HOST_URL not in author.host:
+            # send to remote author
+            remote_route = resolve_remote_route(author.host, view="modify_follower", kwargs={
+                "author_id": author_id,
+                "foreign_author_id": foreign_author_id
+            })
+            auth = get_auth_from_host(author.host)
+            response = requests.get(url=remote_route, auth=auth) 
+            
+            if response.status_code == 200:
+                return Response(response.json())
+            else:
+                return Response({"error": True, "message": "Not following relationship found"}, status=404)
+        else:
+            obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
+            serializer = FollowingSerializer(obj)
+
+            return Response(serializer.data)
     
 @extend_schema(
     parameters=[
