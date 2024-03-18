@@ -496,13 +496,6 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         "error": True,
         "message": "Request body does not match required schema."
       }, status=400)
-    
-    # Check that we are who we say we are
-    if (not "id" in request.session):
-      return Response({
-        "error": True,
-        "message": "You do not have permission to comment as this user."
-      }, status=401)
 
     # Create the comment
     author = get_object_or_404(Author, id=request.session["id"])

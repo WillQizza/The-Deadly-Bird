@@ -4,15 +4,15 @@ import { useState } from "react";
 import { ReactComponent as SendIcon} from 'bootstrap-icons/icons/send.svg';
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../constants";
-import { getUserId } from "../../utils/auth";
 import { apiRequest } from "../../utils/request";
 
 interface CommentFormProps {
-    postId: string
+    postId: string,
+    authorId: string
 }
 
 const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
-    const { postId } = props;
+    const { postId, authorId } = props;
     const [comment, setComment] = useState("");
     const [type, setType] = useState("text/plain");
     const [error, setError] = useState("");
@@ -30,7 +30,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
                 contentType: type
             }).toString();
 
-            const response = await apiRequest(`${baseURL}/api/authors/${getUserId()}/posts/${postId}/comments`, {
+            const response = await apiRequest(`${baseURL}/api/authors/${authorId}/posts/${postId}/comments/`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
