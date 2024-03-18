@@ -183,18 +183,15 @@ def handle_like_inbox(request: HttpRequest):
     content_type=InboxMessage.ContentType.LIKE
   )
 
-  return Response({ "error": False, "message": "Success" })
+  return Response({ "error": False, "message": "Success" }, status=201)
 
 def handle_post_inbox(request: HttpRequest, target_author_id: str):
   """
   This will only be called when a remote node is sending us a post
   """
-  print("handling inbox post...")
-  print(request.data)
   serializer = InboxPostSerializer(data=request.data)
   if not serializer.is_valid():
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
-  print(serializer.data)
 
   # Create the remote author if they do not exist in our system
   author_data = serializer.data["author"]
@@ -294,5 +291,5 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
 
   return Response({
     "error": False,
-    "message": "Sent"
-  })
+    "message": "Success"
+  }, status=201)
