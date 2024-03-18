@@ -3,42 +3,13 @@ import json
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Node
-from identity.models import Author
-from django.contrib.auth.models import User
-from django.db.utils import IntegrityError
-from deadlybird.util import generate_next_id
+from .util import create_remote_author_if_not_exists
 
 def format_node_api_url(node: Node, route: str):
   if node.host.endswith("/"):
     return node.host[:-1] + route
   else:
     return node.host + route
-  
-def create_author_if_not_exists(data: dict[str, any]):
-  try:
-    Author.objects.get(id=data["id"])
-  except Author.DoesNotExist:
-   
-    try: 
-      created_user = User.objects.create_user(
-        # TODO: RETHINK THIS OUT LATER: 
-        # Problem is what if two nodes have an author with the same username?
-        username= data["displayName"] + "-" + generate_next_id()[0:7],
-        email=None,
-        password=None
-      )
-
-      # Create author object from user object
-      Author.objects.create(
-        id=data["id"], #same id as remote object          
-        user=created_user,
-        display_name=data["displayName"],
-        host=data["host"],
-        profile_url=data["url"]
-      )
-
-    except IntegrityError:
-      pass
 
 def create_post_if_not_exists(data: dict[str, any]):
   pass
@@ -69,7 +40,7 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
     
     for member in members:
       # Create author in our system if not already created
-      create_author_if_not_exists(member)
+      create_remote_author_if_not_exists(member)
 
       # Retrieve all of their posts (both friends and public)
       # TODO: fetch_all_posts()

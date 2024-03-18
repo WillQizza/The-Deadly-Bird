@@ -78,6 +78,7 @@ class InboxPostSerializer(serializers.Serializer):
   type = serializers.CharField(read_only=True, default="post")
   id = serializers.CharField()
   title = serializers.CharField()
+  description = serializers.CharField()
   source = serializers.URLField()
   origin = serializers.URLField()
   content = serializers.CharField()

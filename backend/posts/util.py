@@ -26,12 +26,9 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       })
       auth = get_auth_from_host(follower.author.host)
 
-      if post.origin_post != None:
-        # This is a shared post, we need to make some modifications prior to sending
-        post.title = post.origin_post.title
-        post.content = post.origin_post.content
-        post.content_type = post.origin_post.content_type
-        post.author = post.origin_post.author
+      if post.origin_author != None:
+        # This is a shared post, we need to update the author of the post
+        post.author = post.origin_author
 
       payload = InboxPostSerializer(post).data
       response = requests.post(

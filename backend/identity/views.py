@@ -367,14 +367,13 @@ def inbox(request: HttpRequest, author_id: str):
         "message": "Missing necessary request body parameters"
       }, status=400)
     
-    content_id = None
     if content_type == "Like":
       # Ensure like data is valid data
       from .inbox import handle_like_inbox
       return handle_like_inbox(request)
     elif content_type == "post":
       from .inbox import handle_post_inbox
-      return handle_post_inbox(request)
+      return handle_post_inbox(request, target_author_id=author_id)
 
     elif content_type == "Follow": 
       from .inbox import handle_follow_inbox
