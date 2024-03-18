@@ -1,0 +1,32 @@
+.commentImageContainer {
+    flex-grow: 0;
+}
+
+.commentImageContainer img {
+    border: 0.5px solid white;
+}
+
+.commentInfoContainer {
+    flex-grow: 1;
+}
+
+.commentInfoContainer .author {
+    text-decoration: none;
+    font-size: large;
+    color: var(--dark-teal);
+}
+
+.commentInfoContainer .author:hover {
+    color: var(--darker-teal);
+}
+
+.commentInfoContainer .comment {
+    color: var(--light-teal);
+    overflow-wrap: break-word;
+}
+
+.commentInfoContainer .date {
+    margin: 0;
+    font-size: smaller;
+    color: grey;
+}
