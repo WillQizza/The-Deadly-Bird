@@ -12,13 +12,16 @@
 
 # Get Node 20 and pnpm
 FROM node:20 AS frontend
-ENV REACT_APP_BASE_URL ""
 
 # Install Node.js dependencies
 RUN corepack enable pnpm
 WORKDIR /app/frontend
 COPY frontend/*.json .
 RUN pnpm install
+
+# Receive args from compose file, default to port 8000 for prod.
+ARG REACT_APP_BASE_URL "http://localhost:8000" 
+ENV REACT_APP_BASE_URL ${REACT_APP_BASE_URL}
 
 # Compile frontend
 COPY ./frontend/ /app/frontend/
@@ -50,4 +53,5 @@ COPY --from=frontend /app/backend/react/templates/ /app/react/templates/
 
 # Compile static files and run app
 RUN python3 manage.py collectstatic --noinput
-CMD python3 manage.py migrate && gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT --log-level debug
+ENV PYTHONUNBUFFERED TRUE
+CMD python3 manage.py migrate && gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT --access-logfile '-' --error-logfile '-'

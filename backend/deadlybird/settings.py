@@ -29,6 +29,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
   'thedeadlybird-123769211974.herokuapp.com',
+  'deadly-bird-justin-ce5a27ea0b51.herokuapp.com',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',
@@ -39,6 +40,7 @@ ALLOWED_HOSTS = [
 ]
 CSRF_TRUSTED_ORIGINS = [
   'https://thedeadlybird-123769211974.herokuapp.com',
+  'https://deadly-bird-justin-ce5a27ea0b51.herokuapp.com'
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',

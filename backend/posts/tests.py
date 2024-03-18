@@ -1,5 +1,6 @@
 from django.urls import reverse
 from deadlybird.base_test import BaseTestCase
+from deadlybird.util import generate_full_api_url
 from following.models import Following
 from .models import Comment, Post
 
@@ -21,7 +22,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.PUBLIC
+        visibility=Post.Visibility.PUBLIC,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     # Check that we only extract 5 posts from page 1
@@ -55,7 +58,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.FRIENDS
+        visibility=Post.Visibility.FRIENDS,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     # Should not have the friend post
@@ -91,7 +96,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.UNLISTED
+        visibility=Post.Visibility.UNLISTED,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     # Should not have the unlisted post
@@ -118,7 +125,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.PUBLIC
+        visibility=Post.Visibility.PUBLIC,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     # Check that we got the post we made
@@ -139,7 +148,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.FRIENDS
+        visibility=Post.Visibility.FRIENDS,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     # Check that we got the post we made
@@ -173,7 +184,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.UNLISTED
+        visibility=Post.Visibility.UNLISTED,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     # Check that we got the post we made
@@ -293,7 +306,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.PUBLIC
+        visibility=Post.Visibility.PUBLIC,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
 
     Comment.objects.create(
@@ -339,7 +354,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.PUBLIC
+        visibility=Post.Visibility.PUBLIC,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
     response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": post.id }))
     self.assertEquals(response.status_code, 400)
@@ -355,7 +372,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.PUBLIC
+        visibility=Post.Visibility.PUBLIC,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
     response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": post.id }), {
       "contentType": "text/",
@@ -374,7 +393,9 @@ class AuthorPostTest(BaseTestCase):
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
-        visibility=Post.Visibility.PUBLIC
+        visibility=Post.Visibility.PUBLIC,
+        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
     )
     response = self.client.post(reverse("comments", kwargs={ "author_id": self.authors[0].id, "post_id": post.id }), {
       "contentType": "text/plain",

@@ -3,9 +3,7 @@ import { Author } from "../../api/types";
 import { apiGetAuthors } from "../../api/authors";
 import styles from "./ExploreView.module.css";
 import AuthorCarousel from "./AuthorCarousel";
-import { apiGetFollowing } from "../../api/following";
-import { getUserId } from "../../utils/auth";
-import { baseURL } from "../../constants";
+import { apiGetHostname } from "../../api/host";
 
 interface ExploreViewProps {
     viewType: string
@@ -18,30 +16,37 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
     const [curPage, setCurPage] = useState<number>(1);
     const [pageSize, setPageSize] = useState<number>(5);
 
+
     /** Function to fetch authors for a specified page number */
-    const fetchSetAuthors = async (page: number, includeHost?: string, excludeHost?:string) => {
-        const response = await apiGetAuthors(page, pageSize, includeHost, excludeHost);
-        setExploreAuthors(response.items);
+    const fetchSetAuthors = async (page: number, viewType: string) => {
+        const hostRes = await apiGetHostname();
+        const host = hostRes.hostname;
+
+        const response = await apiGetAuthors(page, pageSize);
+
+        if (viewType === "local") {
+            const localAuthors = response.items.filter(author =>
+                author.host.includes(host)
+            );
+            setExploreAuthors(localAuthors);
+        } else {
+            const remoteAuthors = response.items.filter(author =>
+                !author.host.includes(host)
+            );
+            setExploreAuthors(remoteAuthors);
+        }
+
         setIsNextPageAvailable(response.items.length === pageSize);
     };
 
     /** Gets authors based on view type */
     useEffect(() => {
-        if (viewType === "local") {
-            fetchSetAuthors(curPage, baseURL, undefined);
-        } else if (viewType == "remote") {
-            fetchSetAuthors(curPage, undefined, baseURL);
-        }
+        fetchSetAuthors(curPage, viewType); 
     }, [curPage]);
 
     /** Explore view */
     return (
         <div className={styles.exploreViewContainer}>
-            {/* {exploreAuthors.length === 0
-                ? "None Found"
-                : "Found" 
-            } */}
-            {/** Page navigation */}
             <div className={styles.pageNo}>
                 <div className={`${styles.pageButton} ${styles.prevButton}`} onClick={() => curPage > 1 && setCurPage(curPage - 1)}>
                     &lt;

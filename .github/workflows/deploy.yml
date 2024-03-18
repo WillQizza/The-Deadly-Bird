@@ -34,3 +34,20 @@ jobs:
           LIVE_HOST_URL: https://thedeadlybird-123769211974.herokuapp.com/
           AUTH_USERNAME: ${{secrets.REMOTE_AUTH_USERNAME}}
           AUTH_PASSWORD: ${{secrets.REMOTE_AUTH_PASSWORD}}
+
+      - name: Heroku Deployment
+        uses: akhileshns/heroku-deploy@v3.13.15
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+          heroku_app_name: "deadly-bird-justin"
+          heroku_email: "wqi3@ualberta.ca"
+          stack: "container"
+          usedocker: true
+          docker_build_args: |
+            LIVE_HOST_URL
+            AUTH_USERNAME
+            AUTH_PASSWORD
+        env:
+          LIVE_HOST_URL: https://deadly-bird-justin-ce5a27ea0b51.herokuapp.com/
+          AUTH_USERNAME: ${{secrets.REMOTE_AUTH_USERNAME}}
+          AUTH_PASSWORD: ${{secrets.REMOTE_AUTH_PASSWORD}}

@@ -38,6 +38,8 @@ export type Post = {
     contentType: ContentType,
     content: string,
     author: Author,
+    originAuthor?: Author,
+    originId?: string,
     published: string,
     visibility: string,
 

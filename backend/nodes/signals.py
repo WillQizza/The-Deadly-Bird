@@ -5,6 +5,8 @@ from django.dispatch import receiver
 from .models import Node
 from identity.models import Author
 from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
+from deadlybird.util import generate_next_id
 
 def format_node_api_url(node: Node, route: str):
   if node.host.endswith("/"):
@@ -16,23 +18,27 @@ def create_author_if_not_exists(data: dict[str, any]):
   try:
     Author.objects.get(id=data["id"])
   except Author.DoesNotExist:
-    # TODO: RETHINK THIS OUT LATER: Problem is what if two nodes have an author with the same username?
    
-    # Note: The remote user should never have to log in on our frontend, avoiding filling out these details for now.. 
-    created_user = User.objects.create_user(
-      username= str(data["host"]) + str(data["displayName"]), #just concat for now
-      email=None,
-      password=None
-    )
+    try: 
+      created_user = User.objects.create_user(
+        # TODO: RETHINK THIS OUT LATER: 
+        # Problem is what if two nodes have an author with the same username?
+        username= data["displayName"] + "-" + generate_next_id()[0:7],
+        email=None,
+        password=None
+      )
 
-    # Create author object from user object
-    Author.objects.create(
-      id=data["id"], #same id as remote object          
-      user=created_user,
-      display_name=data["displayName"],
-      host=data["host"],
-      profile_url=data["url"]
-    )
+      # Create author object from user object
+      Author.objects.create(
+        id=data["id"], #same id as remote object          
+        user=created_user,
+        display_name=data["displayName"],
+        host=data["host"],
+        profile_url=data["url"]
+      )
+
+    except IntegrityError:
+      pass
 
 def create_post_if_not_exists(data: dict[str, any]):
   pass
@@ -43,7 +49,8 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
   auth = (instance.outgoing_username, instance.outgoing_password)
   
   while True:
-    url = format_node_api_url(instance, f"/authors/?page={page}")
+    url = format_node_api_url(instance, f"/api/authors/?page={page}")
+    print("signal url:", url, "auth: ", auth)
     r = requests.get(url=url, auth=auth)
     if r.status_code != 200:
       # External node error

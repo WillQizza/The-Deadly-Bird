@@ -1,12 +1,52 @@
 from following.models import Following
+from following.util import is_friends
 from identity.models import InboxMessage
+from deadlybird.settings import SITE_HOST_URL
+from nodes.util import get_auth_from_host
+from deadlybird.util import resolve_remote_route
+from .serializers import InboxPostSerializer
+from .models import Post
+import requests
+import json
 
-def send_post_to_inboxes(post_id: int, author_id: int):
-  
+def send_post_to_inboxes(post_id: str, author_id: str):
+  post = Post.objects.get(id=post_id)
+  if post.visibility == Post.Visibility.UNLISTED:
+    return  # Unlisted posts do not get sent to inboxes
+
   followers = Following.objects.filter(target_author=author_id)
   for follower in followers:
-    InboxMessage.objects.create(
-      author=follower.author,
-      content_id=post_id,
-      content_type=InboxMessage.ContentType.POST
-    )
+    if post.visibility == Post.Visibility.FRIENDS and not is_friends(author_id, follower.author.id):
+      continue  # Friend posts should only be sent to the inboxes of friends
+
+    if SITE_HOST_URL not in follower.author.host:
+      # Remote follower, we have to publish the post to their inbox
+      url = resolve_remote_route(follower.author.host, "inbox", {
+          "author_id": follower.author.id
+      })
+      auth = get_auth_from_host(follower.author.host)
+
+      if post.origin_post != None:
+        # This is a shared post, we need to make some modifications prior to sending
+        post.title = post.origin_post.title
+        post.content = post.origin_post.content
+        post.content_type = post.origin_post.content_type
+        post.author = post.origin_post.author
+
+      payload = InboxPostSerializer(post).data
+      response = requests.post(
+        url=url,
+        headers={'Content-Type': 'application/json'}, 
+        data=json.dumps(payload), 
+        auth=auth
+      )
+
+      if not response.ok:
+        print(f"Failed to send inbox message {post_id} to {url}")
+    else:
+      # Local follower, so we can just publish the inbox message and be done 
+      InboxMessage.objects.create(
+        author=follower.author,
+        content_id=post_id,
+        content_type=InboxMessage.ContentType.POST
+      )

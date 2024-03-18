@@ -1,6 +1,7 @@
+import { PostStreamTy } from "../components/post/PostStream";
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
-import { PostResponse, PostsResponse } from "./types";
+import { Post, PostResponse, PostsResponse } from "./types";
 
 /**
  * @description function to retreive the posts from an author
@@ -69,4 +70,23 @@ export const apiDeletePosts = async (authorId: string, postId: string): Promise<
 
     // const data: any = await response.json();
     return response;
+}
+
+/**
+ * @description share a post
+ * @param authorId author whose post is to be shared
+ * @param postId post of author to share
+ */
+export const apiSharePost = async (authorId: string, postId: string): Promise<Post|null> => {
+    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/posts/${postId}/share`, {
+        method: "POST"
+    });
+
+    const json = await response.json();
+
+    if (response.status === 201) {
+        return json as Post;
+    } else {
+        return null;
+    }
 }

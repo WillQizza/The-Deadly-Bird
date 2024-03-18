@@ -9,11 +9,12 @@ from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSeriali
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from .pagination import CommentsPagination
 from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
-from deadlybird.util import generate_full_api_url
+from deadlybird.util import generate_full_api_url, generate_next_id
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
 from following.util import is_friends
 from .serializers import CommentSerializer, PostSerializer
 from .models import Post, Author, Following, Comment
+from likes.models import Like
 from django.db.models import Q
 from .util import send_post_to_inboxes
 
@@ -114,9 +115,11 @@ def posts(request: HttpRequest, author_id: str):
     # Create the post
     author = get_object_or_404(Author, id=author_id)
 
+    id = generate_next_id()
     post = Post.objects.create(
       title=request.POST["title"],
-      origin=generate_full_api_url("api", force_no_slash=True),
+      origin=generate_full_api_url("post", kwargs={ "author_id": author.id, "post_id": id }),
+      source=generate_full_api_url("post", kwargs={ "author_id": author.id, "post_id": id }),
       description=request.POST["description"],
       content_type=request.POST["contentType"],
       content=request.POST["content"],
@@ -201,7 +204,19 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     if post is None:
       return Response({"error": True, "message": "post not found"}, status=404)
     # Delete post
-    try: 
+    try:
+      # Delete all likes associated with the post 
+      likes = Like.objects.all().filter(content_id=post.id, content_type=Like.ContentType.POST)
+      for like in likes:
+        like.delete()
+
+      # Delete all likes associated with the comments of this post
+      comments = Comment.objects.all().filter(post=post)
+      for comment in comments:
+        likes = Like.objects.all().filter(content_id=comment.id, content_type=Like.ContentType.COMMENT)
+        for like in likes:
+          like.delete()
+
       post.delete()
       return Response({"error": False, "message": "post deleted"}, status=204)
     except Exception as e:
@@ -260,12 +275,78 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     post.description = request.POST["description"]
     post.content_type = request.POST["contentType"]
     post.visibility = request.POST["visibility"]
+    post.content = request.POST["content"]
     post.save()
+
+    # Update all local posts that were shared from this original post
+    for shared_post in Post.objects.all().filter(origin_post=post):
+      shared_post.title = request.POST["title"]
+      shared_post.description = request.POST["description"]
+      shared_post.content_type = request.POST["contentType"]
+      shared_post.visibility = request.POST["visibility"]
+      shared_post.content = request.POST["content"]
+      shared_post.save()
 
     return Response({
       "error": False,
       "message": "Post updated successfully."
     }, status=200)
+
+@extend_schema(
+    methods=["POST"],
+    request=None,
+    responses={
+      200: PostSerializer,
+      400: GenericErrorSerializer,
+      401: GenericErrorSerializer,
+      404: GenericErrorSerializer
+    }
+)
+@api_view(["POST"])
+@permission_classes([ SessionAuthenticated ])
+def share_post(request: HttpRequest, author_id: str, post_id: str):
+  # TODO: Check that the user is allowed to share this post (Ritwik)
+  try:
+    post = Post.objects.get(id=post_id)
+  except Post.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Post could not be found."
+    }, status=404)
+  
+  author = Author.objects.get(id=request.session["id"])
+  
+  if post.origin_post != None:
+    # We're sharing a shared post
+    shared_post = Post.objects.create(
+      title=post.title,
+      origin=post.origin,
+      source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
+      description=post.description,
+      content_type=post.content_type,
+      content=post.content,
+      author=author,
+      origin_author=post.origin_author,
+      origin_post=post.origin_post,
+      visibility=post.visibility
+    )
+  else:
+    # We're sharing a post that has never been shared before
+    shared_post = Post.objects.create(
+      title=post.title,
+      origin=post.origin,
+      source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
+      description=post.description,
+      content_type=post.content_type,
+      content=post.content,
+      author=author,
+      origin_post=post,
+      origin_author=post.author,
+      visibility=post.visibility
+    )
+
+  send_post_to_inboxes(shared_post.id, author.id)
+  return Response(PostSerializer(shared_post).data, status=201)
 
 @extend_schema(
     parameters=[
