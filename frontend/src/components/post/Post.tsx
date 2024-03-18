@@ -8,11 +8,14 @@ import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
 import { ReactComponent as LinkIcon} from 'bootstrap-icons/icons/link-45deg.svg';
+import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreateLike } from '../../api/likes';
-import { Overlay, Tooltip } from 'react-bootstrap';
+import { Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
+import CommentForm from '../comment/CommentForm';
+import CommentSection from '../comment/CommentSection';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -76,6 +79,9 @@ const Post: React.FC<PostOptions> = props => {
         const post = await apiSharePost(props.author.id, props.id);
     };
 
+    // Handle whether comments are shown or not
+    const [showComments, setShowComments] = useState(false);
+
     /** Post */
     return (
         <div className={styles.postContainer}>
@@ -134,6 +140,27 @@ const Post: React.FC<PostOptions> = props => {
                             : <Heart className={`${styles.postButton} ${styles.postLike}`} onClick={handleLike}/>}
                         <span className={styles.likeCount}>{likeCount}</span>
                     </div>
+                    {/** Comment */}
+                    <Chat
+                        className={`${styles.postButton} ${styles.postComment}`}
+                        onClick={() => setShowComments(true) }
+                    />
+                    <Offcanvas show={showComments}
+                        onHide={() => setShowComments(false)}
+                        placement="bottom"
+                        scroll={true}
+                        backdrop={true}
+                        className={"h-75"}
+                        data-bs-theme={"dark"}
+                    >
+                        <Offcanvas.Header closeButton>
+                        <Offcanvas.Title>Comment Section</Offcanvas.Title>
+                        </Offcanvas.Header>
+                        <Offcanvas.Body>
+                            <CommentSection postId={props.id} authorId={props.author.id}/>
+                        </Offcanvas.Body>
+                        <CommentForm postId={props.id} authorId={props.author.id}/>
+                    </Offcanvas>
                     {/* Edit */}
                     {
                         (postAuthor.id === getUserId()) ? (

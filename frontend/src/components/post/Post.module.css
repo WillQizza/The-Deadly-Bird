@@ -103,7 +103,11 @@
 }
 
 .postEdit:hover {
-    color: dodgerblue;
+    color: goldenrod;
+}
+
+.postComment:hover {
+    color: mediumslateblue;   
 }
 
 .postTitle {
