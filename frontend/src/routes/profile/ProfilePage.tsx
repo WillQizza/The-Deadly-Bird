@@ -26,24 +26,20 @@ const ProfilePage: React.FC = () => {
     const [followerCount, setFollowerCount] = useState(-1);
     const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
 
-    const curAuthorId : string = getUserId()!; 
+    const loggedInAuthorId : string = getUserId()!; 
     const params = useParams();
     const userId = params["id"]!;
 
     /** Function to update the user's following */
     const updateFollowingState = (userId: string) => {
-
-        apiGetFollower(userId, curAuthorId)
+        console.log("check following state on node of author currently viewed.")
+        apiGetFollower(userId, loggedInAuthorId)
             .then(async response => {
                 if (response.status != 404) { 
                     setFollowState(FollowState.FOLLOWING);
+                } else {
+                    setFollowState(FollowState.NOT_FOLLOWING);
                 } 
-            });
-        apiGetFollowRequest(curAuthorId, userId)
-            .then(response => {
-                if (response.request_id) {
-                    setFollowState(FollowState.PENDING);
-                }
             });
     }
 
@@ -80,7 +76,7 @@ const ProfilePage: React.FC = () => {
     /** Function to render the follow button based on following state */
     const renderButton = () => {
         // Check that the user's profile is not the current user's
-        if (userId === curAuthorId) {
+        if (userId === loggedInAuthorId) {
             return;
         }
 
@@ -89,7 +85,7 @@ const ProfilePage: React.FC = () => {
             case FollowState.FOLLOWING:
                 return (
                     <button className="btn btn-danger" onClick={async () => {
-                        await apiDeleteFollower(authorId, curAuthorId)
+                        await apiDeleteFollower(authorId, loggedInAuthorId)
                             .then(status => {
                                 if (status && status === 204) {
                                     setFollowerCount(followerCount - 1);
@@ -100,20 +96,12 @@ const ProfilePage: React.FC = () => {
                         Unfollow
                     </button>
                 );
-            // Show pending button if a follow request was already sent
-            case FollowState.PENDING:
-                return (
-                    <button className="btn btn-warning" onClick={() => {
-                        alert("Follow Request Already Pending!");
-                    }}>
-                        Pending
-                    </button>
-                );
+
             // Show follow button if not following
             case FollowState.NOT_FOLLOWING:
                 return (
                     <button className="btn btn-primary" onClick={async () => {
-                        const followRequestRes = await apiInboxFollowRequest(curAuthorId, authorId); 
+                        const followRequestRes = await apiInboxFollowRequest(loggedInAuthorId, authorId); 
                         if (followRequestRes === null) {
                             alert(`Failed to connect to remote host`);
                         } else {

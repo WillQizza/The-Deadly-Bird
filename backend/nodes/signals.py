@@ -50,6 +50,7 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
   
   while True:
     url = format_node_api_url(instance, f"/api/authors/?page={page}")
+    print("signal url:", url, "auth: ", auth)
     r = requests.get(url=url, auth=auth)
     if r.status_code != 200:
       # External node error

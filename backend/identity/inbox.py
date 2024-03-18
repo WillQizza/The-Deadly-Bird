@@ -9,6 +9,9 @@ from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from django.urls import reverse
 import json
+import os
+from deadlybird.util import resolve_remote_route
+  
 
 def handle_follow_inbox(request: HttpRequest):
     """
@@ -17,8 +20,7 @@ def handle_follow_inbox(request: HttpRequest):
 
     scenario 2) to_author is on a local node.
         - save inbox message Object locally.
-    """ 
-    
+    """  
     to_author = request.data.get('object')
     from_author = request.data.get('actor')
     
@@ -44,34 +46,32 @@ def handle_follow_inbox(request: HttpRequest):
                 "message": "Conflict: Outstanding request in existence"
             }, status=409) 
     try:
-      print("to_author host: ", to_author.host)
-      print("host in env: ", SITE_HOST_URL)
+      receiving_host = to_author.host
+      if SITE_HOST_URL not in receiving_host:
+        # Remote Following Request
 
-      if SITE_HOST_URL not in str(to_author.host):
-        print("to_author is a foreign author")
-        # url = reverse("inbox", kwargs={
-        #   "author_id": to_author.id
-        # }) 
-        # remote_host = to_author.host
-        
-        # res = requests.post(
-        #    url=remote_host+url,
-        #    headers={'Content-Type': 'application/json'}, 
-        #    data=json.dumps(request.data), 
-        #    auth=get_auth_from_host(remote_host)
-        # )
-        
-        # if res.status_code == 200: 
-        #   FollowingRequest.objects.create(
-        #     target_author_id=to_author.id,
-        #     author_id=from_author.id
-        #   )
-        #   return Response({"error": False, "message": "Remote post OK"}, status=200)
-        # else:
-        return Response({"error": True, "message": "Remote post Failed"}, status=500)
+        url = resolve_remote_route(receiving_host, "inbox", {
+           "author_id": to_author.id
+        })
+
+        auth = get_auth_from_host(receiving_host)
+        if auth is not None and url is not None: 
+          print("auth: ", auth, "url: ", url, "data:", json.dumps(request.data))
+          res = requests.post(
+            url=url,
+            headers={'Content-Type': 'application/json'}, 
+            data=json.dumps(request.data), 
+            auth=auth
+          )
+          if res.status_code == 201:
+            return Response("Successfuly sent remote follow request", status=201) 
+          else:
+            return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)
+        else:
+           return Response("Failed to retrieve authentication and form url", status=500) 
 
       else:
-        print("to_author is a local author")
+        # Local Following Request
         follow_req = FollowingRequest.objects.create(
             target_author_id=to_author.id,
             author_id=from_author.id
@@ -85,8 +85,7 @@ def handle_follow_inbox(request: HttpRequest):
         "error": False,
         "message": "Successfuly created follow request and inbox message."
       }, status=201)   
-    except Exception as e:
-      print(f"exception: {e}")
+    except:
       return Response({
           "error": True,
           "message": "Failed to create FollowRequest or InboxMessage"
