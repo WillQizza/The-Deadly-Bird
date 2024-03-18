@@ -316,7 +316,7 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
   
   author = Author.objects.get(id=request.session["id"])
   
-  if post.origin_post != None:
+  if post.origin_author != None:
     # We're sharing a shared post
     shared_post = Post.objects.create(
       title=post.title,

@@ -1,16 +1,18 @@
 # Utility file to factor out the large inbox view in views.py
 import requests
+import json
 from django.http import HttpRequest
+from django.contrib.auth.models import User
 from rest_framework.response import Response
 from .models import Author, InboxMessage
 from following.models import Following, FollowingRequest 
 from identity.util import check_authors_exist
+from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
-from nodes.util import get_auth_from_host
+from nodes.util import get_auth_from_host, create_remote_author_if_not_exists, get_host_from_api_url
 from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer
-import json
 from deadlybird.util import resolve_remote_route
   
 
@@ -112,7 +114,7 @@ def handle_like_inbox(request: HttpRequest):
   try:
     source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
 
-    # Special case in the scenario we are liking a shared post
+    # Special case in the scenario we are liking a locally shared post
     if like_type == Like.ContentType.POST and source.origin_post != None:
       source = source.origin_post
   except (Post.DoesNotExist, Comment.DoesNotExist):
@@ -149,25 +151,105 @@ def handle_like_inbox(request: HttpRequest):
 
   return Response({ "error": False, "message": "Success" })
 
-def handle_post_inbox(request: HttpRequest):
+def handle_post_inbox(request: HttpRequest, target_author_id: str):
   """
   This will only be called when a remote node is sending us a post
   """
-  print("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-  print(request.data)
   serializer = InboxPostSerializer(data=request.data)
   if not serializer.is_valid():
-    print(serializer.errors)
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
-  
-  print(serializer.data)
 
   # Create the remote author if they do not exist in our system
+  author_data = serializer.data["author"]
+  author = create_remote_author_if_not_exists(author_data)
 
   # Check the source URL to extract the original poster to register in our system
+  source_url = serializer.data["source"]
+  source_author_id, _, source_post_id = source_url.split("/")[-3:]
+
   # If original poster does not exist, register in our system
+  source_author = None
+  if author.id != source_author_id:
+    # Get the source author's information
+    source_host = get_host_from_api_url(source_url)
+    url = resolve_remote_route(source_host, "author", {
+      "author_id": source_author_id
+    })
+    auth = get_auth_from_host(source_host)
+    if auth is None or url is None:
+      print(f"Failed to get source author from \"{source_url}\" due to missing credentials or url")
+      return Response({ "error": True, "message": "Missing node credentials for source author" }, status=500)
+    
+    res = requests.get(
+      url=url,
+      auth=auth
+    )
+    if not res.ok:
+      print(f"Failed to get source author from \"{url}\" using credentials.")
+      return Response({ "error": True, "message": "Failed to GET source author" }, status=500)
+
+    source_author_serializer = InboxAuthorSerializer(data=res.json())
+    if not source_author_serializer.is_valid():
+      print(f"Failed to parse source author JSON from \"{url}\"")
+      return Response({ "error": True, "message": "Invalid source author JSON format" }, status=500)
+    
+    source_author = create_remote_author_if_not_exists(source_author_serializer["data"])
 
   # Create the post if it does not exist in our system
   # The post is considered shared if the original poster does not match the remote author it is assigned with
+  try:
+    post = Post.objects.get(id=source_post_id)
+  except Post.DoesNotExist:
+    if source_author != None:
+      # This is a propagated shared post
+      origin_post_id = serializer.data["origin"].split("/")[-1]
+      original_shared_post = Post.objects.create(
+        id=origin_post_id,
+        title=serializer.data["title"],
+        source=serializer.data["source"],
+        origin=serializer.data["origin"],
+        description=serializer.data["description"],
+        content_type=serializer.data["contentType"],
+        content=serializer.data["content"],
+        author=author,
+        published_date=serializer.data["published"],
+        visibility=serializer.data["visibility"]
+      )
+
+      post = Post.objects.create(
+        id=source_post_id,
+        author=source_author, # The source author is the one who shared the post
+        origin_author=author,  # The origin_author is the one who originally posted the post
+        origin_post=original_shared_post,
+        title=serializer.data["title"],
+        source=serializer.data["source"],
+        origin=serializer.data["origin"],
+        description=serializer.data["description"],
+        content_type=serializer.data["contentType"],
+        content=serializer.data["content"],
+        published_date=serializer.data["published"],
+        visibility=serializer.data["visibility"]
+      )
+    else:
+      # This is a regular propagated post
+      post = Post.objects.create(
+        id=source_post_id,
+        title=serializer.data["title"],
+        source=serializer.data["source"],
+        origin=serializer.data["origin"],
+        description=serializer.data["description"],
+        content_type=serializer.data["contentType"],
+        content=serializer.data["content"],
+        author=author,
+        published_date=serializer.data["published"],
+        visibility=serializer.data["visibility"]
+      )
+
+  target_author = Author.objects.get(id=target_author_id)
 
   # Create inbox message
+  InboxMessage.objects.create(
+    author=target_author,
+    content_id=post.id,
+    content_type=InboxMessage.ContentType.POST
+  )
