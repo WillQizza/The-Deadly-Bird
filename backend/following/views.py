@@ -192,9 +192,31 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             response = requests.get(url=remote_route, auth=auth) 
             
             if response.status_code == 200:
-                return Response(response.json())
-            else:
+                # synrchonize with remote
+                existing_request = FollowingRequest.objects.filter(
+                    author_id=foreign_author_id, target_author_id=author_id
+                ).first()
+                if existing_request:
+                    Following.objects.get_or_create(
+                        author_id=foreign_author_id,
+                        target_author_id=author_id
+                    )
+                    existing_request.delete()
+                    return Response(response.json())
+                else:
+                    return Response({"message": "prerequisite follow request object missing."}, status=404)
+            elif response.status_code == 404:
+                existing_follow = Following.objects.filter(
+                    author_id=foreign_author_id, target_author_id=author_id
+                ).first()
+                if existing_follow:
+                    # synchronize with remote
+                    existing_follow.delete()
                 return Response({"error": True, "message": "Not following relationship found"}, status=404)
+            else:
+                return Response({"error": True, 
+                                 "message": f"Remote node failed with status {response.status_code}"
+                                }, status=response.status_code)
         else:
             obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
             serializer = FollowingSerializer(obj)
