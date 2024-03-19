@@ -70,6 +70,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
                     {/** Input */}
                     <Form.Control
                         placeholder=""
+                        as="textarea"
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         isInvalid={!!error}
