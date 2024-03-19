@@ -113,9 +113,12 @@ const Post: React.FC<PostOptions> = props => {
                 {/* Buttons */}
                 <div className={styles.postButtons}>
                     {/* Share */}
-                    <ArrowRepeat 
-                        className={`${styles.postButton} ${styles.postShare}`}
-                        onClick={handleShare}/>
+                    {props.visibility === "PUBLIC" && (
+                        <ArrowRepeat
+                            className={`${styles.postButton} ${styles.postShare}`}
+                            onClick={handleShare}
+                        />
+                    )}
                     {/* Copy Link */}
                     <LinkIcon
                         ref={linkButton}
