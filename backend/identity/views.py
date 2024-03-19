@@ -153,7 +153,7 @@ def author(request: HttpRequest, author_id: str):
     # Update bio
     if "bio" in request.POST:
       bio = request.POST["bio"]
-      if (0 < len(bio) < 255):
+      if (0 <= len(bio) < 255):
         author.bio = bio
       else:
         error = "Invalid bio length"
