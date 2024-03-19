@@ -9,11 +9,11 @@ from following.models import Following, FollowingRequest
 from identity.util import check_authors_exist
 from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
-from nodes.util import get_auth_from_host, create_remote_author_if_not_exists, get_host_from_api_url
+from nodes.util import get_auth_from_host, create_remote_author_if_not_exists
 from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer
-from deadlybird.util import resolve_remote_route
+from deadlybird.util import resolve_remote_route, get_host_from_api_url
   
 
 def handle_follow_inbox(request: HttpRequest):
@@ -193,31 +193,30 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   if not serializer.is_valid():
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
 
-  # Create the remote author if they do not exist in our system
+  # Create the remote author if they do not exist in our system (origin author)
   author_data = serializer.data["author"]
-  author = create_remote_author_if_not_exists(author_data)
+  origin_author = create_remote_author_if_not_exists(author_data)
 
-  # Check the source URL to extract the original poster to register in our system
+  origin_url = serializer.data["origin"]
+  origin_author_id, _, origin_post_id = origin_url.split("/")[-3:]
+
+  # Ensure the source author also exists in our systems
   source_url = serializer.data["source"]
   source_author_id, _, source_post_id = source_url.split("/")[-3:]
-
-  # If original poster does not exist, register in our system
-  source_author = None
-  if author.id != source_author_id:
-    # Get the source author's information
+  try:
+    source_author = Author.objects.get(id=source_author_id)
+  except Author.DoesNotExist:
+    # Source author does not exist in our systems. Register them
     source_host = get_host_from_api_url(source_url)
     url = resolve_remote_route(source_host, "author", {
       "author_id": source_author_id
     })
-    auth = get_auth_from_host(source_host)
-    if auth is None or url is None:
-      print(f"Failed to get source author from \"{source_url}\" due to missing credentials or url")
-      return Response({ "error": True, "message": "Missing node credentials for source author" }, status=500)
-    
+    auth = get_auth_from_host(source_host)    
     res = requests.get(
       url=url,
       auth=auth
     )
+    
     if not res.ok:
       print(f"Failed to get source author from \"{url}\" using credentials.")
       return Response({ "error": True, "message": "Failed to GET source author" }, status=500)
@@ -229,15 +228,34 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
     
     source_author = create_remote_author_if_not_exists(source_author_serializer["data"])
 
-  # Create the post if it does not exist in our system
-  # The post is considered shared if the original poster does not match the remote author it is assigned with
-  try:
-    post = Post.objects.get(id=source_post_id)
-  except Post.DoesNotExist:
-    if source_author != None:
-      # This is a propagated shared post
-      origin_post_id = serializer.data["origin"].split("/")[-1]
-      original_shared_post = Post.objects.create(
+  # We now have origin_author and source_author
+
+  is_normal_post_propagation = origin_post_id == serializer.data["id"]
+
+  if is_normal_post_propagation:
+    # Normal post propagation, just create the post if it does not exist in our system
+    try:
+      post = Post.objects.get(id=serializer.data["id"])
+    except Post.DoesNotExist:
+      post = Post.objects.create(
+        id=serializer.data["id"],
+        title=serializer.data["title"],
+        source=serializer.data["source"],
+        origin=serializer.data["origin"],
+        description=serializer.data["description"],
+        content_type=serializer.data["contentType"],
+        content=serializer.data["content"],
+        author=origin_author,
+        published_date=serializer.data["published"],
+        visibility=serializer.data["visibility"]
+      )
+  else:
+    # Post propagation of a shared post
+    # Ensure origin post exists
+    try:
+      origin_post = Post.objects.get(id=origin_post_id)
+    except Post.DoesNotExist:
+      origin_post = Post.objects.create(
         id=origin_post_id,
         title=serializer.data["title"],
         source=serializer.data["source"],
@@ -245,37 +263,26 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
         description=serializer.data["description"],
         content_type=serializer.data["contentType"],
         content=serializer.data["content"],
-        author=author,
+        author=origin_author,
         published_date=serializer.data["published"],
         visibility=serializer.data["visibility"]
       )
 
+    # Create shared post if not exist
+    try:
+      post = Post.objects.get(id=serializer.data["id"])
+    except Post.DoesNotExist:
       post = Post.objects.create(
-        id=source_post_id,
-        author=source_author, # The source author is the one who shared the post
-        origin_author=author,  # The origin_author is the one who originally posted the post
-        origin_post=original_shared_post,
+        id=serializer.data["id"],
         title=serializer.data["title"],
         source=serializer.data["source"],
         origin=serializer.data["origin"],
         description=serializer.data["description"],
         content_type=serializer.data["contentType"],
         content=serializer.data["content"],
-        published_date=serializer.data["published"],
-        visibility=serializer.data["visibility"]
-      )
-    else:
-      # This is a regular propagated post
-      print(f"propagating id {source_post_id}")
-      post = Post.objects.create(
-        id=source_post_id,
-        title=serializer.data["title"],
-        source=serializer.data["source"],
-        origin=serializer.data["origin"],
-        description=serializer.data["description"],
-        content_type=serializer.data["contentType"],
-        content=serializer.data["content"],
-        author=author,
+        author=source_author,
+        origin_author=origin_author,
+        origin_post=origin_post,
         published_date=serializer.data["published"],
         visibility=serializer.data["visibility"]
       )

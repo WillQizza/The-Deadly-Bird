@@ -1,5 +1,6 @@
 from django.urls import reverse
 from django.conf import settings
+from deadlybird.settings import SITE_HOST_URL
 import secrets
 import os
 
@@ -27,3 +28,21 @@ def resolve_remote_route(host: str, view: str, kwargs):
 
   route = reverse(viewname=view, kwargs=kwargs)
   return host[:-1] + route if host.endswith("/") else host + route
+
+def get_host_from_api_url(url: str) -> str|None:
+  """
+  Retrieve the base host associated with the url.
+  While hacky, this method will work.
+  """
+  
+  if url.startswith(SITE_HOST_URL):
+     return SITE_HOST_URL
+  
+  if os.environ.get("DOCKER") is not None:
+    url = url.replace("localhost", "host.docker.internal")
+  
+  from nodes.models import Node
+  for node in Node.objects.all():
+    if url.startswith(node.host):
+      return node.host
+  return None

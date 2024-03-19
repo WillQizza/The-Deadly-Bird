@@ -42,13 +42,3 @@ def create_remote_author_if_not_exists(data: dict[str, any]):
 
     except IntegrityError:
       pass
-
-def get_host_from_api_url(url: str) -> str|None:
-  """
-  Retrieve the base host associated with the url.
-  While hacky, this method will work.
-  """
-  for node in Node.objects.all():
-    if url.startswith(node.host):
-      return node.host
-  return None

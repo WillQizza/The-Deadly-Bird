@@ -8,7 +8,7 @@ from rest_framework import serializers
 from deadlybird.serializers import GenericErrorSerializer
 from deadlybird.permissions import RemoteOrSessionAuthenticated
 from deadlybird.settings import SITE_HOST_URL
-from deadlybird.util import resolve_remote_route
+from deadlybird.util import resolve_remote_route, get_host_from_api_url
 from nodes.util import get_auth_from_host
 from identity.models import Author
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
@@ -86,13 +86,19 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
                 "message": "author post not Found"
             }, 404)
         
-        if SITE_HOST_URL not in author_post.source:
-            # This is a remote post! Fetch it from the source instead.
-            url = resolve_remote_route(author_post.author.host, "post_likes", {
-                "author_id": author_post.author.id,
-                "post_id": author_post.id
+        if (SITE_HOST_URL not in author_post.source) or (author_post.source != author_post.origin):
+            # This is a remote post/not the original post! Fetch it from the source instead. Extract the author id and post id from the source url
+
+            # See if there's an even earlier post that leads to this origin (prevents crash through constant redirect back and forth between two nodes)
+            author_post = Post.objects.all().filter(origin=author_post.origin).order_by("published_date").first()
+
+            source_author_id, _, source_post_id = author_post.source.split("/")[-3:]
+            source_host_url = get_host_from_api_url(author_post.source)
+            url = resolve_remote_route(source_host_url, "post_likes", {
+                "author_id": source_author_id,
+                "post_id": source_post_id
             })
-            auth = get_auth_from_host(author_post.author.host)
+            auth = get_auth_from_host(source_host_url)
             response = requests.get(
                 url=url,
                 auth=auth
