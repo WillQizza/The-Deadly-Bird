@@ -31,14 +31,18 @@ const ProfilePage: React.FC = () => {
     const userId = params["id"]!;
 
     /** Function to update the user's following */
-    const updateFollowingState = (userId: string) => {
-        console.log("check following state on node of author currently viewed.")
+    const updateFollowingState = async (userId: string) => {
+        const followRequestRes = await apiGetFollowRequest(loggedInAuthorId, userId);
         apiGetFollower(userId, loggedInAuthorId)
             .then(async response => {
                 if (response.status != 404) { 
                     setFollowState(FollowState.FOLLOWING);
                 } else {
-                    setFollowState(FollowState.NOT_FOLLOWING);
+                    if (followRequestRes.status === 404) {
+                        setFollowState(FollowState.NOT_FOLLOWING);
+                    } else {
+                        setFollowState(FollowState.PENDING);
+                    }
                 } 
             });
     }
@@ -94,6 +98,15 @@ const ProfilePage: React.FC = () => {
                             });
                     }}>
                         Unfollow
+                    </button>
+                );
+ 
+            case FollowState.PENDING:
+                return (
+                    <button className="btn btn-warning" onClick={() => {
+                        alert("Follow Request Already Pending!");
+                    }}>
+                        Pending
                     </button>
                 );
 

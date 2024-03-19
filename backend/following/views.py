@@ -183,6 +183,7 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     elif request.method == 'GET':
 
         if SITE_HOST_URL not in author.host:
+            print("RESOLVE REMOTE GET")
             # send to remote author
             remote_route = resolve_remote_route(author.host, view="modify_follower", kwargs={
                 "author_id": author_id,
@@ -190,7 +191,9 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             })
             auth = get_auth_from_host(author.host)
             response = requests.get(url=remote_route, auth=auth) 
-            
+
+            print("RETURN FROM REMOTE")
+            print("RESPONSE:", response) 
             if response.status_code == 200:
                 # synrchonize with remote
                 existing_request = FollowingRequest.objects.filter(
@@ -204,7 +207,15 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
                     existing_request.delete()
                     return Response(response.json())
                 else:
-                    return Response({"message": "prerequisite follow request object missing."}, status=404)
+                    existing_follow = Following.objects.filter(
+                        author_id=foreign_author_id,
+                        target_author_id=author_id
+                    ).first()
+                    if existing_follow is not None:
+                        # already replicated
+                        return Response(response.json())
+                    else:
+                        return Response({"message": "prerequisite follow request object missing."}, status=404)
             elif response.status_code == 404:
                 existing_follow = Following.objects.filter(
                     author_id=foreign_author_id, target_author_id=author_id
@@ -218,11 +229,20 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
                                  "message": f"Remote node failed with status {response.status_code}"
                                 }, status=response.status_code)
         else:
-            obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
-            serializer = FollowingSerializer(obj)
+            print("RESOLVE LOCAL GET")
+            follow = Following.objects.filter(
+                author_id=foreign_author_id, target_author_id=author_id
+            ).first()
 
-            return Response(serializer.data)
-    
+            print("FOLLOW OBJ:", follow)
+            if follow is not None:
+                print("FOUND FOLLOW OBJ")
+                serializer = FollowingSerializer(follow)
+                print("SERIALIZER DATA:", serializer.data)
+                return Response(serializer.data)
+            else:
+                return Response({"message": "No follow object found."}, status=404)
+ 
 @extend_schema(
     parameters=[
         OpenApiParameter("local_author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to interact with"),
@@ -248,18 +268,19 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
         200: FollowRequestSerializer
     }
 )
-@api_view(["POST", "GET"])
+@api_view(["GET"])
 @permission_classes([RemoteOrSessionAuthenticated])
-def request_follower(request: HttpRequest, local_author_id: str, foreign_author_id: str):
+def request_follower(request: HttpRequest, author_id: str, target_author_id: str):
     """
     Request a follower on local or foreign host.
     URL: None specified
     """
+    follow_req = FollowingRequest.objects.filter(
+        author_id=author_id, target_author_id=target_author_id
+    ).first()
 
-    if request.method == "GET":
-        # Get serialized following relation
-        follow_req = get_object_or_404(FollowingRequest, 
-                                       author_id=local_author_id, 
-                                       target_author_id=foreign_author_id)
+    if follow_req is not None:
         serializer = FollowRequestSerializer(follow_req)
-        return Response(serializer.data) 
+        return Response(serializer.data)
+    else:
+        return Response({"message": "Follow Request not found", "status": 404}, status=404) 

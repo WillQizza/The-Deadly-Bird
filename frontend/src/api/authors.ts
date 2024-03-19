@@ -20,9 +20,7 @@ export const apiGetAuthors = async (page: number, size: number, includeHost?: st
     if (excludeHost) {
         query += `&exclude_host=${encodeURIComponent(excludeHost)}`;
     }
-    console.log("includeHost:", includeHost);
-    console.log("excludeHost:", excludeHost);
-    console.log("apiGetAuthors:", `${baseURL}/api/authors/?${query}`);
+
     const response = await apiRequest(`${baseURL}/api/authors/?${query}`);
     const data: AuthorsResponse = await response.json();
 

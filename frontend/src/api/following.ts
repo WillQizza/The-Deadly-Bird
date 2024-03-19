@@ -90,13 +90,13 @@ export const apiInboxFollowRequest = async (
 }
 
 export const apiGetFollowRequest = async(
-    localAuthorId: string, 
-    foreignAuthorId: string,
+    authorId: string, 
+    targetAuthorId: string,
 )
 : Promise<any> => { 
     const init: RequestInit = {method: "GET",}
     const response = await apiRequest(
-        `${baseURL}/api/authors/request-follower/${localAuthorId}/${foreignAuthorId}`,
+        `${baseURL}/api/authors/request-follower/${authorId}/${targetAuthorId}`,
         init
     );
     const data = await response.json();
