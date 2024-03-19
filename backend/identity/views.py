@@ -224,6 +224,13 @@ def login(request: HttpRequest):
       "authenticated": False,
       "message": "Invalid username or password. Please try again."
     }, status=401)
+  
+  # Check if activated
+  if not user.is_active:
+    return Response({
+      "authenticated": False,
+      "message": "Account not activated. Contact admin to activate."
+    }, status=403)
 
   # Start session
   author = Author.objects.get(user=user)
@@ -298,8 +305,10 @@ def register(request: HttpRequest):
   except:
     pass
   
-  # Create user object
+  # Create user object (default inactive)
   created_user = User.objects.create_user(username=username, email=email, password=password)
+  created_user.is_active = False
+  created_user.save()
 
   # Create author object from user object
   id = generate_next_id()
