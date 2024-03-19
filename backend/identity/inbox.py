@@ -52,12 +52,11 @@ def handle_follow_inbox(request: HttpRequest):
       receiving_host = to_author.host
       if SITE_HOST_URL not in receiving_host:
         # Remote Following Request
-
         url = resolve_remote_route(receiving_host, "inbox", {
            "author_id": to_author.id
         })
-
         auth = get_auth_from_host(receiving_host)
+        
         if auth is not None and url is not None: 
           print("auth: ", auth, "url: ", url, "data:", json.dumps(request.data))
           res = requests.post(
@@ -67,6 +66,11 @@ def handle_follow_inbox(request: HttpRequest):
             auth=auth
           )
           if res.status_code == 201:
+            # create local following request to synrchonize
+            follow_req = FollowingRequest.objects.create(
+              target_author_id=to_author.id,
+              author_id=from_author.id
+            )
             return Response("Successfuly sent remote follow request", status=201) 
           else:
             return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)

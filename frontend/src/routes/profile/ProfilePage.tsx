@@ -102,9 +102,9 @@ const ProfilePage: React.FC = () => {
                 return (
                     <button className="btn btn-primary" onClick={async () => {
                         const followRequestRes = await apiInboxFollowRequest(loggedInAuthorId, authorId); 
-                        if (followRequestRes === null) {
+                        if (followRequestRes === null || followRequestRes.error) {
                             alert(`Failed to connect to remote host`);
-                        } else {
+                        } else { 
                             alert(`Follow Request Sent!`);
                         }
                     }}>
