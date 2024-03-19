@@ -5,6 +5,7 @@ from deadlybird.base_test import BaseTestCase
 from deadlybird.util import generate_full_api_url
 import json
 from identity.serializers import AuthorSerializer
+from django.contrib.auth.models import User
 from likes.models import Like
 
 # Create your tests here.
@@ -61,6 +62,17 @@ class AuthenticationTest(BaseTestCase):
       "email": "newuser@newuser.com"
     })
     self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    # Double check that we cannot login without admin apporval
+    response = self.client.post("/api/login/", {
+      "username": "newuser",
+      "password": "newuser"
+    })
+    self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    user = User.objects.get(username="newuser")
+    user.is_active = True
+    user.save()
 
     # Double check that we can login with the newly created user
     response = self.client.post("/api/login/", {

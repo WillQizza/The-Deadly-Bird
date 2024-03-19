@@ -10,7 +10,7 @@ from identity.util import check_authors_exist
 from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
 from deadlybird.util import resolve_remote_route, get_host_from_api_url
-from nodes.util import get_auth_from_host, create_remote_author_if_not_exists, get_host_from_api_url, format_node_api_url
+from nodes.util import get_auth_from_host, create_remote_author_if_not_exists
 from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer

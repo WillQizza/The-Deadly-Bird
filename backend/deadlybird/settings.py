@@ -69,7 +69,7 @@ INSTALLED_APPS = [
     'likes',
     'posts',
     'nodes',
-    
+    'django_crontab',
     'drf_spectacular',
 ]
 
