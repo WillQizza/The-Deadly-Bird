@@ -16,6 +16,7 @@ from likes.models import Like
 from posts.serializers import InboxPostSerializer
 from deadlybird.util import resolve_remote_route, get_host_with_slash
 from nodes.util import create_remote_author_if_not_exists
+from following.util import compare_domains
 
 def handle_follow_inbox(request: HttpRequest):
     """
@@ -57,7 +58,7 @@ def handle_follow_inbox(request: HttpRequest):
             }, status=409) 
     try:
       receiving_host = to_author.host
-      if SITE_HOST_URL not in receiving_host:
+      if not compare_domains(SITE_HOST_URL not in receiving_host):
         # Remote Following Request
         url = resolve_remote_route(receiving_host, "inbox", {
            "author_id": to_author.id

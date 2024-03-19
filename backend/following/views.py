@@ -14,6 +14,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serial
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from deadlybird.util import resolve_remote_route
+from .util import compare_domains
 import requests
 
 @extend_schema(
@@ -182,7 +183,7 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     
     elif request.method == 'GET':
 
-        if SITE_HOST_URL not in author.host:
+        if not compare_domains(SITE_HOST_URL, author.host):
             # send to remote author
             remote_route = resolve_remote_route(author.host, view="modify_follower", kwargs={
                 "author_id": author_id,

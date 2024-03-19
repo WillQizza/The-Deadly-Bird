@@ -198,7 +198,7 @@ REST_FRAMEWORK = {
 }
 
 # Used for internode communication
-SITE_HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000/")
+SITE_HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000")
 SITE_REMOTE_AUTH_USERNAME = os.environ.get("REMOTE_AUTH_USERNAME", "username")
 SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")
 
