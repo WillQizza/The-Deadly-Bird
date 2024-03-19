@@ -183,7 +183,6 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     elif request.method == 'GET':
 
         if SITE_HOST_URL not in author.host:
-            print("RESOLVE REMOTE GET")
             # send to remote author
             remote_route = resolve_remote_route(author.host, view="modify_follower", kwargs={
                 "author_id": author_id,
@@ -192,8 +191,6 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             auth = get_auth_from_host(author.host)
             response = requests.get(url=remote_route, auth=auth) 
 
-            print("RETURN FROM REMOTE")
-            print("RESPONSE:", response) 
             if response.status_code == 200:
                 # synrchonize with remote
                 existing_request = FollowingRequest.objects.filter(
@@ -229,16 +226,12 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
                                  "message": f"Remote node failed with status {response.status_code}"
                                 }, status=response.status_code)
         else:
-            print("RESOLVE LOCAL GET")
             follow = Following.objects.filter(
                 author_id=foreign_author_id, target_author_id=author_id
             ).first()
 
-            print("FOLLOW OBJ:", follow)
             if follow is not None:
-                print("FOUND FOLLOW OBJ")
                 serializer = FollowingSerializer(follow)
-                print("SERIALIZER DATA:", serializer.data)
                 return Response(serializer.data)
             else:
                 return Response({"message": "No follow object found."}, status=404)
