@@ -3,13 +3,7 @@ import json
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import Node
-from .util import create_remote_author_if_not_exists
-
-def format_node_api_url(node: Node, route: str):
-  if node.host.endswith("/"):
-    return node.host[:-1] + route
-  else:
-    return node.host + route
+from .util import create_remote_author_if_not_exists, format_node_api_url
 
 def create_post_if_not_exists(data: dict[str, any]):
   pass

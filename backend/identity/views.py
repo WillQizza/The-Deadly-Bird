@@ -380,7 +380,8 @@ def inbox(request: HttpRequest, author_id: str):
       return handle_follow_inbox(request)
 
     elif content_type == "comment":
-      return Response({ "error": True, "message": "Not implemented yet." }, status=500)
+      from .inbox import handle_like_inbox
+      return handle_like_inbox(request)
     
     else:
       return Response({ "error": True, "message": "Unknown inbox type" }, status=400)

@@ -31,7 +31,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
                 contentType: type
             }).toString();
 
-            const response = await apiRequest(`${baseURL}/api/authors/${authorId}/posts/${postId}/comments/`, {
+            const response = await apiRequest(`${baseURL}/api/authors/${authorId}/posts/${postId}/comments`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'

@@ -27,3 +27,6 @@ def resolve_remote_route(host: str, view: str, kwargs):
 
   route = reverse(viewname=view, kwargs=kwargs)
   return host[:-1] + route if host.endswith("/") else host + route
+
+def get_host_with_slash(host: str):
+  return host if host.endswith("/") else host + "/"

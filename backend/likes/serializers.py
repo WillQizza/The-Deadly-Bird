@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from deadlybird.util import generate_full_api_url
+from deadlybird.util import generate_full_api_url, get_host_with_slash
+from deadlybird.settings import SITE_HOST_URL
 from identity.serializers import AuthorSerializer
 from drf_spectacular.utils import inline_serializer
 from .models import Like
@@ -26,8 +27,8 @@ class LikeSerializer(serializers.ModelSerializer):
             post = Post.objects.get(id=obj.content_id)
             return generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id })
         else:
-            # TODO: We need a comment route for this?
-            return generate_full_api_url("comment")
+            comment = Comment.objects.get(id=obj.content_id)
+            return f"{get_host_with_slash(SITE_HOST_URL)}api/authors/{comment.post.author.id}/posts/{comment.post.id}/comments/{comment.id}"
     
     def to_representation(self, instance):
         data = super().to_representation(instance)

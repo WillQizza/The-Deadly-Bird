@@ -21,7 +21,7 @@ export const apiGetPostLikes = async (
  * @description get comment likes for a post
  * @param authorID of post with comment to retreive likes from
  * @param postID post authorID likes
- * @param commentID comment of the 
+ * @param commentID comment to get the likes of
 */
 export const apiGetCommentLikes = async (
     authorID: string,
@@ -29,16 +29,16 @@ export const apiGetCommentLikes = async (
     commentID: string,
 ): Promise<LikesResponse> => {
     const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}/likes`);    
-    const data: LikesResponse = await response.json(); 
+    const data: LikesResponse = await response.json();
     return data;
 }
 
 /**
- * @description create a like object
+ * @description create a like object for a post
  * @param authorID author initiating the like
  * @param postID post authorID likes
  */
-export const apiCreateLike = async (
+export const apiCreatePostLike = async (
     authorID: string,
     postID: string
 ): Promise<any> => {
@@ -56,6 +56,35 @@ export const apiCreateLike = async (
             "object": `${baseURL}/api/authors/${authorID}/posts/${postID}`
         })
     });    
+    const data: any = await response.json(); 
+    return data;
+}
+
+/**
+ * @description create a like object for a comment
+ * @param authorID author initiating the like
+ * @param postID post the comment is on
+ * @param commentID comment the author likes
+ */
+export const apiCreateCommentLike = async (
+    authorID: string,
+    postID: string,
+    commentID: string
+): Promise<any> => {
+    const ourAuthor = (await apiGetAuthor(getUserId()))!;
+    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/inbox/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "summary": `${ourAuthor.displayName} Likes your comment`,
+            "type": "comment",
+            "author": ourAuthor,
+            "object": `${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}`
+        })
+    });
     const data: any = await response.json(); 
     return data;
 }

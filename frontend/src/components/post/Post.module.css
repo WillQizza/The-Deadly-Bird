@@ -94,6 +94,7 @@
 
 .postLiked {
     color: red;
+    cursor: default;
 }
 
 .likeCount {
