@@ -46,3 +46,6 @@ def get_host_from_api_url(url: str) -> str|None:
     if url.startswith(node.host):
       return node.host
   return None
+
+def get_host_with_slash(host: str):
+  return host if host.endswith("/") else host + "/"

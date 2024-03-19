@@ -9,11 +9,12 @@ from following.models import Following, FollowingRequest
 from identity.util import check_authors_exist
 from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
-from nodes.util import get_auth_from_host, create_remote_author_if_not_exists
+from deadlybird.util import resolve_remote_route, get_host_from_api_url
+from nodes.util import get_auth_from_host, create_remote_author_if_not_exists, get_host_from_api_url, format_node_api_url
 from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer
-from deadlybird.util import resolve_remote_route, get_host_from_api_url
+from deadlybird.util import resolve_remote_route, get_host_with_slash
   
 
 def handle_follow_inbox(request: HttpRequest):
@@ -52,12 +53,11 @@ def handle_follow_inbox(request: HttpRequest):
       receiving_host = to_author.host
       if SITE_HOST_URL not in receiving_host:
         # Remote Following Request
-
         url = resolve_remote_route(receiving_host, "inbox", {
            "author_id": to_author.id
         })
-
         auth = get_auth_from_host(receiving_host)
+        
         if auth is not None and url is not None: 
           print("auth: ", auth, "url: ", url, "data:", json.dumps(request.data))
           res = requests.post(
@@ -67,6 +67,11 @@ def handle_follow_inbox(request: HttpRequest):
             auth=auth
           )
           if res.status_code == 201:
+            # create local following request to synrchonize
+            follow_req = FollowingRequest.objects.create(
+              target_author_id=to_author.id,
+              author_id=from_author.id
+            )
             return Response("Successfuly sent remote follow request", status=201) 
           else:
             return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)
@@ -123,6 +128,7 @@ def handle_like_inbox(request: HttpRequest):
       content_source = content_source.origin_post
 
     if like_type == Like.ContentType.POST and (SITE_HOST_URL not in content_source.source):
+      # TODO: DO LATER AFTER TALKING TO HAZEL ABOUT HOW REMOTE LIKES OM COMMENTS WORK
       # We are liking a post that did not originate from this node, so forward the inbox there instead.
       payload = {
         "summary": request.data.get("summary"),
@@ -148,14 +154,43 @@ def handle_like_inbox(request: HttpRequest):
 
       return Response(response.json(), status=response.status_code)
 
+    if like_type == Like.ContentType.COMMENT and (SITE_HOST_URL not in content_source.post.author.host):
+      # TODO: DO LATER AFTER TALKING TO HAZEL ABOUT HOW REMOTE LIKES OM COMMENTS WORK
+      # We are liking a comment whose post does does not originate from this node, so forward the like there instead.
+      comment_object = f"{get_host_with_slash(content_source.post.author.host)}api/authors/{content_source.post.author.id}/posts/{content_source.post.id}/comments/{content_source.id}"
 
+      payload = {
+        "summary": request.data.get("summary"),
+        "type": "Like",
+        "author": InboxAuthorSerializer(author_who_created_like).data,
+        "object": comment_object
+      }
 
-    # TODO: HOW TO HANDLE COMMENT LIKES THAT DON'T ORIGINATE FROM NODE?
+      # TODO: Consider if author was shared post author
+
+      url = resolve_remote_route(content_source.post.author.host, "inbox", {
+          "author_id": content_source.author.id
+      })
+
+      auth = get_auth_from_host(content_source.post.author.host)
+      response = requests.post(
+        url=url,
+        headers={'Content-Type': 'application/json'}, 
+        data=json.dumps(payload), 
+        auth=auth
+      )
+
+      if not response.ok:
+        print(f"An error occurred while propagating a remote like to \"{url}\" (status={response.status_code})")
+      
+      return Response(response.json(), status=response.status_code)
   except (Post.DoesNotExist, Comment.DoesNotExist):
     return Response({
       "error": True,
       "message": "Object does not exist"
     }, status=404)
+  
+  # We are the node who houses the post/comment we are liking
   
   # Check if like already exists
   existing_like = Like.objects.filter(content_type=like_type, 

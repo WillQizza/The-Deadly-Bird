@@ -4,6 +4,12 @@ from django.contrib.auth.models import User
 from deadlybird.util import generate_next_id
 from django.db.utils import IntegrityError
 
+def format_node_api_url(node: Node, route: str):
+  if node.host.endswith("/"):
+    return node.host[:-1] + route
+  else:
+    return node.host + route
+
 def get_auth_from_host(host: str):
     "Given host return the authentication tuple"
     node = Node.objects.all()\

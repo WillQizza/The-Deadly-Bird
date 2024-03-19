@@ -10,7 +10,7 @@ import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-squa
 import { ReactComponent as LinkIcon} from 'bootstrap-icons/icons/link-45deg.svg';
 import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
 import { getUserId } from '../../utils/auth';
-import { apiCreateLike } from '../../api/likes';
+import { apiCreatePostLike } from '../../api/likes';
 import { Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
@@ -72,7 +72,7 @@ const Post: React.FC<PostOptions> = props => {
     const handleLike = async () => {
         setIsLiked(true);
         setLikeCount(likeCount + 1);
-        await apiCreateLike(props.author.id, props.id);
+        await apiCreatePostLike(props.author.id, props.id);
     }
 
     const handleShare = async () => {
@@ -113,9 +113,12 @@ const Post: React.FC<PostOptions> = props => {
                 {/* Buttons */}
                 <div className={styles.postButtons}>
                     {/* Share */}
-                    <ArrowRepeat 
-                        className={`${styles.postButton} ${styles.postShare}`}
-                        onClick={handleShare}/>
+                    {props.visibility === "PUBLIC" && (
+                        <ArrowRepeat
+                            className={`${styles.postButton} ${styles.postShare}`}
+                            onClick={handleShare}
+                        />
+                    )}
                     {/* Copy Link */}
                     <LinkIcon
                         ref={linkButton}

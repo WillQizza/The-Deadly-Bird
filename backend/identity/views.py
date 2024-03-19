@@ -153,7 +153,7 @@ def author(request: HttpRequest, author_id: str):
     # Update bio
     if "bio" in request.POST:
       bio = request.POST["bio"]
-      if (0 < len(bio) < 255):
+      if (0 <= len(bio) < 255):
         author.bio = bio
       else:
         error = "Invalid bio length"
@@ -224,6 +224,13 @@ def login(request: HttpRequest):
       "authenticated": False,
       "message": "Invalid username or password. Please try again."
     }, status=401)
+  
+  # Check if activated
+  if not user.is_active:
+    return Response({
+      "authenticated": False,
+      "message": "Account not activated. Contact admin to activate."
+    }, status=403)
 
   # Start session
   author = Author.objects.get(user=user)
@@ -298,8 +305,10 @@ def register(request: HttpRequest):
   except:
     pass
   
-  # Create user object
+  # Create user object (default inactive)
   created_user = User.objects.create_user(username=username, email=email, password=password)
+  created_user.is_active = False
+  created_user.save()
 
   # Create author object from user object
   id = generate_next_id()
@@ -380,7 +389,8 @@ def inbox(request: HttpRequest, author_id: str):
       return handle_follow_inbox(request)
 
     elif content_type == "comment":
-      return Response({ "error": True, "message": "Not implemented yet." }, status=500)
+      from .inbox import handle_like_inbox
+      return handle_like_inbox(request)
     
     else:
       return Response({ "error": True, "message": "Unknown inbox type" }, status=400)

@@ -56,7 +56,7 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     
     # Paginate and return serialized result
     serialized_likes = LikeSerializer(likes, many=True)
-    return serialized_likes.data
+    return Response(serialized_likes.data)
 
 @extend_schema(
     methods=["GET"],

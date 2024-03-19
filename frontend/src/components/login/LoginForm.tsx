@@ -38,7 +38,7 @@ const LoginForm: React.FC = () => {
                 const userId = (await response.json()).id;
                 setUserId(userId);
                 navigate('/home');
-            } else if (response.status === 400 || response.status === 401) {
+            } else {
                 const data = await response.json();
                 setLoginMessage(data.message);
                 console.log(loginMessage);
