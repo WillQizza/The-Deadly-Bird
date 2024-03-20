@@ -239,6 +239,9 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   serializer = InboxPostSerializer(data=request.data)
   if not serializer.is_valid():
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
+  
+  print("received inbox message")
+  print(serializer.data)
 
   # Create the remote author if they do not exist in our system (origin author)
   author_data = serializer.data["author"]
@@ -353,6 +356,10 @@ def handle_comment_inbox(request: HttpRequest):
   # WE ONLY RECEIVE THIS REQUEST WHEN THE COMMENT'S POST IS ACTUALLY ON OUR NODE
   post_id = request.data.get('post_id')
   post = Post.objects.get(id=post_id)
+
+  if post.origin_post != None:
+    # This is a shared post!
+    post = post.origin_post
 
   author = create_remote_author_if_not_exists(request.data["author"])
   comment = Comment.objects.create(
