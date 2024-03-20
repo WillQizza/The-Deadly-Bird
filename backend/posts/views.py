@@ -7,16 +7,21 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
-from .pagination import CommentsPagination
+from .pagination import CommentsPagination, generate_comments_pagination_schema, generate_comments_pagination_query_schema
 from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
-from deadlybird.util import generate_full_api_url, generate_next_id
+from deadlybird.util import generate_full_api_url, generate_next_id, resolve_remote_route, get_host_from_api_url
+from nodes.util import get_auth_from_host
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer, OpenApiTypes
-from following.util import is_friends
+from following.util import is_friends, compare_domains
 from .serializers import CommentSerializer, PostSerializer
+from deadlybird.settings import SITE_HOST_URL
 from .models import Post, Author, Following, Comment
 from likes.models import Like
+from identity.models import InboxMessage
 from django.db.models import Q
 from .util import send_post_to_inboxes
+import requests
+import json
 
 PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields={
   "title": serializers.CharField(),
@@ -441,6 +446,30 @@ def post_stream(request: HttpRequest, stream_type: str):
       "message": "Invalid stream type."
     }, status=404)
 
+@extend_schema(
+  parameters=[
+    OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id of the post"),
+    OpenApiParameter("post_id", type=str, location=OpenApiParameter.PATH, required=True, description="Post id of the post to interact with")
+  ]
+)
+@extend_schema(
+  operation_id="api_authors_retrieve_all_post_comments",
+  methods=["GET"],
+  parameters=[
+    *generate_comments_pagination_query_schema()
+  ],
+  responses=generate_comments_pagination_schema()
+)
+@extend_schema(
+  operation_id="api_authors_create_new_post_comment",
+  methods=["POST"],
+  request=PostCreationPayloadSerializer,
+  responses={
+    201: GenericSuccessSerializer,
+    400: GenericErrorSerializer,
+    404: GenericErrorSerializer
+  }
+)
 @api_view(["GET", "POST"])
 @permission_classes([ RemoteOrSessionAuthenticated ])
 def comments(request: HttpRequest, author_id: str, post_id: str):
@@ -467,6 +496,24 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
   
   if request.method == "GET":
     # Get the comments on the post
+
+    # TODO: PART THREE FIX
+    if not compare_domains(post.origin, SITE_HOST_URL):
+      # Remote post. get comments from remote
+      origin_aid, _, origin_pid = post.origin.split("/")[-3:]
+      url = resolve_remote_route(get_host_from_api_url(post.origin), "comments", {
+          "author_id": origin_aid,
+          "post_id": origin_pid
+      })
+
+      auth = get_auth_from_host(get_host_from_api_url(post.origin))
+
+      res = requests.get(url=url, auth=auth, params=request.GET.dict())
+      return Response(res.json(), status=res.status_code)
+    
+    if post.origin_post is not None:
+      post = post.origin_post
+
     comments = Comment.objects.all() \
           .filter(post=post) \
           .order_by("-published_date")
@@ -477,8 +524,7 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
     serialized_comments = CommentSerializer(comments_on_page, many=True)
 
     # Return the serialized comments
-    url = request.build_absolute_uri(reverse("comments", kwargs={ "post_id": post_id, "author_id": author_id }))
-    return paginator.get_paginated_response(url, post_id, serialized_comments.data)
+    return paginator.get_paginated_response(post_id, serialized_comments.data)
   
   else:
     # Add a comment to post
@@ -497,16 +543,107 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         "error": True,
         "message": "Request body does not match required schema."
       }, status=400)
-
-    # Create the comment
+    
     author = get_object_or_404(Author, id=request.session["id"])
 
-    Comment.objects.create(
-      post=post,
-      author=author,
-      content_type=request.POST["contentType"],
-      content=request.POST["comment"]
-    )
+    # Check if the post is a remote post or not
+    if not compare_domains(post.author.host, SITE_HOST_URL):
+      remote_author = post.author
+      # If it is a remote post, then send a inbox request to the remote node's inbox with the comment object
+      # to the owner of the post
+
+      url = resolve_remote_route(remote_author.host, "inbox", {
+          "author_id": remote_author.id
+      })
+
+      comment = Comment.objects.create(
+        post=post,
+        author=author,
+        content_type=request.POST["contentType"],
+        content=request.POST["comment"]
+      )
+      payload = CommentSerializer(comment).data
+
+      # TODO: PART THREE IS A PAIN.
+      payload["post_id"] = post.id
+
+      auth = get_auth_from_host(remote_author.host)
+      response = requests.post(
+        url=url,
+        headers={'Content-Type': 'application/json'}, 
+        data=json.dumps(payload), 
+        auth=auth
+      )
+
+      # Print error if response failed
+      if not response.ok:
+        return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
+    else:
+
+      # Send inbox message to post's owner (or origin post's owner if shared post)
+      if post.origin_author is None:
+        # The post is not shared, so that means that the author is on our node
+        comment = Comment.objects.create(
+          post=post,
+          author=author,
+          content_type=request.POST["contentType"],
+          content=request.POST["comment"]
+        )
+        payload = CommentSerializer(comment).data
+
+        InboxMessage.objects.create(
+            author=comment.post.author,
+            content_id=comment.id,
+            content_type=InboxMessage.ContentType.COMMENT
+        )
+      else:
+        # The post is shared. Is the original author a user we own?
+        if compare_domains(post.origin_author.host, SITE_HOST_URL):
+          comment = Comment.objects.create(
+            post=post.origin_post,
+            author=author,
+            content_type=request.POST["contentType"],
+            content=request.POST["comment"]
+          )
+          payload = CommentSerializer(comment).data
+          # They are! Send a inbox message to the original author
+          InboxMessage.objects.create(
+            author=comment.post.author,
+            content_id=comment.id,
+            content_type=InboxMessage.ContentType.COMMENT
+          )
+        else:
+          comment = Comment.objects.create(
+            post=post,
+            author=author,
+            content_type=request.POST["contentType"],
+            content=request.POST["comment"]
+          )
+          payload = CommentSerializer(comment).data
+
+          # The original author did not originate from our node... What's the source for this post?
+          # Find the quickest post to get to the origin
+          earliest_non_remote_post = Post.objects.all().filter(origin=post.origin).order_by("published_date").first()
+          source_author = earliest_non_remote_post.author
+          
+          url = resolve_remote_route(source_author.host, "inbox", {
+            "author_id": source_author.id
+          })
+
+          # TODO: PART THREE IS A PAIN.
+          payload["post_id"] = post.origin_post.id
+
+          auth = get_auth_from_host(source_author.host)
+          response = requests.post(
+            url=url,
+            headers={'Content-Type': 'application/json'}, 
+            data=json.dumps(payload), 
+            auth=auth
+          )
+
+          if not response.ok:
+            return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
+
 
     return Response({
       "error": False,

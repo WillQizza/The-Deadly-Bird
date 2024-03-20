@@ -347,3 +347,29 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
     "error": False,
     "message": "Success"
   }, status=201)
+
+def handle_comment_inbox(request: HttpRequest):
+  # TODO: PART THREE IS A PAIN. BUT IT ONLY WANTS US TO MAKE IT WORK RIGHT?
+  # WE ONLY RECEIVE THIS REQUEST WHEN THE COMMENT'S POST IS ACTUALLY ON OUR NODE
+  post_id = request.data.get('post_id')
+  post = Post.objects.get(id=post_id)
+
+  author = create_remote_author_if_not_exists(request.data["author"])
+  comment = Comment.objects.create(
+    id=request.data["id"],
+    post=post,
+    author=author,
+    content_type=request.data["contentType"],
+    content=request.data["comment"]
+  )
+
+  InboxMessage.objects.create(
+    author=post.author,
+    content_id=comment.id,
+    content_type=InboxMessage.ContentType.COMMENT
+  )
+
+  return Response({
+    "error": False,
+    "message": "Success"
+  })

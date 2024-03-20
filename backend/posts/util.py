@@ -5,7 +5,8 @@ from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from deadlybird.util import resolve_remote_route
 from .serializers import InboxPostSerializer
-from .models import Post
+from .models import Post, Comment
+from nodes.models import Node
 import requests
 import json
 

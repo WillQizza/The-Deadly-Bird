@@ -45,25 +45,21 @@ class PostSerializer(serializers.ModelSerializer):
       return object.origin_post.id
     return None
     
-
   def get_count(self, object: Post) -> int:
     return Comment.objects.filter(post=object).count()
   
   def get_comments(self, object: Post) -> str:
-    return None # TODO: (currently sets null)
-    # TODO: URL to comments
+    return generate_full_api_url("comments", kwargs={ "author_id": object.author.id, "post_id": object.id })
   
   @extend_schema_field(field=generate_comments_pagination_schema())
   def get_commentsSrc(self, object: Post) -> None:
-    return None # TODO: (currently sets null)
-    # TODO: 5 comments sorted newest to oldest in the api spec format
     return {
       'type': 'comments',
       'page': 1,
       'size': 5,
-      'post': '',  # TODO: URL to post?
-      'id': '', # TODO: ??? Comments page id?...
-      'comments': []  # TODO: Get and serialize comments
+      'post': object.id,
+      'id': object.id,
+      'comments': CommentSerializer(Comment.objects.filter(post=object).order_by("-published_date")[:5], many=True).data
     }
 
   class Meta:

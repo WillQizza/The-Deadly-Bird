@@ -20,7 +20,10 @@ class LikeSerializer(serializers.ModelSerializer):
         return "https://www.w3.org/ns/activitystreams"
 
     def get_summary(self, obj: Like) -> str:
-        return f"{obj.send_author.display_name} Likes your post"
+        if obj.content_type == Like.ContentType.POST:
+            return f"{obj.send_author.display_name} likes your post"
+        else:
+            return f"{obj.send_author.display_name} likes your comment"
 
     def get_object(self, obj: Like) -> str:
         if obj.content_type == Like.ContentType.POST:

@@ -13,6 +13,7 @@ from nodes.util import get_auth_from_host
 from identity.models import Author
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .serializers import LikeSerializer, APIDocsLikeManySerializer
+from following.util import compare_domains
 import requests
 
 @extend_schema(
@@ -48,6 +49,22 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     # Get comment and its likes
     comment = Comment.objects.filter(id=comment_id)\
         .first()
+    
+    # TODO: part 3
+    if not compare_domains(get_host_from_api_url(author_post.origin), SITE_HOST_URL):
+        # Fetch from origin node
+        author_id, _, post_id = author_post.origin.split("/")[-3:]
+        url = resolve_remote_route(get_host_from_api_url(author_post.origin), "comment_likes", {
+            "author_id": author_id,
+            "post_id": post_id,
+            "comment_id": comment_id
+        })
+
+        auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
+        res = requests.get(url=url, auth=auth)
+
+        return Response(res.json(), status=res.status_code)
+
 
     likes = Like.objects.all()\
         .filter(content_type=Like.ContentType.COMMENT)\

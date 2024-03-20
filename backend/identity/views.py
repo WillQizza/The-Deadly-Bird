@@ -240,6 +240,13 @@ def login(request: HttpRequest):
     "id": request.session["id"]
   })
 
+@api_view(["POST"])
+def logout(request: HttpRequest):
+  request.session.flush()
+  return Response({
+    "success": True
+  })
+
 @extend_schema(
     request=inline_serializer("RegistrationDetails", fields={
       "username": serializers.CharField(),
@@ -255,14 +262,6 @@ def login(request: HttpRequest):
       409: GenericErrorSerializer
     }
 )
-
-@api_view(["POST"])
-def logout(request: HttpRequest):
-  request.session.flush()
-  return Response({
-    "success": True
-  })
-
 @api_view(["POST"])
 def register(request: HttpRequest):
   # Check for required credentials
@@ -388,8 +387,8 @@ def inbox(request: HttpRequest, author_id: str):
       return handle_follow_inbox(request)
 
     elif content_type == "comment":
-      from .inbox import handle_like_inbox
-      return handle_like_inbox(request)
+      from .inbox import handle_comment_inbox
+      return handle_comment_inbox(request)
     
     else:
       return Response({ "error": True, "message": "Unknown inbox type" }, status=400)
