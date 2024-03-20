@@ -119,8 +119,12 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       </div>
       
       {/** Avatar upload modal */}
-      <Modal show={showingAvatarModal} centered={true} size="xl" style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}>
-        <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>
+      <Modal show={showingAvatarModal}
+        centered={true} size="xl"
+        style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}
+        onHide={() => setShowingAvatarModal(false)}
+      >
+        <Modal.Header closeButton>
           <Modal.Title>Avatar Upload</Modal.Title>
         </Modal.Header>
 
