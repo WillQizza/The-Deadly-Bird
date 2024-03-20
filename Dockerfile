@@ -17,7 +17,7 @@ FROM node:20 AS frontend
 RUN corepack enable pnpm
 WORKDIR /app/frontend
 COPY frontend/*.json .
-RUN pnpm install
+RUN npm install
 
 # Receive args from compose file, default to port 8000 for prod.
 ARG REACT_APP_BASE_URL "http://localhost:8000" 
