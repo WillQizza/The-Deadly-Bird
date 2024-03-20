@@ -10,11 +10,12 @@ import { apiGetCommentLikes } from "../../api/likes";
 interface CommentSectionProps {
     postId: string,
     authorId: string,
-    commentUpdateCount: number  // indicates if the comment section needs to be updated
+    refresh: boolean  // indicates if the comment section needs to be refreshed
+    setRefresh: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProps) => {
-    const { postId, authorId, commentUpdateCount } = props;
+    const { postId, authorId, refresh, setRefresh } = props;
     const [comments, setComments] = useState<CommentProps[]>([]);
     const commentRef = useRef<HTMLAnchorElement>(null);
     const pageSize = 5;
@@ -96,11 +97,14 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
         }
     }, [comments])
 
-    /** Retrieves comments while scrolling */
+    /** Re-retrieves comments after a comment has been made */
     useEffect(() => {
-        currentPage.current = 1;
-        fetchComments(true);
-    }, [commentUpdateCount])
+        if (refresh) {
+            currentPage.current = 1;
+            fetchComments(true);
+            setRefresh(false);
+        }
+    }, [refresh])
 
     /** Comment section */
     return (

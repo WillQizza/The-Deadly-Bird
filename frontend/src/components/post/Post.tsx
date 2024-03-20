@@ -12,7 +12,7 @@ import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
 import { ReactComponent as Trash } from 'bootstrap-icons/icons/trash3.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreatePostLike } from '../../api/likes';
-import { Button, Modal, Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
+import { Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
@@ -22,8 +22,7 @@ import DeleteDialog from './DeleteDialog';
 type PostOptions = PostTy & {
     likes: number;
     isLiked: boolean;
-    streamUpdateCount: number;
-    setStreamUpdateCount: React.Dispatch<React.SetStateAction<number>>;  // for triggering re-render of the stream when a post is shared
+    refreshStream: () => void;
 };
 
 const Post: React.FC<PostOptions> = props => {
@@ -81,12 +80,12 @@ const Post: React.FC<PostOptions> = props => {
 
     const handleShare = async () => {
         await apiSharePost(props.author.id, props.id);
-        props.setStreamUpdateCount(props.streamUpdateCount + 1);
+        props.refreshStream();
     };
 
     // Handle comment section and commenting
     const [showComments, setShowComments] = useState(false);
-    const [commentUpdateCount, setCommentUpdateCount] = useState(0);  // for indicating to the comment section that it needs to refresh
+    const [refreshComments, setRefreshComments] = useState(false);
 
     // Handle edit
     const [showConfirm, setShowConfirm] = useState(false);
@@ -114,7 +113,7 @@ const Post: React.FC<PostOptions> = props => {
                         show={showConfirm}
                         setShow={setShowConfirm}
                         postId={props.id}
-                        onDelete={() => props.setStreamUpdateCount(props.streamUpdateCount + 1)}
+                        onDelete={props.refreshStream}
                     />
                 </>
             );
@@ -205,14 +204,14 @@ const Post: React.FC<PostOptions> = props => {
                             <CommentSection
                                 postId={props.id}
                                 authorId={props.author.id}
-                                commentUpdateCount={commentUpdateCount}
+                                refresh={refreshComments}
+                                setRefresh={setRefreshComments}
                             />
                         </Offcanvas.Body>
                         <CommentForm
                             postId={props.id}
                             authorId={props.author.id}
-                            commentUpdateCount={commentUpdateCount}
-                            setCommentUpdateCount={setCommentUpdateCount}
+                            refreshCommentStream={() => setRefreshComments(true)}
                         />
                     </Offcanvas>
                     {/* Edit */}

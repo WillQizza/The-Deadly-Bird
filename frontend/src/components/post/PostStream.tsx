@@ -70,8 +70,10 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         {...postResponse} 
                         likes={likes.length}
                         isLiked={isLikedByUs}
-                        streamUpdateCount={streamUpdateCount}
-                        setStreamUpdateCount={setStreamUpdateCount}
+                        refreshStream={() => {
+                            currentPage.current = 1;
+                            generatePosts(true);
+                        }}
                     />
                 );
             }));
@@ -116,12 +118,6 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
             }
         }
     }, [posts])
-
-    // refresh stream when post is shared
-    useEffect(() => {
-        currentPage.current = 1;
-        generatePosts(true);
-    }, [streamUpdateCount])
 
     /** Post stream */
     return (
