@@ -32,7 +32,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       setDisplayName(author.displayName);
       setHomeServer(author.host);
       setBio(author.bio);
-      setGithub(author.github!);
+      setGithub(author.github || "");
       setLoadedContent(true);
 
       if (author.profileImage) {
@@ -126,7 +126,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
         centered
         style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>
           <Modal.Title>Avatar Upload</Modal.Title>
         </Modal.Header>
 
