@@ -3,7 +3,7 @@ from following.util import is_friends
 from identity.models import InboxMessage
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
-from deadlybird.util import resolve_remote_route
+from deadlybird.util import resolve_remote_route, generate_full_api_url
 from .serializers import InboxPostSerializer
 from .models import Post, Comment
 from nodes.models import Node
@@ -29,6 +29,7 @@ def send_post_to_inboxes(post_id: str, author_id: str):
 
       if post.origin_author != None:
         # This is a shared post, we need to update the author of the post
+        post.source = generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id })
         post.author = post.origin_author
 
       payload = InboxPostSerializer(post).data

@@ -239,6 +239,9 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   serializer = InboxPostSerializer(data=request.data)
   if not serializer.is_valid():
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
+  
+  print("received inbox message")
+  print(serializer.data)
 
   # Create the remote author if they do not exist in our system (origin author)
   author_data = serializer.data["author"]
