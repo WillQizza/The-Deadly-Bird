@@ -20,7 +20,7 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
     /** Function to fetch authors for a specified page number */
     const fetchSetAuthors = async (page: number, viewType: string) => {
         const hostRes = await apiGetHostname();
-        const host = hostRes.hostname;
+        const host = hostRes.hostname.replace(/\/$/, "");
 
         const response = await apiGetAuthors(page, pageSize);
 

@@ -35,7 +35,6 @@ ENV PORT 8000
 # Used for django-crontab
 RUN apt-get update
 RUN apt-get install -y cron
-RUN service cron start
 
 ARG LIVE_HOST_URL "http://localhost:8000/"
 ARG AUTH_USERNAME "username"
@@ -58,6 +57,5 @@ COPY --from=frontend /app/backend/react/templates/ /app/react/templates/
 
 # Compile static files and run app
 RUN python3 manage.py collectstatic --noinput
-RUN python3 manage.py crontab add
 ENV PYTHONUNBUFFERED TRUE
-CMD python3 manage.py migrate && gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT --threads 4 --access-logfile '-' --error-logfile '-'
+CMD service cron start && python3 manage.py crontab add && python3 manage.py migrate && gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT --threads 4 --access-logfile '-' --error-logfile '-'

@@ -31,6 +31,16 @@ def resolve_remote_route(host: str, view: str, kwargs):
 
   return urljoin(host, route)
 
+def resolve_docker_host(host: str):
+  """
+  We need to undo resolve_remote_route if trying to filter authors that
+  match a host field of a node instance.
+  """    
+  if os.environ.get("DOCKER") is not None:
+    host = host.replace("host.docker.internal", "localhost")
+  
+  return host
+
 def get_host_from_api_url(url: str) -> str|None:
   """
   Retrieve the base host associated with the url.

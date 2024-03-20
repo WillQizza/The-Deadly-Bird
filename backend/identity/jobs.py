@@ -2,13 +2,13 @@ from posts.models import Post
 from .models import Author
 from django.utils import timezone
 from deadlybird.util import generate_full_api_url, generate_next_id
-from datetime import datetime
 from posts.util import send_post_to_inboxes
 import requests
 
 AUTHORS_PER_CRON_CHECK = 10
 
 def github_task():
+  print("[GITHUB CRON] Starting Task")
   authors = Author.objects.all() \
     .exclude(github=None) \
     .order_by("last_github_check")[:AUTHORS_PER_CRON_CHECK]
@@ -16,17 +16,21 @@ def github_task():
   for author in authors:
     url = f"https://api.github.com/users/{author.github}/events"
 
+    last_github_id = author.last_github_id
+    latest_github_id = None
+
     response = requests.get(url=url)
     if not response.ok:
       continue
     
     json = response.json()
 
-    for event in json:
-      event_date = datetime.fromisoformat(event["created_at"].replace("Z", "+00:00"))
-      event_expired = event_date > author.last_github_check
-      if event_expired:
-        continue
+    for event in json:      
+      if latest_github_id is None:
+        latest_github_id = event["id"]
+
+      if event["id"] == last_github_id:
+        return
 
       title = ""
       description = ""
@@ -55,7 +59,7 @@ def github_task():
         description = f"{event['actor']['display_login']} deleted from a repository."
         content = f"I deleted a **{event['payload']['ref_type']}** ({event['payload']['ref']})"
       else:
-        print(f"Unknown Github Event: {event_type}")
+        print(f"[GITHUB CRON] Unknown Github Event: {event_type}")
         continue
 
       id = generate_next_id()
@@ -73,4 +77,6 @@ def github_task():
       send_post_to_inboxes(id, author.id)
 
     author.last_github_check = timezone.now()
+    author.last_github_id = latest_github_id
     author.save()
+  print("[GITHUB CRON] Ending Task")
