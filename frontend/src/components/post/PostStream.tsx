@@ -60,23 +60,27 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
         }
 
         if ('items' in response) {
-            const newPosts = await Promise.all(response.items.map(async (postResponse) => {
-                const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
-                console.log(likes);
-                const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
-                return (
-                    <Post
-                        key={`${postResponse.author.id}/${postResponse.id}`}
-                        {...postResponse} 
-                        likes={likes.length}
-                        isLiked={isLikedByUs}
-                        refreshStream={() => {
-                            currentPage.current = 1;
-                            generatePosts(true);
-                        }}
-                    />
-                );
-            }));
+            const newPosts = (await Promise.all(response.items.map(async (postResponse) => {
+                try {
+                    const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
+                    const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
+                    return (
+                        <Post
+                            key={`${postResponse.author.id}/${postResponse.id}`}
+                            {...postResponse} 
+                            likes={likes.length}
+                            isLiked={isLikedByUs}
+                            refreshStream={() => {
+                                currentPage.current = 1;
+                                generatePosts(true);
+                            }}
+                        />
+                    );
+                } catch (error) {
+                    console.error(error);
+                    return null;
+                }
+            }))).filter(post => post !== null) as any[];
             reset ? setPosts(newPosts) : setPosts([...posts, ...newPosts]);
         }
     }
