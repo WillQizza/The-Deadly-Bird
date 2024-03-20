@@ -1,6 +1,6 @@
 from django.conf import settings
 from rest_framework import serializers
-from posts.models import Post
+from posts.models import Post, Comment
 from likes.models import Like
 from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
@@ -71,7 +71,10 @@ class InboxMessageSerializer(serializers.Serializer):
       serializer = LikeSerializer(instance=like)
       return serializer.data
     elif instance.content_type == InboxMessage.ContentType.COMMENT:
-      pass
+      from posts.serializers import CommentSerializer
+      comment = Comment.objects.get(id=instance.content_id)
+      serializer = CommentSerializer(instance=comment)
+      return serializer.data
 
     return super().to_representation(instance)
   
