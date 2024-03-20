@@ -42,6 +42,7 @@ class RemoteNodeAuthentication(BaseAuthentication):
     if (username != settings.SITE_REMOTE_AUTH_USERNAME) \
       or (password != settings.SITE_REMOTE_AUTH_PASSWORD):
         print("wrong password")
+        print(f"received ({username}, {password}) when I was expecting ({settings.SITE_REMOTE_AUTH_USERNAME}, {settings.SITE_REMOTE_AUTH_PASSWORD})")
         raise exceptions.NotAuthenticated("Invalid Authorization header: Invalid credentials")
 
     print("request authorized")
