@@ -357,6 +357,10 @@ def handle_comment_inbox(request: HttpRequest):
   post_id = request.data.get('post_id')
   post = Post.objects.get(id=post_id)
 
+  if post.origin_post != None:
+    # This is a shared post!
+    post = post.origin_post
+
   author = create_remote_author_if_not_exists(request.data["author"])
   comment = Comment.objects.create(
     id=request.data["id"],
