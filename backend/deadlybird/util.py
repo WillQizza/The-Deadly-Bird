@@ -31,6 +31,15 @@ def resolve_remote_route(host: str, view: str, kwargs):
 
   return urljoin(host, route)
 
+def resolve_docker_host(host: str):
+  """
+  We may need to 
+  """    
+  if os.environ.get("DOCKER") is not None:
+    host = host.replace("host.docker.internal", "localhost")
+  
+  return host
+
 def get_host_from_api_url(url: str) -> str|None:
   """
   Retrieve the base host associated with the url.
