@@ -12,7 +12,7 @@ import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreatePostLike } from '../../api/likes';
 import { Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
@@ -20,6 +20,8 @@ import CommentSection from '../comment/CommentSection';
 type PostOptions = PostTy & {
     likes: number;
     isLiked: boolean;
+    shareCount: number;
+    setShareCount: React.Dispatch<React.SetStateAction<number>>;  // for triggering re-render of the stream when a post is shared
 };
 
 const Post: React.FC<PostOptions> = props => {
@@ -76,12 +78,13 @@ const Post: React.FC<PostOptions> = props => {
     }
 
     const handleShare = async () => {
-        const post = await apiSharePost(props.author.id, props.id);
+        await apiSharePost(props.author.id, props.id);
+        props.setShareCount(props.shareCount + 1);
     };
 
     // Handle comment section and commenting
     const [showComments, setShowComments] = useState(false);
-    const [updateCount, setUpdateCount] = useState(0);  // for indicating to the comment section that it needs to refresh
+    const [commentCount, setCommentCount] = useState(0);  // for indicating to the comment section that it needs to refresh
 
     /** Post */
     return (
@@ -164,14 +167,14 @@ const Post: React.FC<PostOptions> = props => {
                             <CommentSection
                                 postId={props.id}
                                 authorId={props.author.id}
-                                updateCount={updateCount}
+                                updateCount={commentCount}
                             />
                         </Offcanvas.Body>
                         <CommentForm
                             postId={props.id}
                             authorId={props.author.id}
-                            updateCount={updateCount}
-                            setUpdateCount={setUpdateCount}
+                            commentCount={commentCount}
+                            setCommentCount={setCommentCount}
                         />
                     </Offcanvas>
                     {/* Edit */}

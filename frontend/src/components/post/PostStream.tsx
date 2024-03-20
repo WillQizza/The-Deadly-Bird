@@ -4,7 +4,7 @@ import Post from './Post';
 import { apiGetAuthorPosts, apiGetPost, apiGetPosts, APIPostStreamTy } from '../../api/posts';
 import { apiGetPostLikes } from '../../api/likes';
 import { getUserId } from '../../utils/auth';
-import { LikedResponse, PostsResponse } from '../../api/types';
+import { PostsResponse } from '../../api/types';
 
 export enum PostStreamTy {
     Public,
@@ -20,18 +20,14 @@ export type PostStreamArgs = {
 }
 
 const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
-    const [posts, setPosts] = useState<React.ReactElement[]>([])
+    const [posts, setPosts] = useState<React.ReactElement[]>([]);
     const postRef = useRef<HTMLDivElement>(null);
     const currentPage = useRef(1);
     const pageSize = 5;
-
-    /** Function to add posts to current posts */
-    const addPosts = (newPosts: React.ReactElement[]) => {
-        setPosts([...posts, ...newPosts]);
-    };
+    const [updateCount, setUpdateCount] = useState(0);  // for re-rendering the stream
 
     // function to generate posts (and wait until last post is reached to generate more)
-    const generatePosts = async () => {
+    const generatePosts = async (reset?: boolean) => {
         let response: PostsResponse;
         if (props.type === PostStreamTy.Author && props.authorID) {   // Get profile posts
             response = await apiGetAuthorPosts(props.authorID, currentPage.current, pageSize);
@@ -68,15 +64,24 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                 const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
                 console.log(likes);
                 const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
-                return <Post key={`${postResponse.author.id}/${postResponse.id}`} {...postResponse} likes={likes.length} isLiked={isLikedByUs} />;
+                return (
+                    <Post
+                        key={`${postResponse.author.id}/${postResponse.id}`}
+                        {...postResponse} 
+                        likes={likes.length}
+                        isLiked={isLikedByUs}
+                        shareCount={updateCount}
+                        setShareCount={setUpdateCount}
+                    />
+                );
             }));
-            addPosts(newPosts);
+            reset ? setPosts(newPosts) : setPosts([...posts, ...newPosts]);
         }
     }
 
     // generate initial posts
     useEffect(() => {
-        generatePosts();
+        generatePosts(true);
     }, []);
 
     // generate new posts while scrolling
@@ -111,6 +116,12 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
             }
         }
     }, [posts])
+
+    // refresh stream when post is shared
+    useEffect(() => {
+        currentPage.current = 1;
+        generatePosts(true);
+    }, [updateCount])
 
     /** Post stream */
     return (

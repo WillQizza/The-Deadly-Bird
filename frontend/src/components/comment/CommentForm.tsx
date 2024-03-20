@@ -9,12 +9,12 @@ import { apiRequest } from "../../utils/request";
 interface CommentFormProps {
     postId: string,
     authorId: string,
-    updateCount: number,
-    setUpdateCount: React.Dispatch<React.SetStateAction<number>>  // for signaling to the comment section to update its contents
+    commentCount: number,
+    setCommentCount: React.Dispatch<React.SetStateAction<number>>  // for signaling to the comment section to update its contents
 }
 
 const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
-    const { postId, authorId, updateCount, setUpdateCount } = props;
+    const { postId, authorId, commentCount, setCommentCount } = props;
     const [comment, setComment] = useState("");
     const [type, setType] = useState("text/plain");
     const [error, setError] = useState("");
@@ -42,7 +42,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
             // Handle response
             if (response.ok) {
                 setComment("");
-                setUpdateCount(updateCount + 1);
+                setCommentCount(commentCount + 1);
             } else {
                 const data = await response.json();
                 setResponseMessage(data.message);
