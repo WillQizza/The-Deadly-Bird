@@ -83,45 +83,49 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
 
   /** Settings form */
   return (
-    <Fragment>
-      <div id={styles.container}>
-        {/** Form */}
-        <form method="POST" onSubmit={onSaveClicked}>
-          <div className={styles.row}>
-            {/* Avatar */}
-            <div id={styles.avatarContainer} onClick={onAvatarPromptOpen}>
-              <img alt="Profile Avatar" src={profileImage} />
-            </div>
-            {/** Modifiable information */}
-            <div style={{ flexGrow: 1 }}>
-              <div className={styles.row}>  
-                <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
-                <SettingsInput title="Display Name" name="displayName" type="text" value={displayName} valueSetter={setDisplayName} disabled={!loadedContent} />
+    <>
+      <Fragment>
+        <div id={styles.container}>
+          {/** Form */}
+          <form method="POST" onSubmit={onSaveClicked}>
+            <div className={styles.row}>
+              {/* Avatar */}
+              <div id={styles.avatarContainer} onClick={onAvatarPromptOpen}>
+                <img alt="Profile Avatar" src={profileImage} />
               </div>
-              <div className={styles.row}>
-                <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />
-                <SettingsInput title="Password" name="password" type="password" value=""  valueSetter={setPassword} placeholder="*********" />
+              {/** Modifiable information */}
+              <div style={{ flexGrow: 1 }}>
+                <div className={styles.row}>  
+                  <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
+                  <SettingsInput title="Display Name" name="displayName" type="text" value={displayName} valueSetter={setDisplayName} disabled={!loadedContent} />
+                </div>
+                <div className={styles.row}>
+                  <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />
+                  <SettingsInput title="Password" name="password" type="password" value=""  valueSetter={setPassword} placeholder="*********" />
+                </div>
               </div>
             </div>
-          </div>
-          {/** Bio */}
-          <div className={styles.row}>
-            <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
-            <SettingsInput title="Github" name="github" type="text" value={github} valueSetter={setGithub} disabled={!loadedContent} />
-          </div>
-          {/** Save changes button */}
-          <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
-            <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
-                Save Changes
-            </Button>
-          </div>
-        </form>
-      </div>
-      
+            {/** Bio */}
+            <div className={styles.row}>
+              <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
+              <SettingsInput title="Github" name="github" type="text" value={github} valueSetter={setGithub} disabled={!loadedContent} />
+            </div>
+            {/** Save changes button */}
+            <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
+              <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
+                  Save Changes
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Fragment>
       {/** Avatar upload modal */}
-      <Modal show={showingAvatarModal}
-        centered={true} size="xl"
-        style={{ width: "calc(100% - 14%)", marginLeft: "14%", display: showingAvatarModal ? "block" : "none" }}
+      <Modal
+      show={showingAvatarModal}
+      onHide={() => setShowingAvatarModal(false)}
+      size="xl"
+      centered
+      style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}
       >
         <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>
           <Modal.Title>Avatar Upload</Modal.Title>
@@ -137,7 +141,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
           <Button onClick={onAvatarURLUploaded} disabled={avatarURL.length === 0}>Upload Avatar</Button>
         </Modal.Footer>
       </Modal>
-    </Fragment>
+    </>
   );
 };
 
