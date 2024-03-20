@@ -10,11 +10,11 @@ import { apiGetCommentLikes } from "../../api/likes";
 interface CommentSectionProps {
     postId: string,
     authorId: string,
-    updateCount: number  // indicates if the comment section needs to be updated
+    commentUpdateCount: number  // indicates if the comment section needs to be updated
 }
 
 const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProps) => {
-    const { postId, authorId, updateCount } = props;
+    const { postId, authorId, commentUpdateCount } = props;
     const [comments, setComments] = useState<CommentProps[]>([]);
     const commentRef = useRef<HTMLAnchorElement>(null);
     const pageSize = 5;
@@ -100,7 +100,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
     useEffect(() => {
         currentPage.current = 1;
         fetchComments(true);
-    }, [updateCount])
+    }, [commentUpdateCount])
 
     /** Comment section */
     return (

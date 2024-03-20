@@ -24,7 +24,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const postRef = useRef<HTMLDivElement>(null);
     const currentPage = useRef(1);
     const pageSize = 5;
-    const [updateCount, setUpdateCount] = useState(0);  // for re-rendering the stream
+    const [streamUpdateCount, setStreamUpdateCount] = useState(0);  // for re-rendering the stream
 
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = async (reset?: boolean) => {
@@ -70,8 +70,8 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         {...postResponse} 
                         likes={likes.length}
                         isLiked={isLikedByUs}
-                        shareCount={updateCount}
-                        setShareCount={setUpdateCount}
+                        streamUpdateCount={streamUpdateCount}
+                        setStreamUpdateCount={setStreamUpdateCount}
                     />
                 );
             }));
@@ -121,7 +121,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     useEffect(() => {
         currentPage.current = 1;
         generatePosts(true);
-    }, [updateCount])
+    }, [streamUpdateCount])
 
     /** Post stream */
     return (

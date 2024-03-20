@@ -9,6 +9,7 @@ import FormTextbox from './FormTextbox';
 import RadioButtonGroup from './RadioButtonGroup';
 import ImageUpload from './ImageUpload';
 import { apiDeletePosts } from '../../api/posts';
+import DeleteDialog from './DeleteDialog';
 
 interface PostFormProps {
     image?: boolean,
@@ -129,49 +130,11 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
         setFormErrors(newFormErrors);
         return isValid;
     };
-   
-    /** Function rendering confirmation dialog upon post deletion */
-    const ConfirmDialog = ({}) => {
-        return (
-            <Modal show={showConfirm} onHide={() => {setShowConfirm(false)}}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Delete Post</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>Are you sure you want to delete this post?</Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => {setShowConfirm(false)}}>
-                        Cancel
-                    </Button>
-                    <Button variant="danger" onClick={handleDeletePost}>
-                        Delete
-                    </Button>
-                </Modal.Footer>
-            </Modal>
-        );
-    };
-    
+
     /** Function handling the delete button being clicked */
     const handleDeleteClick = () => {
         setShowConfirm(true);
     };
-
-    /** Function called from delete button to remove the local post*/
-    const handleDeletePost = async () => {
-     
-        console.log("delete post:", postId);
-        await apiDeletePosts(getUserId(), postId)
-            .then(response => {
-                if (response.status == 204) {
-
-                    navigate("/home")
-                } else if (response.status == 404) {
-                    // alert("post not found")
-                } else if (response.status == 500) {
-                    alert("Failed to delete: Internal server errror");
-                }
-            });
-        setShowConfirm(false);
-    }
 
     /** Post form */
     return (
@@ -257,10 +220,14 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                 {/** Delete button */}
                 { props.edit ?
                     <> 
-                    <Button className={styles.deleteButton} onClick={handleDeleteClick}>
-                        Delete Post
-                    </Button>
-                    <ConfirmDialog/>
+                        <Button className={styles.deleteButton} onClick={handleDeleteClick}>
+                            Delete Post
+                        </Button>
+                        <DeleteDialog
+                            show={showConfirm}
+                            setShow={setShowConfirm}
+                            postId={postId}
+                        />
                     </> 
                     : null
                 } 

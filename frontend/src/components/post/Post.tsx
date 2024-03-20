@@ -9,19 +9,21 @@ import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
 import { ReactComponent as LinkIcon} from 'bootstrap-icons/icons/link-45deg.svg';
 import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
+import { ReactComponent as Trash } from 'bootstrap-icons/icons/trash3.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreatePostLike } from '../../api/likes';
-import { Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
+import { Button, Modal, Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
+import DeleteDialog from './DeleteDialog';
 
 type PostOptions = PostTy & {
     likes: number;
     isLiked: boolean;
-    shareCount: number;
-    setShareCount: React.Dispatch<React.SetStateAction<number>>;  // for triggering re-render of the stream when a post is shared
+    streamUpdateCount: number;
+    setStreamUpdateCount: React.Dispatch<React.SetStateAction<number>>;  // for triggering re-render of the stream when a post is shared
 };
 
 const Post: React.FC<PostOptions> = props => {
@@ -79,12 +81,48 @@ const Post: React.FC<PostOptions> = props => {
 
     const handleShare = async () => {
         await apiSharePost(props.author.id, props.id);
-        props.setShareCount(props.shareCount + 1);
+        props.setStreamUpdateCount(props.streamUpdateCount + 1);
     };
 
     // Handle comment section and commenting
     const [showComments, setShowComments] = useState(false);
-    const [commentCount, setCommentCount] = useState(0);  // for indicating to the comment section that it needs to refresh
+    const [commentUpdateCount, setCommentUpdateCount] = useState(0);  // for indicating to the comment section that it needs to refresh
+
+    // Handle edit
+    const [showConfirm, setShowConfirm] = useState(false);
+
+    /** Function rendering edit button (or lack thereof) depending on the user */
+    const EditButton = () => {
+        if (postAuthor.id === getUserId()) {
+            // edit button if they are the author of the post
+            return(<PencilSquare
+                className={`${styles.postButton} ${styles.postEdit}`}
+                onClick={(e) => {
+                    document.location.href = `/post/${props.originId || props.id}`;
+                }}
+            />);
+        }
+        else if (props.originAuthor && props.author.id == getUserId()) {
+            // delete button if they shared the post
+            return(
+                <>
+                    <Trash 
+                        className={`${styles.postButton} ${styles.postDelete}`}
+                        onClick={() => setShowConfirm(true)}
+                    />
+                    <DeleteDialog
+                        show={showConfirm}
+                        setShow={setShowConfirm}
+                        postId={props.id}
+                        onDelete={() => props.setStreamUpdateCount(props.streamUpdateCount + 1)}
+                    />
+                </>
+            );
+        }
+        else {
+            return null;
+        }
+    }
 
     /** Post */
     return (
@@ -167,27 +205,18 @@ const Post: React.FC<PostOptions> = props => {
                             <CommentSection
                                 postId={props.id}
                                 authorId={props.author.id}
-                                updateCount={commentCount}
+                                commentUpdateCount={commentUpdateCount}
                             />
                         </Offcanvas.Body>
                         <CommentForm
                             postId={props.id}
                             authorId={props.author.id}
-                            commentCount={commentCount}
-                            setCommentCount={setCommentCount}
+                            commentUpdateCount={commentUpdateCount}
+                            setCommentUpdateCount={setCommentUpdateCount}
                         />
                     </Offcanvas>
                     {/* Edit */}
-                    {
-                        (postAuthor.id === getUserId()) ? (
-                            <PencilSquare
-                                className={`${styles.postButton} ${styles.postEdit}`}
-                                onClick={(e) => {
-                                    document.location.href = `/post/${props.originId || props.id}`;
-                                }}
-                            />
-                        ) : null
-                    }
+                    <EditButton />
                 </div>
             </div>
         </div>
