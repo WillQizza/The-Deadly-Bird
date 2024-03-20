@@ -44,15 +44,14 @@ def handle_follow_inbox(request: HttpRequest):
     from_author = Author.objects.get(id=from_author["id"])
     to_author = Author.objects.get(id=to_author["id"])
 
-    if Following.objects.filter(author__id=from_author.id,
-                                target_author__id=to_author.id).exists():
+    existing_following = Following.objects.filter(author__id=from_author.id, target_author__id=to_author.id).first()
+    if existing_following is not None:
         print("from author:", from_author.id)
         print("to author:", to_author.id)
 
-        return Response({
-            "error": True,
-            "message": "Conflict: Author is already following"
-        }, status=409)
+        # If this occurs, then that means that the user unfollowed us and we didn't register it.
+        existing_following.delete()
+        
     elif FollowingRequest.objects.filter(author__id=from_author.id,  
         target_author__id=to_author.id).exists():
             print("REQUEST 409 from author:", from_author.id)
