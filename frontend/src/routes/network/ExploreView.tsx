@@ -28,11 +28,13 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
             const localAuthors = response.items.filter(author =>
                 author.host.includes(host)
             );
+            console.log(localAuthors);
             setExploreAuthors(localAuthors);
         } else {
             const remoteAuthors = response.items.filter(author =>
                 !author.host.includes(host)
             );
+            console.log(remoteAuthors);
             setExploreAuthors(remoteAuthors);
         }
 

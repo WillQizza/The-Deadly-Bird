@@ -15,7 +15,8 @@ from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer
 from deadlybird.util import resolve_remote_route, get_host_with_slash
-  
+from nodes.util import create_remote_author_if_not_exists
+from following.util import compare_domains
 
 def handle_follow_inbox(request: HttpRequest):
     """
@@ -28,11 +29,17 @@ def handle_follow_inbox(request: HttpRequest):
     to_author = request.data.get('object')
     from_author = request.data.get('actor')
     
-    if not check_authors_exist(to_author["id"], from_author["id"]):
+    if not check_authors_exist(to_author["id"]):
       return Response({
-        "error": True,
-        "message": "An author provided does not exist"
+        "error": True, "message": "Target author provided does not exist"
       }, status=404)
+
+    if not check_authors_exist(from_author["id"]):
+      remote_author = create_remote_author_if_not_exists(from_author) 
+      if not remote_author:
+        return Response({
+          "error": True, "message": "Failed to create remote author"
+        }, status=400)
 
     from_author = Author.objects.get(id=from_author["id"])
     to_author = Author.objects.get(id=to_author["id"])
@@ -51,7 +58,7 @@ def handle_follow_inbox(request: HttpRequest):
             }, status=409) 
     try:
       receiving_host = to_author.host
-      if SITE_HOST_URL not in receiving_host:
+      if not compare_domains(SITE_HOST_URL, receiving_host):
         # Remote Following Request
         url = resolve_remote_route(receiving_host, "inbox", {
            "author_id": to_author.id

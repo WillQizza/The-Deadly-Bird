@@ -97,8 +97,8 @@ class FollowersTestCase(BaseTestCase):
         self.edit_session(id=from_author_id)
 
         url = reverse('request_follower', kwargs={
-            'local_author_id': from_author_id, 
-            'foreign_author_id': to_author_id
+            'author_id': from_author_id, 
+            'target_author_id': to_author_id
         })
         
         res = self.client.get(url)

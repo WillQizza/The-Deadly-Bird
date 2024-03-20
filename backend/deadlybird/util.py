@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.conf import settings
 from deadlybird.settings import SITE_HOST_URL
+from urllib.parse import urljoin
 import secrets
 import os
 
@@ -27,7 +28,8 @@ def resolve_remote_route(host: str, view: str, kwargs):
     host = host.replace("localhost", "host.docker.internal")
 
   route = reverse(viewname=view, kwargs=kwargs)
-  return host[:-1] + route if host.endswith("/") else host + route
+
+  return urljoin(host, route)
 
 def get_host_from_api_url(url: str) -> str|None:
   """
