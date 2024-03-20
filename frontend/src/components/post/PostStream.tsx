@@ -23,7 +23,9 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const [posts, setPosts] = useState<React.ReactElement[]>([]);
     const postRef = useRef<HTMLDivElement>(null);
     const currentPage = useRef(1);
+    const failedToLoadPosts = useRef(0);
     const pageSize = 5;
+    
     const [streamUpdateCount, setStreamUpdateCount] = useState(0);  // for re-rendering the stream
 
     // function to generate posts (and wait until last post is reached to generate more)
@@ -77,12 +79,12 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         />
                     );
                 } catch (error) {
+                    failedToLoadPosts.current = failedToLoadPosts.current + 1;
                     console.error(error);
                     return null;
                 }
             }))).filter(post => post !== null) as any[];
 
-            console.log("DEBUG", newPosts);
             reset ? setPosts(newPosts) : setPosts([...posts, ...newPosts]);
         }
     }
@@ -95,7 +97,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     // generate new posts while scrolling
     useEffect(() => {
         // check if posts need generated
-        if (Math.floor(posts.length / pageSize) < currentPage.current) {
+        if (Math.floor((posts.length + failedToLoadPosts.current) / pageSize) < currentPage.current) {
             return;
         }
 
@@ -123,7 +125,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                 observer.unobserve(postRef.current);
             }
         }
-    }, [posts])
+    }, [posts, failedToLoadPosts])
 
     /** Post stream */
     return (
