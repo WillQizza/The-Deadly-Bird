@@ -101,9 +101,9 @@ const Inbox = () => {
         // TODO: Implement 
         return (
             <Card key={message+idx} className="mb-2">
-                <Card.Header>Follow Request</Card.Header>
+                <Card.Header>Comment</Card.Header>
                 <Card.Body>
-                    <Card.Text>Liked your post!</Card.Text> 
+                    <Card.Text>{message.author.displayName} commented on your post!</Card.Text> 
                 </Card.Body>
             </Card>
         );
