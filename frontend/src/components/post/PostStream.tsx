@@ -81,6 +81,8 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                     return null;
                 }
             }))).filter(post => post !== null) as any[];
+
+            console.log("DEBUG", newPosts);
             reset ? setPosts(newPosts) : setPosts([...posts, ...newPosts]);
         }
     }
