@@ -33,7 +33,8 @@ def resolve_remote_route(host: str, view: str, kwargs):
 
 def resolve_docker_host(host: str):
   """
-  We may need to 
+  We need to undo resolve_remote_route if trying to filter authors that
+  match a host field of a node instance.
   """    
   if os.environ.get("DOCKER") is not None:
     host = host.replace("host.docker.internal", "localhost")

@@ -45,13 +45,18 @@ def handle_follow_inbox(request: HttpRequest):
     to_author = Author.objects.get(id=to_author["id"])
 
     if Following.objects.filter(author__id=from_author.id,
-                                target_author__id=to_author.id).exists(): 
+                                target_author__id=to_author.id).exists():
+        print("from author:", from_author.id)
+        print("to author:", to_author.id)
+
         return Response({
             "error": True,
             "message": "Conflict: Author is already following"
         }, status=409)
-    elif FollowingRequest.objects.filter(author__id=from_author.id, 
+    elif FollowingRequest.objects.filter(author__id=from_author.id,  
         target_author__id=to_author.id).exists():
+            print("REQUEST 409 from author:", from_author.id)
+            print("to author:", to_author.id)
             return Response({
                 "error": True,
                 "message": "Conflict: Outstanding request in existence"
