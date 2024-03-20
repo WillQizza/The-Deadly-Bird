@@ -23,7 +23,10 @@ const ExploreView: React.FC<ExploreViewProps> = ({viewType}) => {
         const host = hostRes.hostname.replace(/\/$/, "");
 
         const response = await apiGetAuthors(page, pageSize);
-
+        
+        console.log("host:", host);
+        console.log("All authors:", response.items);
+        
         if (viewType === "local") {
             const localAuthors = response.items.filter(author =>
                 author.host.includes(host)
