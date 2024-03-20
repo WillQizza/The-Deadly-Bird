@@ -32,7 +32,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       setDisplayName(author.displayName);
       setHomeServer(author.host);
       setBio(author.bio);
-      setGithub(author.github!);
+      setGithub(author.github || "");
       setLoadedContent(true);
 
       if (author.profileImage) {
