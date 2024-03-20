@@ -85,7 +85,6 @@ class InboxAuthorSerializer(serializers.Serializer):
   host = serializers.URLField()
   displayName = serializers.CharField(source="display_name")
   url = serializers.URLField(source="profile_url")
-  github = serializers.URLField(allow_null=True)
   profileImage = serializers.SerializerMethodField()
 
   def get_profileImage(self, obj) -> str:

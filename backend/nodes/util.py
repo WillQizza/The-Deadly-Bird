@@ -3,6 +3,7 @@ from identity.models import Author
 from django.contrib.auth.models import User
 from deadlybird.util import generate_next_id
 from django.db.utils import IntegrityError
+from django.utils import timezone
 
 def format_node_api_url(node: Node, route: str):
   if node.host.endswith("/"):
@@ -43,7 +44,8 @@ def create_remote_author_if_not_exists(data: dict[str, any]):
         user=created_user,
         display_name=data["displayName"],
         host=data["host"],
-        profile_url=data["url"]
+        profile_url=data["url"],
+        last_github_check=timezone.now()
       )
 
     except IntegrityError:

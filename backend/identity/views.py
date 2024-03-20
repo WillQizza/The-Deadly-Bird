@@ -12,7 +12,6 @@ from likes.serializers import APIDocsLikeSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
 from .serializers import AuthorSerializer, InboxMessageSerializer 
-from identity.util import check_authors_exist
 from deadlybird.settings import SITE_HOST_URL
 
 @extend_schema(

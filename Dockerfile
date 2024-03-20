@@ -32,6 +32,11 @@ RUN pnpm run build
 FROM python:3 AS backend
 ENV PORT 8000
 
+# Used for django-crontab
+RUN apt-get update
+RUN apt-get install -y cron
+RUN service cron start
+
 ARG LIVE_HOST_URL "http://localhost:8000/"
 ARG AUTH_USERNAME "username"
 ARG AUTH_PASSWORD "password"

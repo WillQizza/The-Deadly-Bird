@@ -19,6 +19,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   const [homeServer, setHomeServer] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
+  const [github, setGithub] = useState("");
   const [loadedContent, setLoadedContent] = useState(false);
 
   const [showingAvatarModal, setShowingAvatarModal] = useState(false);
@@ -31,6 +32,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       setDisplayName(author.displayName);
       setHomeServer(author.host);
       setBio(author.bio);
+      setGithub(author.github!);
       setLoadedContent(true);
 
       if (author.profileImage) {
@@ -48,6 +50,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       email,
       bio,
       profileImage,
+      github,
       displayName: displayName
     })
     if (password !== "") {
@@ -104,6 +107,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
           {/** Bio */}
           <div className={styles.row}>
             <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
+            <SettingsInput title="Github" name="github" type="text" value={github} valueSetter={setGithub} disabled={!loadedContent} />
           </div>
           {/** Save changes button */}
           <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
