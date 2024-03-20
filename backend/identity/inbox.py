@@ -233,11 +233,11 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   origin_author = create_remote_author_if_not_exists(author_data)
 
   origin_url = serializer.data["origin"]
-  origin_author_id, _, origin_post_id = origin_url.split("/")[-3:]
+  origin_post_id = origin_url.split("/")[-1]
 
   # Ensure the source author also exists in our systems
   source_url = serializer.data["source"]
-  source_author_id, _, source_post_id = source_url.split("/")[-3:]
+  source_author_id = source_url.split("/")[-3]
   try:
     source_author = Author.objects.get(id=source_author_id)
   except Author.DoesNotExist:

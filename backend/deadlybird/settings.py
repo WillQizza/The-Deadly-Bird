@@ -204,3 +204,8 @@ SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")
 
 # In the case scenario of localhost testing, we can override the cookie name
 SESSION_COOKIE_NAME = os.environ.get("COOKIE_NAME", "sessionid")
+
+# Cron jobs
+CRONJOBS = [
+    ("*/1 * * * *", "identity.jobs.github_task", '>> /tmp/github.log')
+]
