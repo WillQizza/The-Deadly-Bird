@@ -203,3 +203,5 @@ SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")
 
 # In the case scenario of localhost testing, we can override the cookie name
 SESSION_COOKIE_NAME = os.environ.get("COOKIE_NAME", "sessionid")
+
+GITHUB_API_TOKEN = None if len(os.environ.get("GITHUB_API_TOKEN", "")) == 0 else os.environ.get("GITHUB_API_TOKEN")
