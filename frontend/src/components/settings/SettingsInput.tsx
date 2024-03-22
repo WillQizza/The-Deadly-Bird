@@ -23,7 +23,7 @@ const SettingsInput: React.FC<SettingsInputOptions> = options => {
 
   /** Settings input */
   return (
-    <Form.Group className={styles.container}>
+    <Form.Group className={styles.container} data-bs-theme={"dark"}>
       <Form.Label className={styles.label}>
         {options.title}
       </Form.Label>

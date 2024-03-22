@@ -3,7 +3,6 @@
   width: 100%;
   flex-direction: column;
   border-radius: 10px;
-  padding: 20px;
 }
 
 #avatarContainer {
@@ -15,10 +14,9 @@
 #avatarContainer #avatar {
   height: 168px;
   width: 168px;
-  border: 3px solid var(--dark-teal);
+  border: 1.5px solid var(--dark-teal);
   box-shadow: 0px 2px 0px var(--darker-teal);
-  padding: 1rem;
-  margin-bottom: 2rem;
+  padding: 0.5rem;
 }
 
 #avatarContainer #avatar:hover {
@@ -31,7 +29,7 @@
   margin: 2.5rem 0;
   background-color: var(--dark-teal) !important;
   border-color: var(--dark-teal) !important;
-  color: white !important;
+  color: var(--light-teal) !important;
   padding: 0.5rem;
 }
 

@@ -1,4 +1,4 @@
-import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap";
+import { Button, Form, Image, Modal } from "react-bootstrap";
 import styles from "./SettingsForm.module.css";
 import SettingsInput from "./SettingsInput";
 import React, { Fragment, useEffect, useState } from "react";
@@ -87,7 +87,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       <Fragment>
         <div id={styles.container}>
           {/** Form */}
-          <Form method="POST" onSubmit={onSaveClicked} id={styles.form}>
+          <Form method="POST" onSubmit={onSaveClicked}>
             {/* Avatar */}
             <div id={styles.avatarContainer}>
               <Image
