@@ -35,7 +35,7 @@ const SettingsInput: React.FC<SettingsInputOptions> = options => {
         placeholder={options.placeholder}
         value={options.value}
         onChange={onChange}
-    />
+      />
     </Form.Group>
   );
 };

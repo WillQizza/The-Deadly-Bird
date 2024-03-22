@@ -1,33 +1,28 @@
 #container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   height: 100%;
+  padding: 5rem;
 }
 
 #content {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  width: 75%;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 #header {
   display: flex;
-  justify-content: space-between;
   margin-bottom: 25px;
+  padding: 1rem;
 }
 
 #header .headerItem {
-  color: #fff;
+  color: white;
   font-size: 2.5em;
-
   display: flex;
   justify-content: flex-end;
   flex-direction: column;
-
   cursor: default;
 }
 

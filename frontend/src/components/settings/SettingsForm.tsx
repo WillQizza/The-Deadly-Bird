@@ -1,4 +1,4 @@
-import { Button, Modal } from "react-bootstrap";
+import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap";
 import styles from "./SettingsForm.module.css";
 import SettingsInput from "./SettingsInput";
 import React, { Fragment, useEffect, useState } from "react";
@@ -87,36 +87,57 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       <Fragment>
         <div id={styles.container}>
           {/** Form */}
-          <form method="POST" onSubmit={onSaveClicked}>
-            <div className={styles.row}>
-              {/* Avatar */}
-              <div id={styles.avatarContainer} onClick={onAvatarPromptOpen}>
-                <img alt="Profile Avatar" src={profileImage} />
-              </div>
-              {/** Modifiable information */}
-              <div style={{ flexGrow: 1 }}>
-                <div className={styles.row}>  
-                  <SettingsInput title="Email" name="email" type="email" value={email} valueSetter={setEmail} disabled={!loadedContent} />
-                  <SettingsInput title="Display Name" name="displayName" type="text" value={displayName} valueSetter={setDisplayName} disabled={!loadedContent} />
-                </div>
-                <div className={styles.row}>
-                  <SettingsInput title="Home Server" name="homeserver" type="text" value={homeServer} disabled />
-                  <SettingsInput title="Password" name="password" type="password" value=""  valueSetter={setPassword} placeholder="*********" />
-                </div>
-              </div>
+          <Form method="POST" onSubmit={onSaveClicked} id={styles.form}>
+            {/* Avatar */}
+            <div id={styles.avatarContainer}>
+              <Image
+                id={styles.avatar}
+                src={profileImage}
+                alt={"Profile Avatar"}
+                onClick={onAvatarPromptOpen}
+                roundedCircle
+              />
             </div>
+            {/** Email */}
+            <SettingsInput
+              title="Email"name="email" type="email"
+              value={email} valueSetter={setEmail} disabled={!loadedContent}
+            />
+            {/** Display name */}
+            <SettingsInput
+              title="Display Name" name="displayName" type="text"
+              value={displayName} valueSetter={setDisplayName} disabled={!loadedContent}
+            />
+            {/** Home server */}
+            <SettingsInput
+              title="Home Server"
+              name="homeserver"
+              type="text" 
+              value={homeServer} disabled
+            />
+            {/** Password */}
+            <SettingsInput
+              title="Password" name="password" type="password"
+              value="" valueSetter={setPassword} placeholder="*********"
+            />
             {/** Bio */}
-            <div className={styles.row}>
-              <SettingsInput title="Bio" name="bio" type="text" placeholder="What's on your mind?" value={bio} valueSetter={setBio} disabled={!loadedContent} />
-              <SettingsInput title="Github" name="github" type="text" value={github} valueSetter={setGithub} disabled={!loadedContent} />
-            </div>
+            <SettingsInput
+              title="Bio" name="bio" type="text" placeholder="What's on your mind?"
+              value={bio} valueSetter={setBio} disabled={!loadedContent}
+            />
+            {/** Github */}
+            <SettingsInput
+              title="Github" name="github" type="text"
+              value={github} valueSetter={setGithub} disabled={!loadedContent}
+            />
             {/** Save changes button */}
-            <div className={styles.row} style={{ marginTop: 20, justifyContent: "flex-end" }}>
-              <Button type="submit" size="lg" variant="info" disabled={!loadedContent} className={styles.saveChangesButton}>
-                  Save Changes
-              </Button>
-            </div>
-          </form>
+            <Button 
+              type="submit" disabled={!loadedContent} 
+              className={styles.saveChangesButton}
+            >
+              Save Changes
+            </Button>
+          </Form>
         </div>
       </Fragment>
       {/** Avatar upload modal */}
