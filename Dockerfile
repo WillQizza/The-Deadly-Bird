@@ -32,7 +32,7 @@ RUN pnpm run build
 FROM python:3 AS backend
 ENV PORT 8000
 
-ARG LIVE_HOST_URL "http://localhost:8000/"
+ARG LIVE_HOST_URL "http://localhost:8000"
 ARG AUTH_USERNAME "username"
 ARG AUTH_PASSWORD "password"
 ARG GITHUB_API_TOKEN ""

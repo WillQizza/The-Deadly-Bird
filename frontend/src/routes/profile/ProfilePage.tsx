@@ -49,6 +49,7 @@ const ProfilePage: React.FC = () => {
 
     /** Gets user profile */
     useEffect(() => {
+        console.log(publicDir);
         apiGetAuthor(userId)
             .then(async author => {
                 if (!author) {
@@ -67,6 +68,8 @@ const ProfilePage: React.FC = () => {
                     setGithubUsername(author.github);
                 }
                 if (author.profileImage) {
+                    console.log("author:", author);
+                    console.log("image:", author.profileImage);
                     setAvatarURL(author.profileImage);
                 }
             });
