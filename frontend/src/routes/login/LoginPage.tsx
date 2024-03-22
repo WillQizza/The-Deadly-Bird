@@ -23,7 +23,7 @@ const LoginPage: React.FC = () => {
     }, [showLogin]);
 
     /** Login page */
-    return ( 
+    return (
         <Fragment>
             <div className={styles.loginPageContainer}>
                 {/** Logo column */}
@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
                         ? <LoginForm/> 
                         : <RegisterForm showLogin={showLogin} setShowLogin={setShowLogin}/>
                     }
-                    <div onClick={() => setShowLogin(!showLogin)}>
+                    <div onClick={() => setShowLogin(!showLogin)} style={{cursor: "pointer"}}>
                         { authMessage }
                     </div> 
                 </div>

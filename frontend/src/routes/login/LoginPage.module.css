@@ -1,11 +1,11 @@
 .loginPageContainer {
     display: flex;
+    flex-direction: row;
     flex-grow: 1;
-    /* min-height: 100vh;  # this causes footer to be pushed below screen*/
     background-color: var(--grey);
     color: white;
+    min-height: calc(100vh - 64px);
 }
-
 
 .imageColumn {
     width: 35%;
@@ -31,6 +31,8 @@
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    padding: 0.5rem;
+    overflow-y: scroll;
 }
 
 .imageColumn img {
@@ -44,4 +46,18 @@
     text-align: center;
     color: var(--yellow);
     margin-bottom: 20px;
+}
+
+@media only screen and (max-width: 768px) {
+    .imageColumn, .imageColorColumn {
+        display: none;
+    }
+
+    .loginColumn {
+        width: 100%;
+    }
+
+    .loginTitle {
+        font-size: 70px;
+    }
 }
