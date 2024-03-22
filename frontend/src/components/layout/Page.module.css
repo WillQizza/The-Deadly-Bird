@@ -3,6 +3,7 @@
     background-color: var(--grey);
     display: flex;
     flex-direction: column;
+    min-width: fit-content;
     min-height: 100vh;
 }
 
@@ -21,7 +22,6 @@
 .content {
     flex-grow: 1;
     height: 100%;
-    overflow: hidden;
 }
 
 #thinNavbar {
