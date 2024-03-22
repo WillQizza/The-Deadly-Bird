@@ -14,9 +14,8 @@ from nodes.util import get_auth_from_host, create_remote_author_if_not_exists
 from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer
-from deadlybird.util import resolve_remote_route, get_host_with_slash
+from deadlybird.util import resolve_remote_route, get_host_with_slash, compare_domains
 from nodes.util import create_remote_author_if_not_exists
-from following.util import compare_domains
 
 def handle_follow_inbox(request: HttpRequest):
     """
