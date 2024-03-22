@@ -1,93 +1,62 @@
-#logoContainer {
-    margin: auto;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    width: 50%;
+#sidebar {
+    height: 100%;
+    border-color: var(--dark-teal);
 }
 
-#logoContainer > img {
-    width: 100%;
+#sidebar > div {
+    background-color: var(--teal);
+    color: white;
 }
 
-#buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.buttonLink {
-    text-decoration: none;
-}
-
-.button {
-    height: 64px;
-    background-color: var(--dark-teal);
+#sidebarHeader {
     display: flex;
     flex-direction: row;
-}
-
-.button.selected {
-    background-color: var(--darker-teal);
-}
-
-.button > .icon {
-    width: 43%;
-    height: 100%;
-    padding: 15px;
-    margin-top:15px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-}
-
-.button > .icon > * {
-    color: white;
-    width: 64px;
-    height: 64px;
-}
-
-.button > .text {
-    width: 77%;
-    height: 100%;
-    display: flex;
     align-items: center;
-    flex-direction: column;
-    justify-content: center;
-    color: #fff;
-    font-size: 1.5em;
+    padding: 1rem;
+    gap: 2rem;
 }
 
-#navigationContainer {
+#sidebarHeaderCollapsed {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
+    align-items: center;
+    padding: 1rem;
+    gap: 2rem;
 }
 
-#buttons {
-    flex-grow: 1;
+#sidebarHeader > img, #sidebarHeaderCollapsed > img {
+    width: 5rem;
 }
 
-
-#createPost {
-    margin: auto;
-    color: white;
-    margin-bottom: 40px;
-    display: flex;
-    font-size: 24px;
-    background-color: var(--darker-teal);
-    border-radius: 5px; 
-    padding: 20px;
+#sidebarBtn {
+    border: none;
 }
 
-#createPost:hover {
-    color: yellow;
-    cursor: pointer;
+#sidebarBtn:hover, #sidebarBtn:focus {
+    background-color: transparent;
+    color: var(--darker-teal);
 }
 
-.postCreate {
-    width: 30px;
-    height: 30px;
-    margin-right: 10px;
-    cursor: pointer;
+#sidebarBtnCollapsed {
+    border: 1px solid white;
+}
+
+.menuItem:hover, .menuItem > a:hover {
+    background-color: var(--dark-teal) !important;
+    color: var(--light-teal);
+}
+
+.selectedMenuItem {
+    background-color: var(--dark-teal) !important;
+}
+
+#createPostBtn {
+    background-color: var(--lightish-teal) !important;
+    color: var(--grey);
+    margin: 0.5rem 0;
+}
+
+#createPostBtn:hover, #createPostBtn > a:hover {
+    background-color: var(--darker-teal) !important;
+    color: var(--yellow);
 }

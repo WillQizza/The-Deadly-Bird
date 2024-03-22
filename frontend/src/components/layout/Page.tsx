@@ -31,14 +31,13 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
         <div id={styles.root}>
             <div id={styles.contentRoot}>
                 {/** Navigation bar */}
-                <div id={styles.navigation}>
-                    <Navigation items={[
-                        { name: "Home", icon: House, path: "/home" },
-                        { name: "Profile", icon: Person, path: "/profile" },
-                        { name: "Network", icon: Globe, path: "/network" },
-                        { name: "Settings", icon: Gear, path: "/profile/settings" }
-                    ]} selected={selected} />
-                </div>
+                <Navigation items={[
+                    { name: "Home", icon: <House />, path: "/home" },
+                    { name: "Profile", icon: <Person />, path: "/profile" },
+                    { name: "Network", icon: <Globe />, path: "/network" },
+                    { name: "Settings", icon: <Gear />, path: "/profile/settings" }
+                ]} selected={selected} />
+                {/** Content */}
                 <div id={styles.contentAndUpperNav}>
                     {/** Toolbar containing inbox and logout buttons */}
                     <div id={styles.thinNavbar}>
@@ -55,7 +54,6 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
             <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Inbox</Offcanvas.Title>
-                    
                 </Offcanvas.Header>
                 <Offcanvas.Body>
                     <Inbox></Inbox>

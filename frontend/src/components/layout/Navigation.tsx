@@ -1,58 +1,78 @@
-import React, { Fragment } from 'react';
+import React, { useState } from 'react';
 import { publicDir } from "../../constants";
 import styles from "./Navigation.module.css";
 import { ReactComponent as CreatePost } from 'bootstrap-icons/icons/plus-circle.svg';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
+import { Button } from 'react-bootstrap';
 
 type NavItem = {
     name: string;
     path: string;
-    icon: React.ElementType;
+    icon: React.ReactNode;
 };
 
 export type SelectedNavigation = "Home" | "Profile" | "Network" | "Settings";
 
 
 const Navigation = ({ items, selected }: { items: NavItem[], selected?: SelectedNavigation }) => {
-    // return <Fragment>
-    const navigate = useNavigate();
+    
+    const [collapsed, setCollapsed] = useState(true);
 
     /** Navigation bar */
     return (
-        <div id={styles.navigationContainer}>
-            {/** Logo */}
-            <div id={styles.logoContainer}>
-                <img src={`${publicDir}/static/small-logo.png`} alt="Description" />
-            </div>
-
-            {/** Navigation buttons */}
-            <div id={styles.buttons}>
-                {items.map((item, index) => (
-                    <a className={styles.buttonLink} href={item.path} key={index}>
-                        <div className={`${styles.button} ${selected === item.name ? styles.selected : ''}`}>
-                            <div className={styles.icon}>
-                                <item.icon/>
-                            </div>
-                            <div className={styles.text}>
-                                <div>{item.name}</div>
-                            </div>
-                        </div>
-                    </a>
-                ))}
-            </div>
-            
-            {/** Create post button */}
-            <div id={styles.createPost}
-                onClick={() => {navigate("/post")}}>
-                <div id={styles.createPostIcon}>
-                    <CreatePost
-                        className={`${styles.postButton} ${styles.postCreate}`} 
-                    />
-                </div>
-                
-                Post
-            </div>
-        </div>
+        <>
+            <Sidebar
+                id={styles.sidebar}
+                collapsed={collapsed}
+            >
+                {/** Header (logo and navbar button) */}
+                {(collapsed) ? (
+                    <div id={styles.sidebarHeaderCollapsed}>
+                        <img src={`${publicDir}/static/small-logo.png`} alt="Logo" />
+                        <Button
+                            id={styles.sidebarBtnCollapsed}
+                            variant={"outline-light"}
+                            onClick={() => setCollapsed(!collapsed)}
+                        >
+                            ☰
+                        </Button>
+                    </div>
+                ) : (
+                    <div id={styles.sidebarHeader}>
+                        <Button
+                            id={styles.sidebarBtn}
+                            variant={"outline-light"}
+                            onClick={() => setCollapsed(!collapsed)}
+                        >
+                            🡰
+                        </Button>
+                        <img src={`${publicDir}/static/small-logo.png`} alt="Logo" />
+                    </div>
+                )}
+                {/** Menu */}
+                <Menu>
+                    {/** Add post button */}
+                    <MenuItem
+                        id={styles.createPostBtn}
+                        icon={<CreatePost/>}
+                        component={<Link to={"/post"} />}
+                    >
+                        Create Post
+                    </MenuItem>
+                    {/** Navigation links */}
+                    {items.map((item, index) => (
+                        <MenuItem
+                            icon={item.icon}
+                            component={<Link to={item.path} />}
+                            className={`${styles.menuItem} ${selected === item.name ? styles.selectedMenuItem : null}`}
+                        >
+                            {item.name}
+                        </MenuItem>
+                    ))}
+                </Menu>
+            </Sidebar>
+        </>
     ); 
 };
 
