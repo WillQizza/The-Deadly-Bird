@@ -13,8 +13,7 @@ from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSeriali
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
-from deadlybird.util import resolve_remote_route
-from .util import compare_domains
+from deadlybird.util import resolve_remote_route, compare_domains
 import requests
 
 @extend_schema(

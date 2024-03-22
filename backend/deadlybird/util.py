@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.conf import settings
 from deadlybird.settings import SITE_HOST_URL
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 import secrets
 import os
 
@@ -61,3 +61,25 @@ def get_host_from_api_url(url: str) -> str|None:
 
 def get_host_with_slash(host: str):
   return host if host.endswith("/") else host + "/"
+
+def normalize_author_host(host: str):
+  pasrsed_url = urlparse(host)
+  #             http or https         host + port if exists
+  hostname = f"{pasrsed_url.scheme}://{pasrsed_url.netloc}"
+
+  return hostname
+
+def compare_domains(url1, url2):
+    """
+    Compares the domain and port of two URLs to determine if they are equal.
+    """
+    parsed_url_1 = urlparse(url1)
+    parsed_url_2 = urlparse(url2)
+
+    domain1, port1 = (parsed_url_1.hostname, parsed_url_1.port)
+    domain2, port2 = (parsed_url_2.hostname, parsed_url_2.port) 
+
+    if port1 and port2:
+      return domain1 == domain2 and port1 == port2
+    else: 
+      return domain1 == domain2
