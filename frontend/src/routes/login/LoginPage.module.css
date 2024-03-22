@@ -28,11 +28,10 @@
 .loginColumn {
     width: 65%;
     display: flex;
-    justify-content: center;
     align-items: center;
     flex-direction: column;
     padding: 0.5rem;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .imageColumn img {
