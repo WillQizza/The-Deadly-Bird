@@ -2,6 +2,7 @@ from posts.models import Post
 from .models import Author
 from django.utils import timezone
 from deadlybird.util import generate_full_api_url, generate_next_id
+from deadlybird.settings import GITHUB_API_TOKEN
 from posts.util import send_post_to_inboxes
 import requests
 
@@ -19,7 +20,11 @@ def github_task():
     last_github_id = author.last_github_id
     latest_github_id = None
 
-    response = requests.get(url=url)
+    headers = {}
+    if GITHUB_API_TOKEN is not None:
+      headers["Authorization"] = f"Bearer {GITHUB_API_TOKEN}"
+
+    response = requests.get(url=url, headers=headers)
     if not response.ok:
       continue
     
@@ -30,7 +35,7 @@ def github_task():
         latest_github_id = event["id"]
 
       if event["id"] == last_github_id:
-        return
+        break
 
       title = ""
       description = ""

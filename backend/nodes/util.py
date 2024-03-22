@@ -1,7 +1,7 @@
 from .models import Node
 from identity.models import Author
 from django.contrib.auth.models import User
-from deadlybird.util import generate_next_id
+from deadlybird.util import generate_next_id, get_host_with_slash
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
@@ -13,14 +13,14 @@ def format_node_api_url(node: Node, route: str):
 
 def get_auth_from_host(host: str):
     "Given host return the authentication tuple"
-    node = Node.objects.all()\
-        .filter(host=host)\
-        .first()
 
-    if node is not None:
-        return (node.outgoing_username, node.outgoing_password) 
-    else:
-        return ('username', 'password')
+    nodes = Node.objects.all()
+    for node in nodes:
+       if get_host_with_slash(node.host) == get_host_with_slash(host):
+          return (node.outgoing_username, node.outgoing_password)
+       
+    print(f"Could not find credentials to requested host: {host} - Using default credentials")
+    return ('username', 'password')
 
 def create_remote_author_if_not_exists(data: dict[str, any]):
   try:

@@ -134,9 +134,9 @@ def author(request: HttpRequest, author_id: str):
         error = "Invalid email length"
 
     # Update github
-    if "github" in request.POST and len(request.POST["github"]) > 0:
+    if "github" in request.POST:
       github = request.POST["github"]
-      if (0 < len(github) < 254):
+      if (len(github) < 254):
         author.github = github
       else:
         error = "Invalid github length"

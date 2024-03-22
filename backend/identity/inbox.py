@@ -44,15 +44,14 @@ def handle_follow_inbox(request: HttpRequest):
     from_author = Author.objects.get(id=from_author["id"])
     to_author = Author.objects.get(id=to_author["id"])
 
-    if Following.objects.filter(author__id=from_author.id,
-                                target_author__id=to_author.id).exists():
+    existing_following = Following.objects.filter(author__id=from_author.id, target_author__id=to_author.id).first()
+    if existing_following is not None:
         print("from author:", from_author.id)
         print("to author:", to_author.id)
 
-        return Response({
-            "error": True,
-            "message": "Conflict: Author is already following"
-        }, status=409)
+        # If this occurs, then that means that the user unfollowed us and we didn't register it.
+        existing_following.delete()
+        
     elif FollowingRequest.objects.filter(author__id=from_author.id,  
         target_author__id=to_author.id).exists():
             print("REQUEST 409 from author:", from_author.id)
@@ -111,6 +110,152 @@ def handle_follow_inbox(request: HttpRequest):
           "message": "Failed to create FollowRequest or InboxMessage"
       }, status=500) 
       
+def _like_post(request: HttpRequest, post_id, source_author):
+  # someone liked a post
+  try:
+    post = Post.objects.get(id=post_id)
+  except Post.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Post was not found"
+    }, status=404)
+  
+  if not compare_domains(post.origin, SITE_HOST_URL):
+    # Remote post, forward inbox like to origin
+    origin_author_id, _, origin_post_id = post.origin.split("/")[-3:]
+    payload = {
+      "summary": f"{source_author.display_name} liked your post",
+      "type": "Like",
+      "author": InboxAuthorSerializer(source_author).data,
+      "object": resolve_remote_route(get_host_from_api_url(post.origin), view="post", kwargs={ "author_id": origin_author_id, "post_id": origin_post_id })
+    }
+
+    url = resolve_remote_route(get_host_from_api_url(post.origin), "inbox", {
+        "author_id": origin_author_id
+    })
+
+    auth = get_auth_from_host(get_host_from_api_url(post.origin))
+    response = requests.post(
+      url=url,
+      headers={'Content-Type': 'application/json'}, 
+      data=json.dumps(payload), 
+      auth=auth
+    )
+
+    if not response.ok:
+      print(f"An error occurred while propagating a remote post like to \"{url}\" (status={response.status_code})")
+    else:
+      # Create a local copy of it so that our /liked route works fine
+      Like.objects.create(
+        send_author=source_author,
+        receive_author=post.author,
+        content_id=post.id,
+        content_type=Like.ContentType.POST
+      )
+
+    return Response(response.json(), status=response.status_code)
+
+  # We are the origin, like the post.
+
+  # Check if like already exists
+  existing_like = Like.objects.filter(content_type=Like.ContentType.POST, 
+                      send_author=source_author, 
+                      content_id=post.id).first()
+  if existing_like is not None:
+    return Response({
+      "error": True,
+      "message": "Like already exists"
+    }, status=409)
+
+  
+  Like.objects.create(
+    send_author=source_author,
+    receive_author=post.author,
+    content_id=post.id,
+    content_type=Like.ContentType.POST
+  )
+  
+  return Response({
+    "error": False,
+    "message": "Liked!"
+  }, status=201)
+
+def _like_comment(request: HttpRequest, post_id, comment_id, source_author):
+  # someone liked a comment
+  try:
+    post = Post.objects.get(id=post_id)
+  except Post.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Post was not found"
+    }, status=404)
+  
+  if not compare_domains(post.origin, SITE_HOST_URL):
+    # Remote comment, forward inbox like to origin
+    origin_author_id, _, origin_post_id = post.origin.split("/")[-3:]
+    payload = {
+      "summary": f"{source_author.display_name} liked your comment",
+      "type": "Like",
+      "author": InboxAuthorSerializer(source_author).data,
+      "object": f'{resolve_remote_route(get_host_from_api_url(post.origin), view="comments", kwargs={ "author_id": origin_author_id, "post_id": origin_post_id })}/{comment_id}'
+    }
+
+    url = resolve_remote_route(get_host_from_api_url(post.origin), "inbox", {
+        "author_id": origin_author_id
+    })
+
+    auth = get_auth_from_host(get_host_from_api_url(post.origin))
+    response = requests.post(
+      url=url,
+      headers={'Content-Type': 'application/json'}, 
+      data=json.dumps(payload), 
+      auth=auth
+    )
+
+    if not response.ok:
+      print(f"An error occurred while propagating a remote comment like to \"{url}\" (status={response.status_code})")
+    else:
+      # Create a local copy of it so that our /liked route works fine
+      Like.objects.create(
+        send_author=source_author,
+        receive_author=comment.author,
+        content_id=comment.id,
+        content_type=Like.ContentType.COMMENT
+      )
+
+    return Response(response.json(), status=response.status_code)
+
+  # We are the origin, like the comment.
+  try:
+    comment = Comment.objects.get(id=comment_id, post=post)
+  except Comment.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Comment was not found"
+    }, status=404)
+  
+  # Check if like already exists
+  existing_like = Like.objects.filter(content_type=Like.ContentType.COMMENT, 
+                      send_author=source_author, 
+                      content_id=comment.id).first()
+  if existing_like is not None:
+    return Response({
+      "error": True,
+      "message": "Like already exists"
+    }, status=409)
+
+  Like.objects.create(
+      send_author=source_author,
+      receive_author=comment.author,
+      content_id=comment.id,
+      content_type=Like.ContentType.COMMENT
+  )
+  
+  return Response({
+    "error": False,
+    "message": "Liked!"
+  }, status=201)
+
 def handle_like_inbox(request: HttpRequest):
   """
   This will only be called when a local node likes a post/comment or a remote node liked one of our posts/comments
@@ -132,105 +277,11 @@ def handle_like_inbox(request: HttpRequest):
   like_type, id = like_object.split("/")[-2:]
   like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
 
-  try:
-    content_source = Post.objects.get(id=id) if like_type == Like.ContentType.POST else Comment.objects.get(id=id)
-
-    # Special case in the scenario we are liking a locally shared post
-    if like_type == Like.ContentType.POST and content_source.origin_post != None:
-      content_source = content_source.origin_post
-
-    if like_type == Like.ContentType.POST and (SITE_HOST_URL not in content_source.source):
-      # TODO: DO LATER AFTER TALKING TO HAZEL ABOUT HOW REMOTE LIKES OM COMMENTS WORK
-      # We are liking a post that did not originate from this node, so forward the inbox there instead.
-      payload = {
-        "summary": request.data.get("summary"),
-        "type": "Like",
-        "author": InboxAuthorSerializer(author_who_created_like).data,
-        "object": content_source.source
-      }
-
-      url = resolve_remote_route(content_source.author.host, "inbox", {
-          "author_id": content_source.author.id
-      })
-
-      auth = get_auth_from_host(content_source.author.host)
-      response = requests.post(
-        url=url,
-        headers={'Content-Type': 'application/json'}, 
-        data=json.dumps(payload), 
-        auth=auth
-      )
-
-      if not response.ok:
-        print(f"An error occurred while propagating a remote like to \"{url}\" (status={response.status_code})")
-
-      return Response(response.json(), status=response.status_code)
-
-    if like_type == Like.ContentType.COMMENT and (SITE_HOST_URL not in content_source.post.author.host):
-      # TODO: DO LATER AFTER TALKING TO HAZEL ABOUT HOW REMOTE LIKES OM COMMENTS WORK
-      # We are liking a comment whose post does does not originate from this node, so forward the like there instead.
-      comment_object = f"{get_host_with_slash(content_source.post.author.host)}api/authors/{content_source.post.author.id}/posts/{content_source.post.id}/comments/{content_source.id}"
-
-      payload = {
-        "summary": request.data.get("summary"),
-        "type": "Like",
-        "author": InboxAuthorSerializer(author_who_created_like).data,
-        "object": comment_object
-      }
-
-      # TODO: Consider if author was shared post author
-
-      url = resolve_remote_route(content_source.post.author.host, "inbox", {
-          "author_id": content_source.author.id
-      })
-
-      auth = get_auth_from_host(content_source.post.author.host)
-      response = requests.post(
-        url=url,
-        headers={'Content-Type': 'application/json'}, 
-        data=json.dumps(payload), 
-        auth=auth
-      )
-
-      if not response.ok:
-        print(f"An error occurred while propagating a remote like to \"{url}\" (status={response.status_code})")
-      
-      return Response(response.json(), status=response.status_code)
-  except (Post.DoesNotExist, Comment.DoesNotExist):
-    return Response({
-      "error": True,
-      "message": "Object does not exist"
-    }, status=404)
-  
-  # We are the node who houses the post/comment we are liking
-  
-  # Check if like already exists
-  existing_like = Like.objects.filter(content_type=like_type, 
-                      send_author=author_payload["id"], 
-                      content_id=content_source.id).first()
-  
-  if existing_like is not None:
-    return Response({
-      "error": True,
-      "message": "Like already exists"
-    }, status=409)
-  
-  like = Like.objects.create(
-      send_author_id=author_payload["id"],
-      receive_author_id=content_source.author.id,
-      content_id=content_source.id,
-      content_type=like_type
-  )
-  content_id = like.id
-
-  # Create inbox message
-  InboxMessage.objects.create(
-    author=content_source.author,
-    content_id=content_id,
-    content_type=InboxMessage.ContentType.LIKE
-  )
-
-  return Response({ "error": False, "message": "Success" }, status=201)
+  if like_type == Like.ContentType.POST:
+    return _like_post(request, post_id=id, source_author=author_who_created_like)
+  else:
+    post_id = like_object.split("/")[-3]
+    return _like_comment(request, post_id=post_id, comment_id=id, source_author=author_who_created_like)
 
 def handle_post_inbox(request: HttpRequest, target_author_id: str):
   """

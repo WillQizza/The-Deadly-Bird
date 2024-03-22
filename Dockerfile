@@ -32,18 +32,16 @@ RUN pnpm run build
 FROM python:3 AS backend
 ENV PORT 8000
 
-# Used for django-crontab
-RUN apt-get update
-RUN apt-get install -y cron
-
 ARG LIVE_HOST_URL "http://localhost:8000/"
 ARG AUTH_USERNAME "username"
 ARG AUTH_PASSWORD "password"
+ARG GITHUB_API_TOKEN ""
 ENV DOCKER 1
 
 ENV HOST_URL ${LIVE_HOST_URL}
 ENV REMOTE_AUTH_USERNAME ${AUTH_USERNAME}
 ENV REMOTE_AUTH_PASSWORD ${AUTH_PASSWORD}
+ENV GITHUB_API_TOKEN ${GITHUB_API_TOKEN}
 
 # Install Python dependencies
 WORKDIR /app
@@ -58,4 +56,4 @@ COPY --from=frontend /app/backend/react/templates/ /app/react/templates/
 # Compile static files and run app
 RUN python3 manage.py collectstatic --noinput
 ENV PYTHONUNBUFFERED TRUE
-CMD service cron start && python3 manage.py crontab add && python3 manage.py migrate && gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT --threads 4 --access-logfile '-' --error-logfile '-'
+CMD python3 manage.py migrate && gunicorn deadlybird.wsgi:application --bind 0.0.0.0:$PORT --threads 4 --access-logfile '-' --error-logfile '-'

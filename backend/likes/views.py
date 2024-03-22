@@ -46,11 +46,8 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
             "message": "Author post not Found"
         }, 404)
     
-    # Get comment and its likes
-    comment = Comment.objects.filter(id=comment_id)\
-        .first()
-    
-    # TODO: part 3
+
+    # If this is a remote author post, then just redirect.
     if not compare_domains(get_host_from_api_url(author_post.origin), SITE_HOST_URL):
         # Fetch from origin node
         author_id, _, post_id = author_post.origin.split("/")[-3:]
@@ -62,9 +59,12 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
 
         auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
         res = requests.get(url=url, auth=auth)
-
         return Response(res.json(), status=res.status_code)
 
+    # This is a local post
+    # Get comment and its likes
+    comment = Comment.objects.filter(id=comment_id)\
+        .first()
 
     likes = Like.objects.all()\
         .filter(content_type=Like.ContentType.COMMENT)\
@@ -100,31 +100,20 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
         if author_post is None:
             return Response({
                 "error": True,
-                "message": "author post not Found"
+                "message": "author post not found"
             }, 404)
-        
-        if (SITE_HOST_URL not in author_post.source) or (author_post.source != author_post.origin):
-            # This is a remote post/not the original post! Fetch it from the source instead. Extract the author id and post id from the source url
 
-            # See if there's an even earlier post that leads to this origin (prevents crash through constant redirect back and forth between two nodes)
-            author_post = Post.objects.all().filter(origin=author_post.origin).order_by("published_date").first()
-
-            source_author_id, _, source_post_id = author_post.source.split("/")[-3:]
-            source_host_url = get_host_from_api_url(author_post.source)
-            url = resolve_remote_route(source_host_url, "post_likes", {
-                "author_id": source_author_id,
-                "post_id": source_post_id
+        if not compare_domains(author_post.origin, SITE_HOST_URL):
+            # Fetch from origin node
+            author_id, _, post_id = author_post.origin.split("/")[-3:]
+            url = resolve_remote_route(get_host_from_api_url(author_post.origin), "post_likes", {
+                "author_id": author_id,
+                "post_id": post_id
             })
-            auth = get_auth_from_host(source_host_url)
-            response = requests.get(
-                url=url,
-                auth=auth
-            )
 
-            if not response.ok:
-                print(f"An error occurred while fetching remote likes of post {author_post.id} from {url}. (status_code={response.status_code})")
-            
-            return Response(response.json(), status=response.status_code)
+            auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
+            res = requests.get(url=url, auth=auth)
+            return Response(res.json(), status=res.status_code)
         
         # If we shared a post, instead return the original post
         if author_post.origin_post != None:
@@ -165,7 +154,7 @@ def liked(request: HttpRequest, author_id: str):
             "items": []
         })
     
-    if SITE_HOST_URL not in author.host:
+    if not compare_domains(author.host, SITE_HOST_URL):
         # Remote author. Forward request
         url = resolve_remote_route(author.host, "liked", {
             "author_id": author.id

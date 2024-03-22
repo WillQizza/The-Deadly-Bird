@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     'likes',
     'posts',
     'nodes',
-    'django_crontab',
     'drf_spectacular',
 ]
 
@@ -205,12 +204,4 @@ SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")
 # In the case scenario of localhost testing, we can override the cookie name
 SESSION_COOKIE_NAME = os.environ.get("COOKIE_NAME", "sessionid")
 
-# Cron jobs
-CRONJOBS = [
-    ("* * * * *", "identity.jobs.github_task", '>> /tmp/github.log')
-]
-CRONTAB_COMMAND_PREFIX = f"HOST_URL={SITE_HOST_URL} REMOTE_AUTH_USERNAME={SITE_REMOTE_AUTH_USERNAME} SITE_REMOTE_AUTH_PASSWORD={SITE_REMOTE_AUTH_PASSWORD} COOKIE_NAME={SESSION_COOKIE_NAME}"
-if IS_HEROKU_APP:
-    CRONTAB_COMMAND_PREFIX = CRONTAB_COMMAND_PREFIX + f" DYNO={os.environ.get('DYNO')} CI={os.environ.get('CI')}"
-elif IS_DOCKER_APP:
-    CRONTAB_COMMAND_PREFIX = CRONTAB_COMMAND_PREFIX + f" DOCKER={os.environ.get('DOCKER')}"
+GITHUB_API_TOKEN = None if len(os.environ.get("GITHUB_API_TOKEN", "")) == 0 else os.environ.get("GITHUB_API_TOKEN")

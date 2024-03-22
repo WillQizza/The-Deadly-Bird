@@ -23,7 +23,9 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const [posts, setPosts] = useState<React.ReactElement[]>([]);
     const postRef = useRef<HTMLDivElement>(null);
     const currentPage = useRef(1);
+    const failedToLoadPosts = useRef(0);
     const pageSize = 5;
+    
     const [streamUpdateCount, setStreamUpdateCount] = useState(0);  // for re-rendering the stream
 
     // function to generate posts (and wait until last post is reached to generate more)
@@ -60,23 +62,29 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
         }
 
         if ('items' in response) {
-            const newPosts = await Promise.all(response.items.map(async (postResponse) => {
-                const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
-                console.log(likes);
-                const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
-                return (
-                    <Post
-                        key={`${postResponse.author.id}/${postResponse.id}`}
-                        {...postResponse} 
-                        likes={likes.length}
-                        isLiked={isLikedByUs}
-                        refreshStream={() => {
-                            currentPage.current = 1;
-                            generatePosts(true);
-                        }}
-                    />
-                );
-            }));
+            const newPosts = (await Promise.all(response.items.map(async (postResponse) => {
+                try {
+                    const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
+                    const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
+                    return (
+                        <Post
+                            key={`${postResponse.author.id}/${postResponse.id}`}
+                            {...postResponse} 
+                            likes={likes.length}
+                            isLiked={isLikedByUs}
+                            refreshStream={() => {
+                                currentPage.current = 1;
+                                generatePosts(true);
+                            }}
+                        />
+                    );
+                } catch (error) {
+                    failedToLoadPosts.current = failedToLoadPosts.current + 1;
+                    console.error(error);
+                    return null;
+                }
+            }))).filter(post => post !== null) as any[];
+
             reset ? setPosts(newPosts) : setPosts([...posts, ...newPosts]);
         }
     }
@@ -89,7 +97,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     // generate new posts while scrolling
     useEffect(() => {
         // check if posts need generated
-        if (Math.floor(posts.length / pageSize) < currentPage.current) {
+        if (Math.floor((posts.length + failedToLoadPosts.current) / pageSize) < currentPage.current) {
             return;
         }
 
@@ -117,7 +125,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                 observer.unobserve(postRef.current);
             }
         }
-    }, [posts])
+    }, [posts, failedToLoadPosts])
 
     /** Post stream */
     return (
