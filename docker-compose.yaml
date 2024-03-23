@@ -11,8 +11,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - DOCKER=1
-      - HOST_URL=http://localhost:8000/
-      - REACT_APP_BASE_URL=http://localhost:8000
+      - HOST_URL=http://localhost:8000
       - REMOTE_AUTH_USERNAME=username
       - REMOTE_AUTH_PASSWORD=password
   node2:
@@ -26,8 +25,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - DOCKER=1
-      - HOST_URL=http://localhost:8001/
-      - REACT_APP_BASE_URL=http://localhost:8001
+      - HOST_URL=http://localhost:8001
       - COOKIE_NAME=sessionid2
       - REMOTE_AUTH_USERNAME=username
       - REMOTE_AUTH_PASSWORD=password
@@ -42,8 +40,7 @@ services:
       - "host.docker.internal:host-gateway"
     environment:
       - DOCKER=1
-      - HOST_URL=http://localhost:8002/
-      - REACT_APP_BASE_URL=http://localhost:8002
+      - HOST_URL=http://localhost:8002
       - COOKIE_NAME=sessionid3
       - REMOTE_AUTH_USERNAME=username
       - REMOTE_AUTH_PASSWORD=password

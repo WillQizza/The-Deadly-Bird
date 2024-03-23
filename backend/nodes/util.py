@@ -1,7 +1,7 @@
 from .models import Node
 from identity.models import Author
 from django.contrib.auth.models import User
-from deadlybird.util import generate_next_id, get_host_with_slash
+from deadlybird.util import generate_next_id, normalize_author_host, compare_domains
 from django.db.utils import IntegrityError
 from django.utils import timezone
 
@@ -16,7 +16,7 @@ def get_auth_from_host(host: str):
 
     nodes = Node.objects.all()
     for node in nodes:
-       if get_host_with_slash(node.host) == get_host_with_slash(host):
+       if compare_domains(node.host, host):
           return (node.outgoing_username, node.outgoing_password)
        
     print(f"Could not find credentials to requested host: {host} - Using default credentials")
@@ -43,7 +43,7 @@ def create_remote_author_if_not_exists(data: dict[str, any]):
         id=data["id"], #same id as remote object          
         user=created_user,
         display_name=data["displayName"],
-        host=data["host"],
+        host=normalize_author_host(data["host"]),
         profile_url=data["url"],
         last_github_check=timezone.now()
       )

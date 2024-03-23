@@ -8,12 +8,11 @@ from rest_framework import serializers
 from deadlybird.serializers import GenericErrorSerializer
 from deadlybird.permissions import RemoteOrSessionAuthenticated
 from deadlybird.settings import SITE_HOST_URL
-from deadlybird.util import resolve_remote_route, get_host_from_api_url
+from deadlybird.util import resolve_remote_route, get_host_from_api_url, compare_domains
 from nodes.util import get_auth_from_host
 from identity.models import Author
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .serializers import LikeSerializer, APIDocsLikeManySerializer
-from following.util import compare_domains
 import requests
 
 @extend_schema(

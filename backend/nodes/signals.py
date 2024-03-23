@@ -10,13 +10,9 @@ from deadlybird.util import resolve_docker_host
 @receiver(post_delete, sender=Node)
 def handle_delete_node(sender, instance: Node, **kwargs):
 
-  print("===========POST DELETE==========") 
+  resolved_host = resolve_docker_host(instance.host)
 
-  print("INSTANCE.HOST", instance.host)
-
-  remote_authors = Author.objects.filter(host=resolve_docker_host(instance.host))
-
-  print("REMOTE AUTHORS:", remote_authors)
+  remote_authors = Author.objects.filter(host=resolved_host)
 
   for author in remote_authors: 
     user = author.user
@@ -47,7 +43,6 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
       break
     
     for member in members:
-      # Create author in our system if not already created
       create_remote_author_if_not_exists(member)
 
       # Retrieve all of their posts (both friends and public)

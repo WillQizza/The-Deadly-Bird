@@ -50,6 +50,9 @@ const ProfilePage: React.FC = () => {
 
     /** Gets user profile */
     useEffect(() => {
+
+        console.log("PUIBLIC URL:", process.env.PUBLIC_URL);
+
         apiGetAuthor(userId)
             .then(async author => {
                 if (!author) {
