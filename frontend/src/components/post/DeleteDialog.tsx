@@ -35,11 +35,11 @@ const DeleteDialog: React.FC<DeleteDialogProps> = (props: DeleteDialogProps) => 
 
     /** Function rendering confirmation dialog upon post deletion */
     return (
-        <Modal show={show} onHide={() => {setShow(false)}}>
+        <Modal show={show} onHide={() => {setShow(false)}} data-bs-theme={"dark"}>
             <Modal.Header closeButton>
-                <Modal.Title>Delete Post</Modal.Title>
+                <Modal.Title className={"text-white"}>Delete Post</Modal.Title>
             </Modal.Header>
-            <Modal.Body>Are you sure you want to delete this post?</Modal.Body>
+            <Modal.Body className={"text-white"}>Are you sure you want to delete this post?</Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={() => {setShow(false)}}>
                     Cancel
