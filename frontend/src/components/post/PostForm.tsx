@@ -219,7 +219,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         Submit
                     </Button>
                     {/** Delete button */}
-                    { !props.edit ?
+                    { props.edit ?
                         <> 
                             <Button
                                 variant={"danger"}
