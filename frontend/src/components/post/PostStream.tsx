@@ -25,8 +25,6 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const currentPage = useRef(1);
     const failedToLoadPosts = useRef(0);
     const pageSize = 5;
-    
-    const [streamUpdateCount, setStreamUpdateCount] = useState(0);  // for re-rendering the stream
 
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = async (reset?: boolean) => {

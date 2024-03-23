@@ -26,7 +26,7 @@ const HomePage: React.FC = () => {
     
     /** Home Page */
     return ( 
-        <Page selected="Home" overflowScrollOff={true}>
+        <Page selected="Home">
             <div className={styles.tabs}>
                 {/** Tab navigation for stream type */}
                 <Tab.Container defaultActiveKey="Following">

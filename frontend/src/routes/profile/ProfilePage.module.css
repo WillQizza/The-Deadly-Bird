@@ -11,6 +11,7 @@
   border: 2px solid var(--darker-teal);
   cursor: default;
   padding: 0 5px;
+  min-width: fit-content;
 }
 
 #header #avatarContainer {
@@ -89,7 +90,6 @@
 
 #feed {
   background-color: var(--light-teal);
-  flex-grow: 1;
   width: 100%;
   margin-top: 10px;
 }

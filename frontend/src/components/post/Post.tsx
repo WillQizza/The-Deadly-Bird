@@ -12,12 +12,13 @@ import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
 import { ReactComponent as Trash } from 'bootstrap-icons/icons/trash3.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreatePostLike } from '../../api/likes';
-import { Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
+import { Col, Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
 import DeleteDialog from './DeleteDialog';
+import { Row } from 'react-bootstrap';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -127,22 +128,26 @@ const Post: React.FC<PostOptions> = props => {
     return (
         <div className={styles.postContainer}>
             {/* Header */}
-            <div className={styles.postHeader}>
+            <Row className={styles.postHeader}>
                 {/* Profile picture */}
-                <Link to={`/profile/${postAuthor.id}`}>
-                    <img className={styles.postProfilePicture} src={profileImgSrc}/>
-                </Link>
+                <Col className={"flex-grow-0"}>
+                    <Link to={`/profile/${postAuthor.id}`}>
+                        <img className={styles.postProfilePicture} src={profileImgSrc}/>
+                    </Link>
+                </Col>
                 {/* Post info */}
-                <div className={styles.postInfo}>
-                    {/* Author */}
-                    <Link to={`/profile/${postAuthor.id}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
-                    {/* Sub info */}
-                    <div className={styles.postSubInfo}>
-                        {/* Date */}
-                        <div className={styles.postSubInfoItem}>{postDate}</div>
+                <Col className={"flex-grow-1"}>
+                    <div className={styles.postInfo}>
+                        {/* Author */}
+                        <Link to={`/profile/${postAuthor.id}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
+                        {/* Sub info */}
+                        <div className={styles.postSubInfo}>
+                            {/* Date */}
+                            <div className={styles.postSubInfoItem}>{postDate}</div>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </Col>
+            </Row>
             {/* Body */}
             <div className={styles.postBody}>
                 {/* Title */}
@@ -151,72 +156,80 @@ const Post: React.FC<PostOptions> = props => {
                 {/* Content */}
                 <div className={styles.postContent}>{content}</div>
                 {/* Buttons */}
-                <div className={styles.postButtons}>
+                <Row className={styles.postButtons}>
                     {/* Share */}
-                    {props.visibility === "PUBLIC" && (
-                        <ArrowRepeat
-                            className={`${styles.postButton} ${styles.postShare}`}
-                            onClick={handleShare}
-                        />
-                    )}
+                    <Col className={styles.postButtonContainer}>
+                        {props.visibility === "PUBLIC" && (
+                            <ArrowRepeat
+                                className={`${styles.postButton} ${styles.postShare}`}
+                                onClick={handleShare}
+                            />
+                        )}
+                    </Col>
                     {/* Copy Link */}
-                    <LinkIcon
-                        ref={linkButton}
-                        className={`${styles.postButton} ${styles.postLink}`}
-                        onClick={() => {
-                            // Copy post link to user clipboard
-                            if (navigator.clipboard) {
-                                navigator.clipboard.writeText(`${window.location.origin}/profile/${props.author.id}/posts/${props.id}`);
-                                setLinkTooltipShow(true);
-                            }
-                        }}
-                        onMouseLeave={() => setLinkTooltipShow(false)}
-                    />
-                    <Overlay target={linkButton.current} show={linkTooltipShow} placement="bottom">
-                        <Tooltip id="link-tooltip">
-                            Link copied!
-                        </Tooltip>
-                    </Overlay>
+                    <Col className={styles.postButtonContainer}>
+                        <LinkIcon
+                            ref={linkButton}
+                            className={`${styles.postButton} ${styles.postLink}`}
+                            onClick={() => {
+                                // Copy post link to user clipboard
+                                if (navigator.clipboard) {
+                                    navigator.clipboard.writeText(`${window.location.origin}/profile/${props.author.id}/posts/${props.id}`);
+                                    setLinkTooltipShow(true);
+                                }
+                            }}
+                            onMouseLeave={() => setLinkTooltipShow(false)}
+                        />
+                        <Overlay target={linkButton.current} show={linkTooltipShow} placement="bottom">
+                            <Tooltip id="link-tooltip">
+                                Link copied!
+                            </Tooltip>
+                        </Overlay>
+                    </Col>
                     {/* Like */}
-                    <div>
+                    <Col className={styles.postButtonContainer}>
                         {isLiked
                             ? <HeartFilled className={`${styles.postButton} ${styles.postLiked}`} />
                             : <Heart className={`${styles.postButton} ${styles.postLike}`} onClick={handleLike}/>}
                         <span className={styles.likeCount}>{likeCount}</span>
-                    </div>
+                    </Col>
                     {/** Comment */}
-                    <Chat
-                        className={`${styles.postButton} ${styles.postComment}`}
-                        onClick={() => setShowComments(true) }
-                    />
-                    <Offcanvas show={showComments}
-                        onHide={() => setShowComments(false)}
-                        placement="bottom"
-                        scroll={true}
-                        backdrop={true}
-                        className={"h-75"}
-                        data-bs-theme={"dark"}
-                    >
-                        <Offcanvas.Header closeButton>
-                        <Offcanvas.Title>Comment Section</Offcanvas.Title>
-                        </Offcanvas.Header>
-                        <Offcanvas.Body>
-                            <CommentSection
+                    <Col className={styles.postButtonContainer}>
+                        <Chat
+                            className={`${styles.postButton} ${styles.postComment}`}
+                            onClick={() => setShowComments(true) }
+                        />
+                        <Offcanvas show={showComments}
+                            onHide={() => setShowComments(false)}
+                            placement="bottom"
+                            scroll={true}
+                            backdrop={true}
+                            className={"h-75"}
+                            data-bs-theme={"dark"}
+                        >
+                            <Offcanvas.Header closeButton>
+                            <Offcanvas.Title>Comment Section</Offcanvas.Title>
+                            </Offcanvas.Header>
+                            <Offcanvas.Body>
+                                <CommentSection
+                                    postId={props.id}
+                                    authorId={props.author.id}
+                                    refresh={refreshComments}
+                                    setRefresh={setRefreshComments}
+                                />
+                            </Offcanvas.Body>
+                            <CommentForm
                                 postId={props.id}
                                 authorId={props.author.id}
-                                refresh={refreshComments}
-                                setRefresh={setRefreshComments}
+                                refreshCommentStream={() => setRefreshComments(true)}
                             />
-                        </Offcanvas.Body>
-                        <CommentForm
-                            postId={props.id}
-                            authorId={props.author.id}
-                            refreshCommentStream={() => setRefreshComments(true)}
-                        />
-                    </Offcanvas>
+                        </Offcanvas>
+                    </Col>
                     {/* Edit */}
-                    <EditButton />
-                </div>
+                    <Col className={styles.postButtonContainer}>
+                        <EditButton />
+                    </Col>
+                </Row>
             </div>
         </div>
     );
