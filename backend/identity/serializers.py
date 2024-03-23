@@ -6,6 +6,7 @@ from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
 from nodes.models import Node
 from deadlybird.util import resolve_remote_route
+from urllib.parse import urljoin
 
 class AuthorSerializer(serializers.ModelSerializer):
   """
@@ -45,7 +46,7 @@ class AuthorSerializer(serializers.ModelSerializer):
       return obj.profile_picture
     else:
       # Return default avatar
-      return settings.SITE_HOST_URL + "static/default-avatar.png"
+      return urljoin(settings.SITE_HOST_URL, "/static/default-avatar.png")
 
   class Meta:
     model = Author

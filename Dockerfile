@@ -20,8 +20,11 @@ COPY frontend/*.json .
 RUN npm install
 
 # Receive args from compose file, default to port 8000 for prod.
-ARG REACT_APP_BASE_URL "http://localhost:8000" 
+ARG LIVE_HOST_URL "http://localhost:8000"
+ARG REACT_APP_BASE_URL "http://localhost:8000"
+
 ENV REACT_APP_BASE_URL ${REACT_APP_BASE_URL}
+ENV PUBLIC_URL ${LIVE_HOST_URL}
 
 # Compile frontend
 COPY ./frontend/ /app/frontend/
@@ -32,7 +35,7 @@ RUN pnpm run build
 FROM python:3 AS backend
 ENV PORT 8000
 
-ARG LIVE_HOST_URL "http://localhost:8000/"
+ARG LIVE_HOST_URL "http://localhost:8000"
 ARG AUTH_USERNAME "username"
 ARG AUTH_PASSWORD "password"
 ARG GITHUB_API_TOKEN ""
