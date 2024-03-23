@@ -4,14 +4,21 @@
     gap: 0.5rem 1rem;
 }
 
-.submitButton {
+.submitToolbar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
     margin: 1rem 0;
+}
+
+.submitButton {
     background-color: var(--dark-teal);
-    border: 3px solid var(--dark-teal);
+    border: 1px solid var(--dark-teal);
     border-radius: 0.25rem;
     font-weight: bold;
     text-transform: uppercase;
-    letter-spacing: 0.0625rem;
+    letter-spacing: 1px;
 }
 
 .submitButton:hover {
@@ -20,17 +27,8 @@
 }
 
 .deleteButton {
-    margin: 1rem 0;
-    background-color: rgb(179, 4, 4);
-    border: 3px solid rgb(149, 0, 0);
     border-radius: 0.25rem;
     font-weight: bold;
     text-transform: uppercase;
-    letter-spacing: 0.0625rem;
-    margin-left: 10px;
-}
-
-.deleteButton:hover {
-    background-color: rgb(194, 0, 0);
-    border: 3px solid rgb(241, 34, 34);
+    letter-spacing: 1px;
 }

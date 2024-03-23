@@ -213,24 +213,30 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         textarea={true}
                     />
                 )}
-                {/** Submit button */}
-                <Button type='submit' className={styles.submitButton}>
-                    Submit
-                </Button>
-                {/** Delete button */}
-                { props.edit ?
-                    <> 
-                        <Button className={styles.deleteButton} onClick={handleDeleteClick}>
-                            Delete Post
-                        </Button>
-                        <DeleteDialog
-                            show={showConfirm}
-                            setShow={setShowConfirm}
-                            postId={postId}
-                        />
-                    </> 
-                    : null
-                } 
+                <div className={styles.submitToolbar}>
+                    {/** Submit button */}
+                    <Button type='submit' className={styles.submitButton}>
+                        Submit
+                    </Button>
+                    {/** Delete button */}
+                    { !props.edit ?
+                        <> 
+                            <Button
+                                variant={"danger"}
+                                className={styles.deleteButton}
+                                onClick={handleDeleteClick}
+                            >
+                                Delete
+                            </Button>
+                            <DeleteDialog
+                                show={showConfirm}
+                                setShow={setShowConfirm}
+                                postId={postId}
+                            />
+                        </> 
+                        : null
+                    }
+                </div>
             </Form>
         </>
     );
