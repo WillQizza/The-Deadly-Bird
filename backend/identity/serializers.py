@@ -6,13 +6,13 @@ from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
 from nodes.models import Node
 from deadlybird.util import resolve_remote_route
-import requests
 
 class AuthorSerializer(serializers.ModelSerializer):
   """
   Serialize a author.
   """
   type = serializers.CharField(read_only=True, default='author')
+  id = serializers.SerializerMethodField()
   displayName = serializers.CharField(source='display_name')
   profileImage = serializers.SerializerMethodField()
   url = serializers.CharField(source='profile_url')
@@ -20,6 +20,9 @@ class AuthorSerializer(serializers.ModelSerializer):
   followers = serializers.SerializerMethodField()
   following = serializers.SerializerMethodField()
   email = serializers.SerializerMethodField()
+
+  def get_id(self, obj: Author) -> str:
+    return resolve_remote_route(obj.host, "author", kwargs={ "author_id": obj.id })
 
   def get_posts(self, obj: Author) -> int:
     return Post.objects.filter(author=obj).count()
@@ -84,11 +87,17 @@ class InboxAuthorSerializer(serializers.Serializer):
   unique constraints of the models getting in the way
   """
   type = serializers.CharField(read_only=True, default="author")
-  id = serializers.CharField()
+  id = serializers.SerializerMethodField()
   host = serializers.URLField()
   displayName = serializers.CharField(source="display_name")
   url = serializers.URLField(source="profile_url")
   profileImage = serializers.SerializerMethodField()
+
+  def get_id(self, obj) -> str:
+    if isinstance(obj, Author):
+      return resolve_remote_route(obj.host, "author", kwargs={ "author_id": obj.id })
+    else:
+      return resolve_remote_route(obj["host"], "author", kwargs={ "author_id": obj["id"] })
 
   def get_profileImage(self, obj) -> str:
     if isinstance(obj, Author):
@@ -105,4 +114,7 @@ class InboxAuthorSerializer(serializers.Serializer):
   def to_internal_value(self, data):
     return_data = super().to_internal_value(data)
     return_data["profile_picture"] = data["profileImage"]
+    
+    return_data["id"] = data["id"].split("/")[-1]
+
     return return_data
