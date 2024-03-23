@@ -1,97 +1,90 @@
 #container {
-  padding-top: 20px;
-  padding-bottom: 20px;
-  padding-left: 30px;
-  padding-right: 30px;
-  height: 100%;
-
+  padding: 20px 30px;
   display: flex;
   flex-direction: column;
 }
 
 #header {
   display: flex;
-  height: 20%;
-  max-height: 160px;
-  background-color: var(--teal);
-  border: 5px solid var(--dark-teal);
-  cursor: default;
-}
-
-#header > #avatarContainer {
-  height: 100%;
-  aspect-ratio: 1.2 / 1;
-
-  padding-left: 10px;
-  padding-right: 10px;
-
-  display: flex;
-  justify-content: center;
   flex-direction: column;
+  background-color: var(--dark-teal);
+  border: 2px solid var(--darker-teal);
+  cursor: default;
+  padding: 0 5px;
 }
 
-#header > #avatarContainer > img {
-  height: 100%;
-  width: 100%;
+#header #avatarContainer {
+  padding: 3px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 0;
+}
+
+#header #avatarContainer > img {
+  height: 5rem;
+  width: 5rem;
   border-radius: 50%;
-  border: 10px solid var(--dark-teal);
+  border: 1.5px solid var(--dark-teal);
   box-shadow: 0px 2px 0px var(--darker-teal);
 }
 
-#header > #identityContainer {
+#header #identityContainer {
   height: 100%;
   display: flex;
-  justify-content: center;
   flex-direction: column;
-  margin-left: 20px;
-}
-
-#header > #identityContainer > #username {
-  font-size: 3em;
-  color: #fff;
-
-  margin: 0;
-  padding: 0;
-}
-
-#header > #identityContainer > #bio {
-  color: #D3D3D3;
-  font-size: 1em;
-
-  margin: 0;
-  padding: 0;
-
-  margin-left: 0.5em;
-}
-
-#statsAndFollow {
   flex-grow: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-right: 10px;
-  margin-bottom: 10px;
-  color: #fff;
+  padding: 10px;
 }
 
-#statsAndFollow .item {
+#header #identityContainer > #username {
+  font-size: 3em;
+  color: white;
+  margin: 0;
+  padding: 0;
+  overflow-wrap: break-word;
+}
+
+#header #identityContainer > #bio {
+  color: gainsboro;
+  font-size: 1em;
+  margin: 0;
+  padding: 0;
+  overflow-wrap: break-word;
+}
+
+#stats {
   display: flex;
-  justify-content: flex-end;
+  gap: 20px;
+  padding: 10px;
+  color: var(--light-teal);
+}
+
+#stats .item {
+  display: flex;
   flex-direction: column;
+  flex-grow: 0;
 }
 
-#statsAndFollow .item .itemAmount {
+#stats .item .itemAmount {
   font-size: 1.5em;
 }
 
-#githubContainer {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 48px;
-  height: 48px;
-  margin: 10px;
-  cursor: pointer;
+#followButton {
+  display: flex;
+  flex-grow: 0;
+  padding: 10px;
+}
+
+#github {
+  display: flex;
+  height: 40px;
+  justify-content: end;
+  padding: 7px;
+}
+
+#github img {
+  height: 100%;
 }
 
 #feed {

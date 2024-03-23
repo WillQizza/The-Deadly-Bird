@@ -7,6 +7,7 @@ import { apiGetAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiInboxFollowRequest, apiGetFollower, apiGetFollowRequest} from '../../api/following';
 import PostStream, { PostStreamTy } from '../../components/post/PostStream';
+import { Col, Row } from 'react-bootstrap';
 
 enum FollowState {
     FOLLOWING="following",
@@ -130,7 +131,14 @@ const ProfilePage: React.FC = () => {
     /** Profile page */
     return <Page selected="Profile">
         <div id={styles.container}>
-            <div id={styles.header} style={{ position: "relative" }}>
+            <div id={styles.header}>
+                <div id={styles.github}>
+                    {githubUsername ? (
+                        <a href={`https://github.com/${githubUsername}`}>
+                            <img alt="Github Account" src={`${publicDir}/static/github.png`} />
+                        </a>
+                    ) : null}
+                </div>
                 {/** Avatar */}
                 <div id={styles.avatarContainer}>
                     <img alt="Profile Avatar" src={avatarURL} />
@@ -140,35 +148,31 @@ const ProfilePage: React.FC = () => {
                     <h1 id={styles.username}>{username}</h1>
                     <h5 id={styles.bio}>{bio}</h5>
                 </div>
-                {/** Following and post statistics */}
-                <div id={styles.statsAndFollow}> 
-                    <div className={styles.item}>
-                        {renderButton()}
-                    </div>
-                    <div className={styles.item}>
+                {/** Post statistics */}
+                <Row id={styles.stats}>
+                    <Col className={styles.item}>
                         <div>
-                            <span>Posts</span> <span className={styles.itemAmount}>{postCount === -1 ? "" : postCount}</span>
+                            <div>Posts</div>
+                            <div className={styles.itemAmount}>{postCount === -1 ? "" : postCount}</div>
                         </div>
-                    </div>
-                    <div className={styles.item}>
+                    </Col>
+                    <Col className={styles.item}>
                         <div>
-                            <span>Following</span> <span className={styles.itemAmount}>{followingCount === -1 ? "" : followingCount}</span>
+                            <div>Following</div>
+                            <div className={styles.itemAmount}>{followingCount === -1 ? "" : followingCount}</div>
                         </div>
-                    </div>
-                    <div className={styles.item}>
+                    </Col>
+                    <Col className={styles.item}>
                         <div>
-                            <span>Followers</span> <span className={styles.itemAmount}>{followerCount === -1 ? "" : followerCount}</span>
+                            <div>Followers</div>
+                            <div className={styles.itemAmount}>{followerCount === -1 ? "" : followerCount}</div>
                         </div>
-                    </div>
+                    </Col>
+                </Row>
+                {/** Follow and github section */}
+                <div id={styles.followButton}>
+                    {renderButton()}
                 </div>
-                {/** Github section (if applicable) */}
-                {githubUsername ? (
-                    <a href={`https://github.com/${githubUsername}`} target="_blank" rel="noreferrer">
-                        <div id={styles.githubContainer}>
-                            <img alt="Github Account" style={{ height: "100%", width: "100%" }} src={`${publicDir}/static/github.png`} />
-                        </div>
-                    </a>
-                ) : null}
             </div>
             {/** Users feed */}
             <div id={styles.feed}>
