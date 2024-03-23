@@ -95,17 +95,21 @@ const Post: React.FC<PostOptions> = props => {
     const EditButton = () => {
         if (postAuthor.id === getUserId()) {
             // edit button if they are the author of the post
-            return(<PencilSquare
-                className={`${styles.postButton} ${styles.postEdit}`}
-                onClick={(e) => {
-                    document.location.href = `/post/${props.originId || props.id}`;
-                }}
-            />);
+            return (
+                <Col className={styles.postButtonContainer}>
+                    <PencilSquare
+                        className={`${styles.postButton} ${styles.postEdit}`}
+                        onClick={(e) => {
+                            document.location.href = `/post/${props.originId || props.id}`;
+                        }}
+                    />
+                </Col>
+            );
         }
         else if (props.originAuthor && props.author.id == getUserId()) {
             // delete button if they shared the post
             return(
-                <>
+                <Col className={styles.postButtonContainer}>
                     <Trash 
                         className={`${styles.postButton} ${styles.postDelete}`}
                         onClick={() => setShowConfirm(true)}
@@ -116,7 +120,7 @@ const Post: React.FC<PostOptions> = props => {
                         postId={props.id}
                         onDelete={props.refreshStream}
                     />
-                </>
+                </Col>
             );
         }
         else {
@@ -158,14 +162,14 @@ const Post: React.FC<PostOptions> = props => {
                 {/* Buttons */}
                 <Row className={styles.postButtons}>
                     {/* Share */}
-                    <Col className={styles.postButtonContainer}>
-                        {props.visibility === "PUBLIC" && (
+                    {props.visibility === "PUBLIC" && (
+                        <Col className={styles.postButtonContainer}>
                             <ArrowRepeat
                                 className={`${styles.postButton} ${styles.postShare}`}
                                 onClick={handleShare}
                             />
-                        )}
-                    </Col>
+                        </Col>
+                    )}
                     {/* Copy Link */}
                     <Col className={styles.postButtonContainer}>
                         <LinkIcon
@@ -226,9 +230,7 @@ const Post: React.FC<PostOptions> = props => {
                         </Offcanvas>
                     </Col>
                     {/* Edit */}
-                    <Col className={styles.postButtonContainer}>
-                        <EditButton />
-                    </Col>
+                    <EditButton />
                 </Row>
             </div>
         </div>
