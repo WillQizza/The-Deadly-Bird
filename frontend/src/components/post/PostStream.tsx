@@ -5,6 +5,7 @@ import { apiGetAuthorPosts, apiGetPost, apiGetPosts, APIPostStreamTy } from '../
 import { apiGetPostLikes } from '../../api/likes';
 import { getUserId } from '../../utils/auth';
 import { PostsResponse } from '../../api/types';
+import { extractAuthorIdFromApi } from '../../api/utils';
 
 export enum PostStreamTy {
     Public,
@@ -65,7 +66,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
             const newPosts = (await Promise.all(response.items.map(async (postResponse) => {
                 try {
                     const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
-                    const isLikedByUs = !!likes.find(like => like.author.id === getUserId());
+                    const isLikedByUs = !!likes.find(like => extractAuthorIdFromApi(like.author.id) === getUserId());
                     return (
                         <Post
                             key={`${postResponse.author.id}/${postResponse.id}`}

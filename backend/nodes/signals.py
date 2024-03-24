@@ -3,8 +3,8 @@ import json
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Node
-from identity.models import Author, User   
-from .util import create_remote_author_if_not_exists, format_node_api_url
+from identity.models import Author
+from .util import get_or_create_remote_author_from_api_payload, format_node_api_url
 from deadlybird.util import resolve_docker_host
 
 @receiver(post_delete, sender=Node)
@@ -43,7 +43,7 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
       break
     
     for member in members:
-      create_remote_author_if_not_exists(member)
+      get_or_create_remote_author_from_api_payload(member)
 
       # Retrieve all of their posts (both friends and public)
       # TODO: fetch_all_posts()

@@ -6,6 +6,7 @@ import { baseURL } from "../../constants";
 import { apiRequest } from "../../utils/request";
 import { getUserId } from "../../utils/auth";
 import { apiGetCommentLikes } from "../../api/likes";
+import { extractAuthorIdFromApi } from "../../api/utils";
 
 interface CommentSectionProps {
     postId: string,
@@ -26,7 +27,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
     const fetchComments = async (reset?: boolean) => {
         // Request comments data
         const response = await apiRequest(
-            `${baseURL}/api/authors/${authorId}/posts/${postId}/comments?page=${currentPage.current}&size=${pageSize}`, {
+            `${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${postId}/comments?page=${currentPage.current}&size=${pageSize}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"

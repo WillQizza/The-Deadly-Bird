@@ -5,6 +5,7 @@ import { Author } from '../../api/types';
 import styles from './AuthorCarousel.module.css';
 import { getUserId } from '../../utils/auth';
 import { apiInboxFollowRequest } from '../../api/following';
+import { extractAuthorIdFromApi } from '../../api/utils';
 
 const AuthorCarousel = ({authors = []}: {authors: Author[]}) => {
     const userId: string = getUserId().toString();
@@ -34,7 +35,7 @@ const AuthorCarousel = ({authors = []}: {authors: Author[]}) => {
                         <Row>
                             {group.map((author: Author, idx: number) => (
                                 <Col key={idx}>
-                                    <Card className={styles.card} onClick={() => handleCardClick(author.id)}>
+                                    <Card className={styles.card} onClick={() => handleCardClick(extractAuthorIdFromApi(author.id))}>
                                         <Card.Img variant="top" src={author.profileImage || 'https://via.placeholder.com/150'} />
                                         <Card.Body>
                                             <div className={styles.cardDisplayname}>{author.displayName}</div>

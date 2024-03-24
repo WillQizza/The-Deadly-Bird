@@ -5,6 +5,7 @@ import { ReactComponent as SendIcon} from 'bootstrap-icons/icons/send.svg';
 import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../constants";
 import { apiRequest } from "../../utils/request";
+import { extractAuthorIdFromApi } from "../../api/utils";
 
 interface CommentFormProps {
     postId: string,
@@ -30,7 +31,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
                 contentType: type
             }).toString();
 
-            const response = await apiRequest(`${baseURL}/api/authors/${authorId}/posts/${postId}/comments`, {
+            const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${postId}/comments`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'

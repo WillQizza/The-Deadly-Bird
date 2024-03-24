@@ -1,8 +1,8 @@
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
 import { FollowersResponse } from "./types";
-import { Author } from "./types";
 import { apiGetAuthor } from "./authors";
+import { extractAuthorIdFromApi } from "./utils";
 
 /**
  * @description function to retreive the followers for an author
@@ -70,7 +70,7 @@ export const apiInboxFollowRequest = async (
         const fromAuthor = (await apiGetAuthor(fromAuthorID))!;
         const toAuthor = (await apiGetAuthor(toAuthorID))!;
         
-        const response = await apiRequest(`${baseURL}/api/authors/${toAuthor.id}/inbox/`, {
+        const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(toAuthor.id)}/inbox/`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -96,7 +96,7 @@ export const apiGetFollowRequest = async(
 : Promise<any> => { 
     const init: RequestInit = {method: "GET",}
     const response = await apiRequest(
-        `${baseURL}/api/authors/request-follower/${authorId}/${targetAuthorId}`,
+        `${baseURL}/api/authors/request-follower/${extractAuthorIdFromApi(authorId)}/${extractAuthorIdFromApi(targetAuthorId)}`,
         init
     );
     const data = await response.json();
@@ -110,7 +110,7 @@ export const apiGetFollowRequest = async(
  */
 export const apiDeleteFollower = async (authorId: string, foreignAuthorId: string )
 : Promise<number> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/followers/${extractAuthorIdFromApi(foreignAuthorId)}`, {
         method: "DELETE",
     });
     
@@ -125,7 +125,7 @@ export const apiDeleteFollower = async (authorId: string, foreignAuthorId: strin
 export const apiPutFollower = async (authorId: string, targetAuthorId: string)
 : Promise<number> => {
 
-    const response = await apiRequest(`${baseURL}/api/authors/${targetAuthorId}/followers/${authorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(targetAuthorId)}/followers/${extractAuthorIdFromApi(authorId)}`, {
         method: "PUT",
     });
     return response.status;
@@ -133,7 +133,7 @@ export const apiPutFollower = async (authorId: string, targetAuthorId: string)
 
 export const apiGetFollower = async (authorId: string, foreignAuthorId: string)
 : Promise<any> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorId}/followers/${foreignAuthorId}`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/followers/${extractAuthorIdFromApi(foreignAuthorId)}`, {
         method: "GET",
     });
     if (!response.ok) {

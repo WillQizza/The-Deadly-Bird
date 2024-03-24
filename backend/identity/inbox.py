@@ -10,12 +10,12 @@ from identity.util import check_authors_exist
 from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
 from deadlybird.util import resolve_remote_route, get_host_from_api_url
-from nodes.util import get_auth_from_host, create_remote_author_if_not_exists
+from nodes.util import get_auth_from_host, get_or_create_remote_author_from_api_payload
 from posts.models import Post, Comment
 from likes.models import Like
 from posts.serializers import InboxPostSerializer
 from deadlybird.util import resolve_remote_route, get_host_with_slash, compare_domains
-from nodes.util import create_remote_author_if_not_exists
+from nodes.util import get_or_create_remote_author_from_api_payload
 
 def handle_follow_inbox(request: HttpRequest):
     """
@@ -34,7 +34,7 @@ def handle_follow_inbox(request: HttpRequest):
       }, status=404)
 
     if not check_authors_exist(from_author["id"]):
-      remote_author = create_remote_author_if_not_exists(from_author) 
+      remote_author = get_or_create_remote_author_from_api_payload(from_author) 
       if not remote_author:
         return Response({
           "error": True, "message": "Failed to create remote author"
@@ -271,7 +271,7 @@ def handle_like_inbox(request: HttpRequest):
   
   # Ensure the author sending the like exists
   # In the case the author does not exist within our system, it's a remote author who's liking it.
-  author_who_created_like = create_remote_author_if_not_exists(author_payload)
+  author_who_created_like = get_or_create_remote_author_from_api_payload(author_payload)
   
   like_type, id = like_object.split("/")[-2:]
   like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
@@ -295,7 +295,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
 
   # Create the remote author if they do not exist in our system (origin author)
   author_data = serializer.data["author"]
-  origin_author = create_remote_author_if_not_exists(author_data)
+  origin_author = get_or_create_remote_author_from_api_payload(author_data)
 
   origin_url = serializer.data["origin"]
   origin_post_id = origin_url.split("/")[-1]
@@ -326,7 +326,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
       print(f"Failed to parse source author JSON from \"{url}\"")
       return Response({ "error": True, "message": "Invalid source author JSON format" }, status=500)
     
-    source_author = create_remote_author_if_not_exists(source_author_serializer["data"])
+    source_author = get_or_create_remote_author_from_api_payload(source_author_serializer["data"])
 
   # We now have origin_author and source_author
 
@@ -411,7 +411,7 @@ def handle_comment_inbox(request: HttpRequest):
     # This is a shared post!
     post = post.origin_post
 
-  author = create_remote_author_if_not_exists(request.data["author"])
+  author = get_or_create_remote_author_from_api_payload(request.data["author"])
   comment = Comment.objects.create(
     id=request.data["id"],
     post=post,

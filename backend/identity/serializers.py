@@ -13,7 +13,6 @@ class AuthorSerializer(serializers.ModelSerializer):
   Serialize a author.
   """
   type = serializers.CharField(read_only=True, default='author')
-  id = serializers.SerializerMethodField()
   displayName = serializers.CharField(source='display_name')
   profileImage = serializers.SerializerMethodField()
   url = serializers.CharField(source='profile_url')
@@ -21,9 +20,6 @@ class AuthorSerializer(serializers.ModelSerializer):
   followers = serializers.SerializerMethodField()
   following = serializers.SerializerMethodField()
   email = serializers.SerializerMethodField()
-
-  def get_id(self, obj: Author) -> str:
-    return resolve_remote_route(obj.host, "author", kwargs={ "author_id": obj.id })
 
   def get_posts(self, obj: Author) -> int:
     return Post.objects.filter(author=obj).count()
@@ -47,6 +43,16 @@ class AuthorSerializer(serializers.ModelSerializer):
     else:
       # Return default avatar
       return urljoin(settings.SITE_HOST_URL, "/static/default-avatar.png")
+    
+  def to_internal_value(self, data):
+    internal_data = super().to_internal_value(data)
+    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    return internal_data
+  
+  def to_representation(self, instance):
+    data = super().to_representation(instance)
+    data["id"] = resolve_remote_route(data["host"], "author", kwargs={ "author_id": data["id"] }, force_no_slash=True)
+    return data
 
   class Meta:
     model = Author
@@ -96,10 +102,10 @@ class InboxAuthorSerializer(serializers.Serializer):
 
   def get_id(self, obj) -> str:
     if isinstance(obj, Author):
-      return resolve_remote_route(obj.host, "author", kwargs={ "author_id": obj.id })
+      return resolve_remote_route(obj.host, "author", kwargs={ "author_id": obj.id }, force_no_slash=True)
     else:
-      return resolve_remote_route(obj["host"], "author", kwargs={ "author_id": obj["id"] })
-
+      return resolve_remote_route(obj["host"], "author", kwargs={ "author_id": obj["id"] }, force_no_slash=True)
+    
   def get_profileImage(self, obj) -> str:
     if isinstance(obj, Author):
       profile_picture = obj.profile_picture

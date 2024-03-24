@@ -1,0 +1,1 @@
+cd .. && docker build . -t deadly-bird && docker compose down && docker compose up

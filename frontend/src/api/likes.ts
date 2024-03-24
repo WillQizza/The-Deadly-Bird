@@ -3,6 +3,7 @@ import { LikesResponse } from "./types";
 import { apiRequest } from "../utils/request";
 import { apiGetAuthor } from "./authors";
 import { getUserId } from "../utils/auth";
+import { extractAuthorIdFromApi } from "./utils";
 
 /**
  * @description function to retreive the posts from an author
@@ -12,7 +13,8 @@ export const apiGetPostLikes = async (
     authorID: string,
     postID: string,
 ): Promise<LikesResponse> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/likes`);    
+    console.log("get post likes of " + authorID);
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${postID}/likes`);    
     const data: LikesResponse = await response.json(); 
     return data;
 }
@@ -28,7 +30,7 @@ export const apiGetCommentLikes = async (
     postID: string,
     commentID: string,
 ): Promise<LikesResponse> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}/likes`);    
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${postID}/comments/${commentID}/likes`);    
     const data: LikesResponse = await response.json();
     return data;
 }
@@ -42,8 +44,9 @@ export const apiCreatePostLike = async (
     authorID: string,
     postID: string
 ): Promise<any> => {
+    console.log(authorID, " was extracted");
     const ourAuthor = (await apiGetAuthor(getUserId()))!;
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/inbox/`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox/`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -72,7 +75,7 @@ export const apiCreateCommentLike = async (
     commentID: string
 ): Promise<any> => {
     const ourAuthor = (await apiGetAuthor(getUserId()))!;
-    const response = await apiRequest(`${baseURL}/api/authors/${authorID}/inbox/`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox/`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -82,7 +85,7 @@ export const apiCreateCommentLike = async (
             "summary": `${ourAuthor.displayName} Likes your comment`,
             "type": "comment",
             "author": ourAuthor,
-            "object": `${baseURL}/api/authors/${authorID}/posts/${postID}/comments/${commentID}`
+            "object": `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${postID}/comments/${commentID}`
         })
     });
     const data: any = await response.json(); 

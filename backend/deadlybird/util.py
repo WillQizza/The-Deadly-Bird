@@ -19,17 +19,28 @@ def generate_full_api_url(view: str, force_no_slash = False, kwargs: dict[str, s
   
   return api_url
 
-def resolve_remote_route(host: str, view: str, kwargs):
+def resolve_remote_route(host: str, view: str, kwargs = None, force_no_slash = False):
   """
   Given the hostname of an author, we may have to swap the hostname to escape
   the dockercontainer and construct a url to the host. Only applicable to local dev.
   """    
+  route = reverse(viewname=view, kwargs=kwargs)
+  url = urljoin(dockerize_localhost(host), route)
+
+  if url.endswith("/") and force_no_slash:
+    return url[:-1]
+  else:
+    return url
+
+def dockerize_localhost(host: str):
+  """
+  We need to replace localhost with host.docker.internal or else it will redirect
+  requests to the internal container network rather than the host network.
+  """
   if os.environ.get("DOCKER") is not None:
     host = host.replace("localhost", "host.docker.internal")
-
-  route = reverse(viewname=view, kwargs=kwargs)
-
-  return urljoin(host, route)
+    
+  return host
 
 def resolve_docker_host(host: str):
   """
@@ -76,8 +87,8 @@ def compare_domains(url1, url2):
     parsed_url_1 = urlparse(url1)
     parsed_url_2 = urlparse(url2)
 
-    domain1, port1 = (parsed_url_1.hostname, parsed_url_1.port)
-    domain2, port2 = (parsed_url_2.hostname, parsed_url_2.port) 
+    domain1, port1 = (dockerize_localhost(parsed_url_1.hostname), parsed_url_1.port)
+    domain2, port2 = (dockerize_localhost(parsed_url_2.hostname), parsed_url_2.port) 
 
     if port1 and port2:
       return domain1 == domain2 and port1 == port2

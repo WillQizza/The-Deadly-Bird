@@ -18,6 +18,7 @@ import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
 import DeleteDialog from './DeleteDialog';
+import { extractAuthorIdFromApi } from '../../api/utils';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -64,7 +65,7 @@ const Post: React.FC<PostOptions> = props => {
         case ContentType.APPLICATION_BASE64:
         case ContentType.PNG_BASE64:
         case ContentType.JPEG_BASE64:
-            content = <img style={{ maxWidth: "100%" }} src={`${baseURL}/api/authors/${postAuthor.id}/posts/${props.id}/image`} alt="Image Post" />;
+            content = <img style={{ maxWidth: "100%" }} src={`${baseURL}/api/authors/${extractAuthorIdFromApi(postAuthor.id)}/posts/${props.id}/image`} alt="Image Post" />;
             break;
         default:
             content = <span>{props.content}</span>;
@@ -92,7 +93,7 @@ const Post: React.FC<PostOptions> = props => {
 
     /** Function rendering edit button (or lack thereof) depending on the user */
     const EditButton = () => {
-        if (postAuthor.id === getUserId()) {
+        if (extractAuthorIdFromApi(postAuthor.id) === getUserId()) {
             // edit button if they are the author of the post
             return(<PencilSquare
                 className={`${styles.postButton} ${styles.postEdit}`}
@@ -101,7 +102,7 @@ const Post: React.FC<PostOptions> = props => {
                 }}
             />);
         }
-        else if (props.originAuthor && props.author.id == getUserId()) {
+        else if (props.originAuthor && extractAuthorIdFromApi(props.author.id) === getUserId()) {
             // delete button if they shared the post
             return(
                 <>
@@ -129,13 +130,13 @@ const Post: React.FC<PostOptions> = props => {
             {/* Header */}
             <div className={styles.postHeader}>
                 {/* Profile picture */}
-                <Link to={`/profile/${postAuthor.id}`}>
+                <Link to={`/profile/${extractAuthorIdFromApi(postAuthor.id)}`}>
                     <img className={styles.postProfilePicture} src={profileImgSrc}/>
                 </Link>
                 {/* Post info */}
                 <div className={styles.postInfo}>
                     {/* Author */}
-                    <Link to={`/profile/${postAuthor.id}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
+                    <Link to={`/profile/${extractAuthorIdFromApi(postAuthor.id)}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
                     {/* Sub info */}
                     <div className={styles.postSubInfo}>
                         {/* Date */}
@@ -166,7 +167,7 @@ const Post: React.FC<PostOptions> = props => {
                         onClick={() => {
                             // Copy post link to user clipboard
                             if (navigator.clipboard) {
-                                navigator.clipboard.writeText(`${window.location.origin}/profile/${props.author.id}/posts/${props.id}`);
+                                navigator.clipboard.writeText(`${window.location.origin}/profile/${extractAuthorIdFromApi(props.author.id)}/posts/${props.id}`);
                                 setLinkTooltipShow(true);
                             }
                         }}
