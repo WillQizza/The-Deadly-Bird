@@ -7,6 +7,7 @@ import { apiRequest } from "../../utils/request";
 import { getUserId } from "../../utils/auth";
 import { apiGetCommentLikes } from "../../api/likes";
 import { extractAuthorIdFromApi } from "../../api/utils";
+import { apiGetComments } from "../../api/comments";
 
 interface CommentSectionProps {
     postId: string,
@@ -25,39 +26,32 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
 
     /** Function for fetching more comments */
     const fetchComments = async (reset?: boolean) => {
-        // Request comments data
-        const response = await apiRequest(
-            `${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${postId}/comments?page=${currentPage.current}&size=${pageSize}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-            }
-        );
         // Handle response
-        const data = await response.json();
-        if (response.ok) {
-            let newComments: CommentProps[] = [];
-            for (const commentData of data.comments) {
-                const likeData = await apiGetCommentLikes(authorId, postId, commentData.id);
-                newComments.push({
-                    id: commentData.id,
-                    postAuthorId: authorId,
-                    postId: postId,
-                    authorId: commentData.author.id,
-                    authorName: commentData.author.displayName,
-                    profileImg: commentData.author.profileImage,
-                    comment: commentData.comment,
-                    contentType: commentData.contentType,
-                    date: commentData.published,
-                    likes: likeData.length,
-                    liked: !!likeData.find(like => like.author.id === getUserId())
-                });
-            }
-            reset ? setComments(newComments) : setComments([...comments, ...newComments]);
-        } else {
+        const data = await apiGetComments(authorId, postId, currentPage.current, pageSize);
+        console.log(data);
+        if (data["message"]) {
             setResponseMessage(data.message);
+            return;
         }
+
+        let newComments: CommentProps[] = [];
+        for (const commentData of data.comments) {
+            const likeData = await apiGetCommentLikes(authorId, postId, commentData.id);
+            newComments.push({
+                id: commentData.id,
+                postAuthorId: authorId,
+                postId: postId,
+                authorId: commentData.author.id,
+                authorName: commentData.author.displayName,
+                profileImg: commentData.author.profileImage,
+                comment: commentData.comment,
+                contentType: commentData.contentType,
+                date: commentData.published,
+                likes: likeData.length,
+                liked: !!likeData.find(like => like.author.id === getUserId())
+            });
+        }
+        reset ? setComments(newComments) : setComments([...comments, ...newComments]);
     };
 
     /** Retrieves initial comments on mount */

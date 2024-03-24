@@ -7,3 +7,6 @@ export const extractAuthorIdFromApi = (apiId: string) => {
     return apiId;
   }
 };
+
+export const extractPostIdFromApi = extractAuthorIdFromApi;
+export const extractCommentIdFromApi = extractAuthorIdFromApi;

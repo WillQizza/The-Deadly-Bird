@@ -1,7 +1,7 @@
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
 import { Post, PostResponse, PostsResponse } from "./types";
-import { extractAuthorIdFromApi } from "./utils";
+import { extractAuthorIdFromApi, extractPostIdFromApi } from "./utils";
 
 /**
  * @description function to retreive the posts from an author
@@ -13,7 +13,7 @@ export const apiGetAuthorPosts = async (
     size: number
 ): Promise<PostsResponse> => {
     const response = await apiRequest(
-        `${baseURL}/api/authors/${authorID}/posts/?page=${page}&size=${size}`
+        `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/?page=${page}&size=${size}`
     );    
     const data: PostsResponse = await response.json(); 
     return data;
@@ -44,7 +44,7 @@ export const apiGetPost = async (
     postID: string,
 ): Promise<PostResponse | null> => {
     const response = await apiRequest(
-        `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${postID}`
+        `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${extractPostIdFromApi(postID)}`
     );
     if (!response.ok) {
         return null;
@@ -65,7 +65,7 @@ export const apiDeletePosts = async (authorId: string, postId: string): Promise<
         "method": "delete"
     }
     const response = await apiRequest(
-        `${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${postId}`, init
+        `${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${extractPostIdFromApi(postId)}`, init
     );
 
     // const data: any = await response.json();
@@ -78,7 +78,7 @@ export const apiDeletePosts = async (authorId: string, postId: string): Promise<
  * @param postId post of author to share
  */
 export const apiSharePost = async (authorId: string, postId: string): Promise<Post|null> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${postId}/share`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${extractPostIdFromApi(postId)}/share`, {
         method: "POST"
     });
 

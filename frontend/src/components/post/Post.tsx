@@ -18,7 +18,7 @@ import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
 import DeleteDialog from './DeleteDialog';
-import { extractAuthorIdFromApi } from '../../api/utils';
+import { extractAuthorIdFromApi, extractPostIdFromApi } from '../../api/utils';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -98,7 +98,7 @@ const Post: React.FC<PostOptions> = props => {
             return(<PencilSquare
                 className={`${styles.postButton} ${styles.postEdit}`}
                 onClick={(e) => {
-                    document.location.href = `/post/${props.originId || props.id}`;
+                    document.location.href = `/post/${extractPostIdFromApi(props.originId || props.id)}`;
                 }}
             />);
         }

@@ -17,7 +17,7 @@ def generate_full_api_url(view: str, force_no_slash = False, kwargs: dict[str, s
   if force_no_slash and api_url.endswith("/"):
     api_url = api_url[:-1]
   
-  return api_url
+  return dockerize_localhost(api_url)
 
 def resolve_remote_route(host: str, view: str, kwargs = None, force_no_slash = False):
   """

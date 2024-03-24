@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { baseURL } from "../../constants";
 import { apiRequest } from "../../utils/request";
 import { extractAuthorIdFromApi } from "../../api/utils";
+import { apiPostComment } from "../../api/comments";
 
 interface CommentFormProps {
     postId: string,
@@ -26,25 +27,13 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
         // Handle comment input
         if (comment) {
             // Send request for commenting on post
-            const formData = new URLSearchParams({
-                comment: comment,
-                contentType: type
-            }).toString();
-
-            const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorId)}/posts/${postId}/comments`, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: formData
-            });
+            const data = await apiPostComment(authorId, postId, { comment, contentType: type });
 
             // Handle response
-            if (response.ok) {
+            if (data["error"]) {
                 setComment("");
                 refreshCommentStream();
             } else {
-                const data = await response.json();
                 setResponseMessage(data.message);
             }
         } else {

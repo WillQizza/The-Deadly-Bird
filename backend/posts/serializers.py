@@ -1,45 +1,46 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
-from deadlybird.util import generate_full_api_url
+from deadlybird.util import generate_full_api_url, resolve_remote_route, get_host_from_api_url
 from .models import Post, Comment
 from identity.serializers import InboxAuthorSerializer
 from .pagination import generate_comments_pagination_schema
 
+
 class CommentSerializer(serializers.ModelSerializer):
   type = serializers.CharField(read_only=True, default="comment")
-  author = serializers.SerializerMethodField()
+  author = AuthorSerializer()
   comment = serializers.CharField(source="content")
   contentType = serializers.CharField(source="content_type")
   published = serializers.DateTimeField(source="published_date")
-
-  def get_author(self, object: Comment) -> AuthorSerializer: # This typing is purposely wrong so that the drf can serialize the docs correctly
-    serializer = AuthorSerializer(object.author)
-    return serializer.data
 
   class Meta:
     model = Comment
     fields = ["type", "id", "author", "comment", "contentType", "published"]
 
+  def to_internal_value(self, data):
+    internal_data = super().to_internal_value(data)
+    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    return internal_data
+  
+  def to_representation(self, instance):
+    post_author_id = instance.post.author.id
+    post_id = instance.post.id
+    data = super().to_representation(instance)
+    data["id"] = f'{generate_full_api_url("comments", kwargs={ "author_id": post_author_id, "post_id": post_id }, force_no_slash=True)}/{data["id"]}'
+    return data
+
 class PostSerializer(serializers.ModelSerializer):
   type = serializers.CharField(read_only=True, default="post")
   contentType = serializers.CharField(source="content_type")
-  author = serializers.SerializerMethodField()
-  originAuthor = serializers.SerializerMethodField()
+  author = AuthorSerializer()
+  originAuthor = AuthorSerializer(source="origin_author")
   originId = serializers.SerializerMethodField()
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
   published = serializers.DateTimeField(source="published_date")
 
-  def get_author(self, object: Post) -> AuthorSerializer: # This typing is purposely wrong so that the drf can serialize the docs correctly
-    return AuthorSerializer(object.author).data
-  
-  def get_originAuthor(self, object: Post) -> AuthorSerializer:
-    if object.origin_author != None:
-      return AuthorSerializer(object.origin_author).data
-    return None
-  
   def get_originId(self, object: Post) -> str:
     if object.origin_post != None:
       return object.origin_post.id
@@ -61,6 +62,17 @@ class PostSerializer(serializers.ModelSerializer):
       'id': object.id,
       'comments': CommentSerializer(Comment.objects.filter(post=object).order_by("-published_date")[:5], many=True).data
     }
+  
+  def to_internal_value(self, data):
+    internal_data = super().to_internal_value(data)
+    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    return internal_data
+  
+  def to_representation(self, instance):
+    author_id = instance.author.id
+    data = super().to_representation(instance)
+    data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
+    return data
 
   class Meta:
     model = Post
@@ -82,3 +94,8 @@ class InboxPostSerializer(serializers.Serializer):
   author = InboxAuthorSerializer()
   published = serializers.DateTimeField(source="published_date")
   visibility = serializers.ChoiceField(choices=Post.Visibility.values)
+
+  def to_internal_value(self, data):
+    internal_data = super().to_internal_value(data)
+    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    return internal_data
