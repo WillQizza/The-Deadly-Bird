@@ -25,23 +25,28 @@ def handle_follow_inbox(request: HttpRequest):
     scenario 2) to_author is on a local node.
         - save inbox message Object locally.
     """  
-    to_author = request.data.get('object')
-    from_author = request.data.get('actor')
+    to_author = InboxAuthorSerializer(data=request.data.get('object'))
+    from_author = InboxAuthorSerializer(data=request.data.get('actor'))
+    if not to_author.is_valid() or not from_author.is_valid():
+      return Response({
+        "error": True,
+        "message": "Author payloads not valid"
+      }, status=404)
     
-    if not check_authors_exist(to_author["id"]):
+    if not check_authors_exist(to_author.validated_data["id"]):
       return Response({
         "error": True, "message": "Target author provided does not exist"
       }, status=404)
 
-    if not check_authors_exist(from_author["id"]):
+    if not check_authors_exist(from_author.validated_data["id"]):
       remote_author = get_or_create_remote_author_from_api_payload(from_author) 
       if not remote_author:
         return Response({
           "error": True, "message": "Failed to create remote author"
         }, status=400)
 
-    from_author = Author.objects.get(id=from_author["id"])
-    to_author = Author.objects.get(id=to_author["id"])
+    from_author = Author.objects.get(id=from_author.validated_data["id"])
+    to_author = Author.objects.get(id=to_author.validated_data["id"])
 
     existing_following = Following.objects.filter(author__id=from_author.id, target_author__id=to_author.id).first()
     if existing_following is not None:

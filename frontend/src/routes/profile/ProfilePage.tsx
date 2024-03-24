@@ -35,7 +35,7 @@ const ProfilePage: React.FC = () => {
         const followRequestRes = await apiGetFollowRequest(loggedInAuthorId, userId);
         apiGetFollower(userId, loggedInAuthorId)
             .then(async response => {
-                if (response.status != 404) { 
+                if (response.status !== 404) { 
                     setFollowState(FollowState.FOLLOWING);
                 } else {
                     if (followRequestRes.status === 404) {
@@ -121,6 +121,7 @@ const ProfilePage: React.FC = () => {
                         if (followRequestRes === null || followRequestRes.error) {
                             alert(`Failed to connect to remote host`);
                         } else { 
+                            await updateFollowingState(authorId);
                             alert(`Follow Request Sent!`);
                         }
                     }}>
