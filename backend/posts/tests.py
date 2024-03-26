@@ -1,6 +1,6 @@
 from django.urls import reverse
 from deadlybird.base_test import BaseTestCase
-from deadlybird.util import generate_full_api_url
+from deadlybird.util import generate_full_api_url, generate_next_id
 from following.models import Following
 from .models import Comment, Post
 
@@ -119,21 +119,23 @@ class AuthorPostTest(BaseTestCase):
     """
     self.edit_session(id=self.authors[1].id)
 
+    id = generate_next_id()
     post = Post.objects.create(
+        id=id,
         title=f"Another Post",
         description="A sample post.",
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
         visibility=Post.Visibility.PUBLIC,
-        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
-        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
+        source=generate_full_api_url("post", kwargs={ "author_id": self.authors[0].id, "post_id": id }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": self.authors[0].id, "post_id": id })
     )
 
     # Check that we got the post we made
     response1 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
-    self.assertEquals(post.id, response1["id"])
-    self.assertEquals(post.author.id, response1["author"]["id"])
+    self.assertEquals(generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }), response1["id"])
+    self.assertEquals(generate_full_api_url("author", kwargs={ "author_id": post.author.id }, force_no_slash=True), response1["author"]["id"])
     self.assertTrue(self._is_post_object(response1))
 
   def test_getting_single_friend_post(self):
@@ -142,15 +144,17 @@ class AuthorPostTest(BaseTestCase):
     """
     self.edit_session(id=self.authors[1].id)
 
+    id = generate_next_id()
     post = Post.objects.create(
+        id=id,
         title=f"Another Post",
         description="A sample post.",
         content_type=Post.ContentType.PLAIN,
         content="This is a test post.",
         author=self.authors[0],
         visibility=Post.Visibility.FRIENDS,
-        source=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" }),
-        origin=generate_full_api_url("post", kwargs={ "author_id": "a", "post_id": "a" })
+        source=generate_full_api_url("post", kwargs={ "author_id": self.authors[1].id, "post_id": id }),
+        origin=generate_full_api_url("post", kwargs={ "author_id": self.authors[1].id, "post_id": id })
     )
 
     # Check that we got the post we made
@@ -168,8 +172,8 @@ class AuthorPostTest(BaseTestCase):
     )
     self.edit_session(id=self.authors[1].id)
     response2 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
-    self.assertEquals(post.id, response2["id"])
-    self.assertEquals(post.author.id, response2["author"]["id"])
+    self.assertEquals(generate_full_api_url("post", kwargs={ "post_id": post.id, "author_id": post.author.id }), response2["id"])
+    self.assertEquals(generate_full_api_url("author", kwargs={ "author_id": post.author.id }, force_no_slash=True), response2["author"]["id"])
     self.assertTrue(self._is_post_object(response2))
 
   def test_getting_single_unlisted_post(self):
@@ -191,8 +195,8 @@ class AuthorPostTest(BaseTestCase):
 
     # Check that we got the post we made
     response1 = self.client.get(reverse("post", kwargs={"post_id": post.id , "author_id": self.authors[0].id }), { "size": 1 }).json()
-    self.assertEquals(post.id, response1["id"])
-    self.assertEquals(post.author.id, response1["author"]["id"])
+    self.assertEquals(generate_full_api_url("post", kwargs={ "post_id": post.id, "author_id": post.author.id }), response1["id"])
+    self.assertEquals(generate_full_api_url("author", kwargs={ "author_id": post.author.id }, force_no_slash=True), response1["author"]["id"])
     self.assertTrue(self._is_post_object(response1))
 
   def _is_post_object(self, obj):

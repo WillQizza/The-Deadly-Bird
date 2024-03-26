@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,9 +28,14 @@ SECRET_KEY = 'django-insecure-!nezhdbxb@-tn@fxu41lv02cil*n$s5gcyr9ofskmv^0vd5#4!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# If we are running tests
+TESTING = sys.argv[1:2] == ['test']
+
 ALLOWED_HOSTS = [
   'thedeadlybird-123769211974.herokuapp.com',
   'deadly-bird-justin-ce5a27ea0b51.herokuapp.com',
+  'depresso-espresso-7e0a859d2d18.herokuapp.com',
+  'web-wizards-roop-06e9f4b1fec9.herokuapp.com',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',
@@ -41,6 +47,8 @@ ALLOWED_HOSTS = [
 CSRF_TRUSTED_ORIGINS = [
   'https://thedeadlybird-123769211974.herokuapp.com',
   'https://deadly-bird-justin-ce5a27ea0b51.herokuapp.com',
+  'https://depresso-espresso-7e0a859d2d18.herokuapp.com',
+  'https://web-wizards-roop-06e9f4b1fec9.herokuapp.com',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',

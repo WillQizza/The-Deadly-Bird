@@ -396,7 +396,7 @@ def post_image(_: HttpRequest, author_id: str, post_id: str):
     }
 )
 @api_view(["GET"])
-@permission_classes([ SessionAuthenticated ])
+@permission_classes([ RemoteOrSessionAuthenticated ])
 def post_stream(request: HttpRequest, stream_type: str):
   # Public stream
   if stream_type == "public":
@@ -414,7 +414,7 @@ def post_stream(request: HttpRequest, stream_type: str):
     return paginator.get_paginated_response(serialized_posts.data)
   
   # Following stream
-  elif stream_type == 'following':
+  elif stream_type == 'following' and "id" in request.session:
     paginator = Pagination("posts")
 
     # Get all authors following

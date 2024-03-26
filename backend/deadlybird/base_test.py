@@ -11,7 +11,7 @@ from posts.models import Post, Comment
 from following.models import Following, FollowingRequest
 from django.contrib.auth.models import User
 from likes.models import Like
-from deadlybird.util import generate_full_api_url
+from deadlybird.util import generate_full_api_url, generate_next_id
 
 class BaseTestCase(TestCase):
 
@@ -35,8 +35,13 @@ class BaseTestCase(TestCase):
         """
         authors = []
         for i in range(1, 11):
+            id = generate_next_id()
             user = User.objects.create_user(username=f'user{i}', password='password123')
-            author = Author.objects.create(user=user, display_name=f'user{i}', host=generate_full_api_url(view="api", force_no_slash=True))
+            author = Author.objects.create(id=id,
+                                           user=user, 
+                                           display_name=f'user{i}', 
+                                           host=generate_full_api_url(view="api", force_no_slash=True),
+                                           profile_url=generate_full_api_url("author", kwargs={ "author_id": id }))
             authors.append(author)
         return authors
 
@@ -120,7 +125,12 @@ class BaseTestCase(TestCase):
         default_password = password if password is not None else f"user{i}"
         
         user = User.objects.create_user(username=default_username, password=default_password)
-        author = Author.objects.create(user=user, display_name=default_username, host=generate_full_api_url(view="api", force_no_slash=True),)
+        id = generate_next_id()
+        author = Author.objects.create(id=id,
+                                       user=user,
+                                       display_name=default_username, 
+                                       host=generate_full_api_url(view="api", force_no_slash=True),
+                                       profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })) 
         self.authors.append(author)
 
         return author 
