@@ -6,7 +6,7 @@ import { getUserId } from '../../utils/auth';
 import { ReactComponent as Allow } from 'bootstrap-icons/icons/check-lg.svg';
 import { ReactComponent as Deny } from 'bootstrap-icons/icons/x-lg.svg';
 import styles from './Inbox.module.css';
-import { apiDeleteFollower, apiPutFollower } from '../../api/following';
+import { apiDeleteFollower, apiPutFollower, apiDeleteFollowRequest } from '../../api/following';
 import { apiClearInbox } from '../../api/inbox';
 import { Author } from '../../api/types';
 
@@ -55,7 +55,7 @@ const Inbox = () => {
 
         /** Function for handling rejection of follow request */
         const followReject = (author_id: string, target_author_id: string) => {
-            // TODO: delete follow request 
+            apiDeleteFollowRequest(author_id, target_author_id);
             setInboxMessages(prevMessages => prevMessages.filter((_, index) => index !== idx)); 
         }
 

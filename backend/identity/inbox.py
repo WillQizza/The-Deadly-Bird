@@ -129,6 +129,34 @@ def handle_unfollow_inbox(request: HttpRequest):
     obj.delete()
 
   return Response("Successfuly unfollwed", status=204) 
+
+def handle_follow_response_inbox(request: HttpRequest):
+  to_author = InboxAuthorSerializer(data=request.data.get('object'))
+  from_author = InboxAuthorSerializer(data=request.data.get('actor'))
+  if not to_author.is_valid() or not from_author.is_valid():
+    return Response({
+      "error": True,
+      "message": "Author payloads not valid"
+    }, status=404)
+
+  if request.data.get('accepted'):
+    Following.objects.get_or_create(
+        author_id=to_author.validated_data["id"],
+        target_author_id=from_author.validated_data["id"],
+    )
+
+  # delete follow request
+  follow_req = FollowingRequest.objects.filter(
+      author_id=to_author.validated_data["id"], 
+      target_author_id=from_author.validated_data["id"],
+  ).first()
+  if follow_req:
+      inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
+      if inbox_msg:
+          inbox_msg.delete()
+      follow_req.delete()
+
+  return Response("Successfuly created follow", status=201) 
       
 def _like_post(request: HttpRequest, post_id, source_author):
   # someone liked a post

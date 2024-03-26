@@ -103,6 +103,20 @@ export const apiGetFollowRequest = async(
     return data;
 }
 
+export const apiDeleteFollowRequest = async (
+    authorId: string, 
+    targetAuthorId: string
+)
+: Promise<any> => {
+    const init: RequestInit = {method: "DELETE",}
+    const response = await apiRequest(
+        `${baseURL}/api/authors/request-follower/${extractAuthorIdFromApi(authorId)}/${extractAuthorIdFromApi(targetAuthorId)}`,
+        init
+    );
+    const data = await response.json();
+    return data;
+}
+
 /**
  * @description remove foreign author as a follower of author id.   
  * @param authorId author that following
