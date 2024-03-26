@@ -99,3 +99,15 @@ class InboxPostSerializer(serializers.Serializer):
     internal_data = super().to_internal_value(data)
     internal_data["id"] = internal_data["id"].split("/")[:-1]
     return internal_data
+
+class InboxCommentSerializer(serializers.Serializer):
+  """
+  Validate a payload is a inbox comment payload with the
+  unique constraints of the models getting in the way.
+  """
+  type = serializers.CharField(read_only=True, default="comment")
+  id = serializers.CharField()
+  author = InboxAuthorSerializer()
+  comment = serializers.CharField(source="content")
+  contentType = serializers.CharField(source="content_type")
+  published = serializers.DateTimeField(source="published_date")

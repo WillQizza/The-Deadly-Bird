@@ -13,7 +13,7 @@ from deadlybird.util import resolve_remote_route, get_host_from_api_url
 from nodes.util import get_auth_from_host, get_or_create_remote_author_from_api_payload
 from posts.models import Post, Comment
 from likes.models import Like
-from posts.serializers import InboxPostSerializer
+from posts.serializers import InboxPostSerializer, InboxCommentSerializer
 from deadlybird.util import resolve_remote_route, get_host_with_slash, compare_domains
 from nodes.util import get_or_create_remote_author_from_api_payload
 
@@ -422,22 +422,52 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   }, status=201)
 
 def handle_comment_inbox(request: HttpRequest):
-  # TODO: PART THREE IS A PAIN. BUT IT ONLY WANTS US TO MAKE IT WORK RIGHT?
-  # WE ONLY RECEIVE THIS REQUEST WHEN THE COMMENT'S POST IS ACTUALLY ON OUR NODE
-  post_id = request.data.get('post_id')
+  serializer = InboxCommentSerializer(data=request.data)
+  if not serializer.is_valid():
+    return Response({
+      "error": True,
+      "message": "Invalid comment payload."
+    }, status=400)
+  
+  post_id, _, comment_id = serializer.data["id"].split("/")[-3:]
   post = Post.objects.get(id=post_id)
 
   if post.origin_post != None:
     # This is a shared post!
     post = post.origin_post
 
-  author = get_or_create_remote_author_from_api_payload(request.data["author"])
+  if not compare_domains(post.origin, SITE_HOST_URL):
+    # Remote post. Redirect to proper remote host
+    url = resolve_remote_route(post.author.host, "inbox", {
+        "author_id": post.author.id
+    })
+    auth = get_auth_from_host(post.author.host)
+
+    payload = {
+      "type": serializer.data["type"],
+      "id": f'{resolve_remote_route(post.author.host, "comments", kwargs={ "author_id": post.author.id, "post_id": post.id })}/{comment_id}',
+      "author": serializer.data["author"],
+      "comment": serializer.data["comment"],
+      "contentType": serializer.data["contentType"],
+      "published": serializer.data["published"]
+    }
+
+    response = requests.post(
+      url=url,
+      headers={'Content-Type': 'application/json'}, 
+      data=json.dumps(payload), 
+      auth=auth
+    )
+    return Response(response.json(), status=response.status_code)
+    
+
+  author = get_or_create_remote_author_from_api_payload(serializer.data["author"])
   comment = Comment.objects.create(
-    id=request.data["id"],
+    id=comment_id,
     post=post,
     author=author,
-    content_type=request.data["contentType"],
-    content=request.data["comment"]
+    content_type=serializer.data["contentType"],
+    content=serializer.data["comment"]
   )
 
   InboxMessage.objects.create(
