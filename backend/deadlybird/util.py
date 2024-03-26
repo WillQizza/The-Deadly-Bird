@@ -2,11 +2,11 @@ from django.urls import reverse
 from django.conf import settings
 from deadlybird.settings import SITE_HOST_URL
 from urllib.parse import urljoin, urlparse
-import secrets
 import os
+import uuid
 
 def generate_next_id():
-  return secrets.token_urlsafe(10)
+  return uuid.uuid4()
 
 def generate_full_api_url(view: str, force_no_slash = False, kwargs: dict[str, str] = None):
   if settings.SITE_HOST_URL.endswith("/"):
