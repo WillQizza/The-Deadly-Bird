@@ -100,7 +100,7 @@ const Post: React.FC<PostOptions> = props => {
                     <PencilSquare
                         className={`${styles.postButton} ${styles.postEdit}`}
                         onClick={(e) => {
-                            document.location.href = `/post/${extractPostIdFromApi(props.originId || props.id)}`;
+                            document.location.href = `/post/${extractPostIdFromApi(extractPostIdFromApi(props.originId || props.id))}`;
                         }}
                     />
                 </Col>
@@ -135,7 +135,7 @@ const Post: React.FC<PostOptions> = props => {
             <Row className={styles.postHeader}>
                 {/* Profile picture */}
                 <Col className={"flex-grow-0"}>
-                    <Link to={`/profile/${extractAuthorIdFromApi(postAuthor.id)}`}>
+                    <Link to={`/profile/${extractAuthorIdFromApi(extractAuthorIdFromApi(postAuthor.id))}`}>
                         <img className={styles.postProfilePicture} src={profileImgSrc}/>
                     </Link>
                 </Col>
@@ -143,7 +143,7 @@ const Post: React.FC<PostOptions> = props => {
                 <Col className={"flex-grow-1"}>
                     <div className={styles.postInfo}>
                         {/* Author */}
-                        <Link to={`/profile/${extractAuthorIdFromApi(postAuthor.id)}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
+                        <Link to={`/profile/${extractAuthorIdFromApi(extractAuthorIdFromApi(postAuthor.id))}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
                         {/* Sub info */}
                         <div className={styles.postSubInfo}>
                             {/* Date */}
@@ -178,7 +178,7 @@ const Post: React.FC<PostOptions> = props => {
                             onClick={() => {
                                 // Copy post link to user clipboard
                                 if (navigator.clipboard) {
-                                    navigator.clipboard.writeText(`${window.location.origin}/profile/${extractAuthorIdFromApi(props.author.id)}/posts/${props.id}`);
+                                    navigator.clipboard.writeText(`${window.location.origin}/profile/${extractAuthorIdFromApi(extractAuthorIdFromApi(props.author.id))}/posts/${props.id}`);
                                     setLinkTooltipShow(true);
                                 }
                             }}

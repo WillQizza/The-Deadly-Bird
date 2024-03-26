@@ -562,9 +562,6 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
       )
       payload = CommentSerializer(comment).data
 
-      # TODO: PART THREE IS A PAIN.
-      payload["post_id"] = post.id
-
       auth = get_auth_from_host(remote_author.host)
       response = requests.post(
         url=url,
@@ -627,9 +624,6 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
           url = resolve_remote_route(source_author.host, "inbox", {
             "author_id": source_author.id
           })
-
-          # TODO: PART THREE IS A PAIN.
-          payload["post_id"] = post.origin_post.id
 
           auth = get_auth_from_host(source_author.host)
           response = requests.post(
