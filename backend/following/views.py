@@ -14,7 +14,10 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serial
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from deadlybird.util import resolve_remote_route, compare_domains
+from identity.util import check_author_is_remote
+from identity.serializers import AuthorSerializer
 import requests
+import json
 
 @extend_schema(
     parameters=[
@@ -160,6 +163,24 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     if request.method == "DELETE":
         obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
         obj.delete()
+        # if author we are following is remote, then send unfollow request
+        if check_author_is_remote(author_id):
+            remote_route = resolve_remote_route(author.host, view="inbox", kwargs={
+                "author_id": author_id,
+            })
+            auth = get_auth_from_host(author.host)
+            post_json = {
+                "type": "Unfollow",
+                "summary": f"{foreign_author.display_name} wants to unfollow {author.display_name}",
+                "actor": AuthorSerializer(foreign_author).data,
+                "object": AuthorSerializer(author).data,
+            }
+            requests.post(
+                url=remote_route, 
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(post_json),
+                auth=auth,
+            )
         return Response({"error": False, "message": "Follower removed successfully."}, status=204)
 
     elif request.method == "PUT": 
