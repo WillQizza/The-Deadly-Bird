@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from deadlybird.util import generate_next_id, normalize_author_host, compare_domains
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from identity.serializers import InboxAuthorSerializer
+import json
 
 def format_node_api_url(node: Node, route: str):
   if node.host.endswith("/"):
@@ -22,7 +24,14 @@ def get_auth_from_host(host: str):
     print(f"Could not find credentials to requested host: {host} - Using default credentials")
     return ('username', 'password')
 
-def create_remote_author_if_not_exists(data: dict[str, any]):
+def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
+  serializer = InboxAuthorSerializer(data=data)
+  if not serializer.is_valid():
+    print(f"Unable to parse remote author JSON: {json.dumps(data)}")
+    return None
+  data = serializer.validated_data
+  print("parsed data is now " + json.dumps(data))
+  
   try:
     return Author.objects.get(id=data["id"])
   except Author.DoesNotExist:

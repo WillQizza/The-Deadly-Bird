@@ -5,6 +5,7 @@ import {
     AuthorsResponse,
     Author  
 } from "./types";
+import { extractAuthorIdFromApi } from "./utils";
 
 /**
  * @description function to access the /authors view API.
@@ -32,7 +33,7 @@ export const apiGetAuthors = async (page: number, size: number, includeHost?: st
  * @param id author id to retrieve
  */
 export const apiGetAuthor = async (id: string): Promise<Author|null> => {
-    const response = await apiRequest(`${baseURL}/api/authors/${id}/`);
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(id)}/`);
 
     if (response.status === 404) {
         return null;

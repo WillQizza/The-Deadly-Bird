@@ -44,7 +44,6 @@ def send_post_to_inboxes(post_id: str, author_id: str):
         print(f"Failed to send inbox message {post_id} to {url}")
         print(response.text)
 
-      
     else:
       # Local follower, so we can just publish the inbox message and be done 
       InboxMessage.objects.create(

@@ -2,6 +2,7 @@ from rest_framework import serializers
 from deadlybird.util import generate_full_api_url, get_host_with_slash
 from deadlybird.settings import SITE_HOST_URL
 from identity.serializers import AuthorSerializer
+from identity.models import Author
 from drf_spectacular.utils import inline_serializer
 from .models import Like
 from posts.models import Post, Comment

@@ -496,7 +496,6 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
     # Get the comments on the post
 
-    # TODO: PART THREE FIX
     if not compare_domains(post.origin, SITE_HOST_URL):
       # Remote post. get comments from remote
       origin_aid, _, origin_pid = post.origin.split("/")[-3:]
