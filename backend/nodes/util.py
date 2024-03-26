@@ -30,7 +30,6 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
     print(f"Unable to parse remote author JSON: {json.dumps(data)}")
     return None
   data = serializer.validated_data
-  print("parsed data is now " + json.dumps(data))
   
   try:
     return Author.objects.get(id=data["id"])
@@ -40,7 +39,7 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
       created_user = User.objects.create_user(
         # TODO: RETHINK THIS OUT LATER: 
         # Problem is what if two nodes have an author with the same username?
-        username=data["displayName"] + "-" + generate_next_id()[0:7],
+        username=data["display_name"] + "-" + generate_next_id()[0:7],
         email=None,
         password=None,
       )
@@ -51,9 +50,9 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
       return Author.objects.create(
         id=data["id"], #same id as remote object          
         user=created_user,
-        display_name=data["displayName"],
+        display_name=data["display_name"],
         host=normalize_author_host(data["host"]),
-        profile_url=data["url"],
+        profile_url=data["profile_url"],
         last_github_check=timezone.now()
       )
 
