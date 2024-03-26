@@ -386,6 +386,10 @@ def inbox(request: HttpRequest, author_id: str):
       from .inbox import handle_follow_inbox
       return handle_follow_inbox(request)
 
+    elif content_type == "Unfollow":
+      from .inbox import handle_unfollow_inbox
+      return handle_unfollow_inbox(request)
+
     elif content_type == "comment":
       from .inbox import handle_comment_inbox
       return handle_comment_inbox(request)
