@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from deadlybird.settings import TESTING
 from apscheduler.schedulers.background import BackgroundScheduler
 
 class IdentityConfig(AppConfig):
@@ -6,7 +7,8 @@ class IdentityConfig(AppConfig):
     name = 'identity'
 
     def ready(self):
-        from .jobs import github_task
-        scheduler = BackgroundScheduler()
-        scheduler.add_job(github_task, 'interval', minutes=1)
-        scheduler.start()
+        if not TESTING:
+            from .jobs import github_task
+            scheduler = BackgroundScheduler()
+            scheduler.add_job(github_task, 'interval', minutes=1)
+            scheduler.start()

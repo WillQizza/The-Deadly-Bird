@@ -187,7 +187,6 @@ def _like_post(request: HttpRequest, post_id, source_author):
       "message": "Like already exists"
     }, status=409)
 
-  
   Like.objects.create(
     send_author=source_author,
     receive_author=post.author,

@@ -126,7 +126,7 @@ class AuthorTests(BaseTestCase):
     self.edit_session(id=self.authors[0].id)
 
     response = self.client.get(reverse("author", kwargs={ "author_id": self.authors[1].id })).json()
-    self.assertEquals(response["id"], self.authors[1].id)
+    self.assertEquals(response["id"], generate_full_api_url("author", kwargs={ "author_id": self.authors[1].id }, force_no_slash=True))
     self.assertEquals(response["displayName"], self.authors[1].display_name)
 
   def _is_author_object(self, obj):

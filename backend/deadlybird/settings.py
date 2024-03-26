@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +27,9 @@ SECRET_KEY = 'django-insecure-!nezhdbxb@-tn@fxu41lv02cil*n$s5gcyr9ofskmv^0vd5#4!
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
+# If we are running tests
+TESTING = sys.argv[1:2] == ['test']
 
 ALLOWED_HOSTS = [
   'thedeadlybird-123769211974.herokuapp.com',
