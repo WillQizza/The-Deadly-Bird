@@ -29,7 +29,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
         // Handle response
         const data = await apiGetComments(authorId, postId, currentPage.current, pageSize);
         console.log(data);
-        if (data["message"]) {
+        if (data["error"]) {
             setResponseMessage(data.message);
             return;
         }
