@@ -12,7 +12,7 @@ from likes.serializers import APIDocsLikeSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
 from .serializers import AuthorSerializer, InboxMessageSerializer 
-from deadlybird.settings import SITE_HOST_URL
+from identity.util import get_this_host_url
 
 @extend_schema(
     operation_id="api_authors_retrieve_all",
@@ -314,7 +314,7 @@ def register(request: HttpRequest):
     id=id,
     user=created_user,
     display_name=created_user.username,
-    host=SITE_HOST_URL.rstrip("/"),
+    host=get_this_host_url(),
     profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })
   )
     
