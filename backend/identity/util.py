@@ -24,6 +24,9 @@ def check_author_is_remote(author_id: str) -> bool:
     """
     this_host = get_this_host_url()
     author = Author.objects.filter(id=author_id).first()
-    check_host = author.host
-    # if hosts don't match then remote author
-    return not compare_domains(this_host, check_host)
+    if author is not None: 
+        check_host = author.host
+        # if hosts don't match then remote author
+        return not compare_domains(this_host, check_host)
+    # author does not exist 
+    return False
