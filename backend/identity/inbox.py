@@ -140,6 +140,9 @@ def _like_post(request: HttpRequest, post_id, source_author):
       "message": "Post was not found"
     }, status=404)
   
+  if post.origin_post is not None:
+    post = post.origin_post
+  
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote post, forward inbox like to origin
     origin_author_id, _, origin_post_id = post.origin.split("/")[-3:]
@@ -165,7 +168,8 @@ def _like_post(request: HttpRequest, post_id, source_author):
     if not response.ok:
       print(f"An error occurred while propagating a remote post like to \"{url}\" (status={response.status_code})")
     else:
-      # Create a local copy of it so that our /liked route works fine
+      # Create a local copy of it so that our /liked route works fin
+
       Like.objects.create(
         send_author=source_author,
         receive_author=post.author,
@@ -209,6 +213,9 @@ def _like_comment(request: HttpRequest, post_id, comment_id, source_author):
       "message": "Post was not found"
     }, status=404)
   
+  if post.origin_post is not None:
+    post = post.origin_post
+
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote comment, forward inbox like to origin
     origin_author_id, _, origin_post_id = post.origin.split("/")[-3:]
@@ -237,8 +244,8 @@ def _like_comment(request: HttpRequest, post_id, comment_id, source_author):
       # Create a local copy of it so that our /liked route works fine
       Like.objects.create(
         send_author=source_author,
-        receive_author=comment.author,
-        content_id=comment.id,
+        receive_author=post.author,
+        content_id=comment_id,
         content_type=Like.ContentType.COMMENT
       )
 

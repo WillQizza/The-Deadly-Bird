@@ -2,12 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { ListGroup, Alert } from "react-bootstrap";
 import Comment from "./Comment";
 import { CommentProps } from "./Comment";
-import { baseURL } from "../../constants";
-import { apiRequest } from "../../utils/request";
 import { getUserId } from "../../utils/auth";
 import { apiGetCommentLikes } from "../../api/likes";
-import { extractAuthorIdFromApi } from "../../api/utils";
 import { apiGetComments } from "../../api/comments";
+import { extractAuthorIdFromApi } from "../../api/utils";
 
 interface CommentSectionProps {
     postId: string,
@@ -28,7 +26,6 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
     const fetchComments = async (reset?: boolean) => {
         // Handle response
         const data = await apiGetComments(authorId, postId, currentPage.current, pageSize);
-        console.log(data);
         if (data["error"]) {
             setResponseMessage(data.message);
             return;
@@ -48,7 +45,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
                 contentType: commentData.contentType,
                 date: commentData.published,
                 likes: likeData.length,
-                liked: !!likeData.find(like => like.author.id === getUserId())
+                liked: !!likeData.find(like => extractAuthorIdFromApi(like.author.id) === getUserId())
             });
         }
         reset ? setComments(newComments) : setComments([...comments, ...newComments]);
