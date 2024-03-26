@@ -44,7 +44,6 @@ export const apiCreatePostLike = async (
     authorID: string,
     postID: string
 ): Promise<any> => {
-    console.log(authorID, " was extracted");
     const ourAuthor = (await apiGetAuthor(getUserId()))!;
     const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox/`, {
         method: "POST",
@@ -83,7 +82,7 @@ export const apiCreateCommentLike = async (
         body: JSON.stringify({
             "@context": "https://www.w3.org/ns/activitystreams",
             "summary": `${ourAuthor.displayName} Likes your comment`,
-            "type": "comment",
+            "type": "Like",
             "author": ourAuthor,
             "object": `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${extractPostIdFromApi(postID)}/comments/${extractCommentIdFromApi(commentID)}`
         })

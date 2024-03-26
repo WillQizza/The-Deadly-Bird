@@ -44,30 +44,19 @@ def following(request, author_id: str):
 
     # Search a subset of author ids if target_author_ids parameter is present
     if include_author_ids: 
-        queryset = Following.objects.filter(
+        following = Following.objects.filter(
             target_author_id__in=include_author_ids, author_id=author_id
         ).select_related('author')\
          .order_by('id')
     # Otherwise search author ids
     else:
-        queryset = Following.objects.filter(target_author_id=author_id)\
+        following = Following.objects.filter(target_author_id=author_id)\
             .select_related('author')\
             .order_by('id')
 
-    # Paginate results
-    paginator = Pagination("following")
-    page = paginator.paginate_queryset(queryset, request)
-    
     # Return serialized results
-    #TODO: refactor this
-    if page is not None:
-        authors = [following.author for following in page]
-        serializer = FollowingSerializer(authors)
-        return paginator.get_paginated_response(serializer.data)
-    else:
-        authors = [following.author for following in queryset]
-        serializer = FollowingSerializer(authors)
-        return Response(serializer.data)
+    serializer = FollowingSerializer([f.author for f in following])
+    return Response(serializer.data)
 
 @extend_schema(
     operation_id="api_authors_followers_retrieve_all",
@@ -85,23 +74,12 @@ def followers(request, author_id: str):
     GET [local, remote]: get a list of authors who are AUTHOR_ID's followers       
     """
     # Get authors who are following author id
-    queryset = Following.objects.filter(target_author_id=author_id)\
+    followers = [f.author for f in Following.objects.filter(target_author_id=author_id)\
         .select_related('author')\
-        .order_by('id')
-
-    # Paginate results
-    paginator = Pagination("followers")
-    page = paginator.paginate_queryset(queryset, request)
+        .order_by('id')]
     
     # Return serialized results
-    if page is not None:
-        authors = [following.author for following in page]
-        serializer = FollowingSerializer(authors)
-        return paginator.get_paginated_response(serializer.data)
-    else:
-        authors = [following.author for following in queryset]
-        serializer = FollowingSerializer(authors)
-        return Response(serializer.data)  
+    return Response(FollowingSerializer(followers).data)
 
 @extend_schema(
     parameters=[
