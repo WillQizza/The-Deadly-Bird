@@ -99,7 +99,7 @@ class InboxAuthorSerializer(serializers.Serializer):
   """
   type = serializers.CharField(read_only=True, default="author")
   id = serializers.SerializerMethodField()
-  github = serializers.CharField(required=False)
+  github = serializers.CharField(required=False, allow_null=True)
   host = serializers.URLField()
   displayName = serializers.CharField(source="display_name")
   url = serializers.URLField(source="profile_url")

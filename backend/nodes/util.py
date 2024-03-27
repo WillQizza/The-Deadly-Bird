@@ -28,6 +28,7 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
   serializer = InboxAuthorSerializer(data=data)
   if not serializer.is_valid():
     print(f"Unable to parse remote author JSON: {json.dumps(data)}")
+    print(serializer.errors)
     return None
   data = serializer.validated_data
   
