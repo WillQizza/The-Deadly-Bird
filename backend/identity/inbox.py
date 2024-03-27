@@ -409,7 +409,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   source_url = serializer.data["source"]
   if not ("posts" in source_url):
     # TODO: HACKY FIX
-    source_url = remove_trailing_slash(source_url) + f"/authors/{serializer.data['author']['id'].split('/')[-1]}/posts/{serializer.data['id']}"
+    source_url = origin_url
   source_author = get_or_create_remote_author_from_api_payload(serializer.data["author"])
 
   # Get origin post
