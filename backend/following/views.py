@@ -178,23 +178,24 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             follow_req.delete()
 
         # send follow response (can be remote or local)
-        route = resolve_remote_route(foreign_author.host, view="inbox", kwargs={
-            "author_id": foreign_author_id,
-        })
-        auth = get_auth_from_host(foreign_author.host)
-        post_json = {
-            "type": "FollowResponse",
-            "summary": f"{author.display_name} accepted your follow request",
-            "actor": AuthorSerializer(author).data,
-            "object": AuthorSerializer(foreign_author).data,
-            "accepted": True,
-        }
-        requests.post(
-            url=route,
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(post_json),
-            auth=auth,
-        )
+        if not compare_domains(foreign_author.host, SITE_HOST_URL):
+            route = resolve_remote_route(foreign_author.host, view="inbox", kwargs={
+                "author_id": foreign_author_id,
+            })
+            auth = get_auth_from_host(foreign_author.host)
+            post_json = {
+                "type": "FollowResponse",
+                "summary": f"{author.display_name} accepted your follow request",
+                "actor": AuthorSerializer(author).data,
+                "object": AuthorSerializer(foreign_author).data,
+                "accepted": True,
+            }
+            requests.post(
+                url=route,
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(post_json),
+                auth=auth,
+            )
 
         return Response({"error": False, "message": "Follower added successfully."}, status=201)
     
