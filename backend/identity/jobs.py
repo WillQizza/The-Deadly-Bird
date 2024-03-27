@@ -2,7 +2,7 @@ from posts.models import Post
 from .models import Author
 from django.utils import timezone
 from deadlybird.util import generate_full_api_url, generate_next_id
-from deadlybird.settings import GITHUB_API_TOKEN
+from deadlybird.settings import GITHUB_API_TOKEN, SITE_HOST_URL
 from posts.util import send_post_to_inboxes
 import requests
 
@@ -11,7 +11,8 @@ AUTHORS_PER_CRON_CHECK = 10
 def github_task():
   print("[GITHUB CRON] Starting Task")
   authors = Author.objects.all() \
-    .exclude(github=None) \
+    .exclude(github=None)
+    .filter(host=SITE_HOST_URL) \
     .order_by("last_github_check")[:AUTHORS_PER_CRON_CHECK]
 
   for author in authors:
