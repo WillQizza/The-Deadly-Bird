@@ -45,7 +45,7 @@ export const apiCreatePostLike = async (
     postID: string
 ): Promise<any> => {
     const ourAuthor = (await apiGetAuthor(getUserId()))!;
-    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox/`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -74,7 +74,7 @@ export const apiCreateCommentLike = async (
     commentID: string
 ): Promise<any> => {
     const ourAuthor = (await apiGetAuthor(getUserId()))!;
-    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox/`, {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"

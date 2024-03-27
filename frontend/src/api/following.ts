@@ -63,7 +63,7 @@ export const apiInboxFollowRequest = async (
         const fromAuthor = (await apiGetAuthor(fromAuthorID))!;
         const toAuthor = (await apiGetAuthor(toAuthorID))!;
         
-        const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(toAuthor.id)}/inbox/`, {
+        const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(toAuthor.id)}/inbox`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
