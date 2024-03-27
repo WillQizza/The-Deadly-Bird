@@ -368,7 +368,7 @@ def inbox(request: HttpRequest, author_id: str):
     # Check request data
     content_type = request.data.get("type")
     print("INBOX REQUEST RECEIVED WITH TYPE " + content_type)
-    print(request.body)
+    print(request.data)
 
     if content_type == None:
       return Response({
