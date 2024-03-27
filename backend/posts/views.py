@@ -483,7 +483,7 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
 
     if post.origin_post is not None:
       post = post.origin_post
-  except:
+  except Post.DoesNotExist:
     return Response({
       "error": True,
       "message": "Post not found."

@@ -46,4 +46,4 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
       author = get_or_create_remote_author_from_api_payload(member)
 
       # Retrieve all of their posts (both friends and public)
-      import_public_posts_from_author(author, instance)
+      # import_public_posts_from_author(author, instance)
