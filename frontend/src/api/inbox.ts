@@ -15,6 +15,7 @@ export const getInboxMessages = async (
         `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox?page=${page}&size=${size}`,
         {method: "GET"}
     );   
+    console.log(`${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/inbox?page=${page}&size=${size}`, "url");
     const data: InboxResponse = await response.json(); 
     return data;
 }

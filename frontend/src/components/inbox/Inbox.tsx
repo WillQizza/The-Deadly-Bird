@@ -65,17 +65,16 @@ const Inbox = () => {
                 <Card.Header>Follow Request</Card.Header>
                 <Card.Body>
                     {/** Follow request information */}
-                    <Card.Text>type: {message.type}</Card.Text>
-                    <Card.Text>from: {message.author.displayName}</Card.Text>
-                    <Card.Text>to: {message.target_author.displayName}</Card.Text>
+                    <Card.Text>from: {message.actor.displayName}</Card.Text>
+                    <Card.Text>to: {message.object.displayName}</Card.Text>
                     {/** Accept and Reject buttons */}
                     <div className={styles.postButtons}>
                         <Allow 
                             className={`${styles.postButton} ${styles.postShare}`} 
-                            onClick={() => {followAccept(message.author, message.target_author)}} 
+                            onClick={() => {followAccept(message.actor, message.object)}} 
                         />
                         <Deny className={`${styles.postButton} ${styles.postLike}`}
-                            onClick={() => {followReject(message.author.id, message.target_author.id)}} 
+                            onClick={() => {followReject(message.actor.id, message.object.id)}} 
                         />
                     </div> 
                 </Card.Body>
