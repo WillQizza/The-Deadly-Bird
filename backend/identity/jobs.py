@@ -11,7 +11,7 @@ AUTHORS_PER_CRON_CHECK = 10
 def github_task():
   print("[GITHUB CRON] Starting Task")
   authors = Author.objects.all() \
-    .exclude(github=None)
+    .exclude(github=None) \
     .filter(host=SITE_HOST_URL) \
     .order_by("last_github_check")[:AUTHORS_PER_CRON_CHECK]
 
