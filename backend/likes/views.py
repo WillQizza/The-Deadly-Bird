@@ -93,7 +93,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
     if request.method == "GET":        
         # Get the post specified by the url 
         author_post = Post.objects\
-            .filter(id=post_id, author_id=author_id)\
+            .filter(id=post_id)\
             .first()
 
         if author_post is None:

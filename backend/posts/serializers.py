@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
-from deadlybird.util import generate_full_api_url, remove_trailing_slash
+from deadlybird.util import generate_full_api_url, remove_trailing_slash, resolve_remote_route
 from .models import Post, Comment
 from identity.serializers import InboxAuthorSerializer
 from .pagination import generate_comments_pagination_schema
@@ -70,10 +70,13 @@ class PostSerializer(serializers.ModelSerializer):
     internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
     return internal_data
   
-  def to_representation(self, instance):
+  def to_representation(self, instance: Post):
     author_id = instance.author.id
     data = super().to_representation(instance)
-    data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
+    if instance.origin_post is not None:
+      data["id"] = resolve_remote_route(instance.author.host, "post", kwargs={ "author_id": instance.origin_post.author.id, "post_id": instance.origin_post.id }, force_no_slash=True)
+    else:
+      data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
     return data
 
   class Meta:

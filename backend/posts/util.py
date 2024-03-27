@@ -29,8 +29,7 @@ def send_post_to_inboxes(post_id: str, author_id: str):
 
       if post.origin_author != None:
         # This is a shared post, we need to update the author of the post
-        post.source = generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id })
-        post.author = post.origin_author
+        post.source = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": post.origin_post.id })
 
       payload = InboxPostSerializer(post).data
       response = requests.post(
@@ -46,6 +45,9 @@ def send_post_to_inboxes(post_id: str, author_id: str):
 
     else:
       # Local follower, so we can just publish the inbox message and be done 
+      if post.origin_post is not None:
+        post_id = post.origin_post.id
+
       InboxMessage.objects.create(
         author=follower.author,
         content_id=post_id,

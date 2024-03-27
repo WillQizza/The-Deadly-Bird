@@ -55,7 +55,7 @@ export const apiCreatePostLike = async (
             "summary": `${ourAuthor.displayName} Likes your post`,
             "type": "Like",
             "author": ourAuthor,
-            "object": `${baseURL}/api/authors/${authorID}/posts/${postID}`
+            "object": `${baseURL}/api/authors/${extractAuthorIdFromApi(authorID)}/posts/${extractPostIdFromApi(postID)}`
         })
     });    
     const data: any = await response.json(); 

@@ -57,16 +57,14 @@ def get_host_from_api_url(url: str) -> str|None:
   Retrieve the base host associated with the url.
   While hacky, this method will work.
   """
-  
-  if remove_trailing_slash(url).startswith(remove_trailing_slash(SITE_HOST_URL)):
+  url = remove_trailing_slash(dockerize_localhost(url))
+
+  if url.startswith(dockerize_localhost(remove_trailing_slash(SITE_HOST_URL))):
      return SITE_HOST_URL
-  
-  if os.environ.get("DOCKER") is not None:
-    url = url.replace("localhost", "host.docker.internal")
   
   from nodes.models import Node
   for node in Node.objects.all():
-    if remove_trailing_slash(url).startswith(remove_trailing_slash(node.host)):
+    if url.startswith(remove_trailing_slash(node.host)):
       return node.host
   return None
 

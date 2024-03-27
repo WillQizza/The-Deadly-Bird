@@ -347,109 +347,143 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   if not serializer.is_valid():
     return Response({ "error": True, "message": "Invalid post payload" }, status=400)
   
-  print("received inbox message")
+  print("received post inbox message")
   print(serializer.data)
 
-  # Create the remote author if they do not exist in our system (origin author)
-  author_data = serializer.data["author"]
-  origin_author = get_or_create_remote_author_from_api_payload(author_data)
-
+  # Ensure the origin author exists in our systems
   origin_url = serializer.data["origin"]
-  origin_post_id = origin_url.split("/")[-1]
-
-  # Ensure the source author also exists in our systems
-  source_url = serializer.data["source"]
-  source_author_id = source_url.split("/")[-3]
+  origin_author_id = origin_url.split("/")[-3]
   try:
-    source_author = Author.objects.get(id=source_author_id)
+    origin_author = Author.objects.get(id=origin_author_id)
   except Author.DoesNotExist:
     # Source author does not exist in our systems. Register them
-    source_host = get_host_from_api_url(source_url)
-    url = resolve_remote_route(source_host, "author", {
-      "author_id": source_author_id
+    origin_host = get_host_from_api_url(origin_url)
+    url = resolve_remote_route(origin_host, "author", {
+      "author_id": origin_author_id
     })
-    auth = get_auth_from_host(source_host)    
+    auth = get_auth_from_host(origin_host)    
     res = requests.get(
       url=url,
       auth=auth
     )
     
     if not res.ok:
-      print(f"Failed to get source author from \"{url}\" using credentials.")
-      return Response({ "error": True, "message": "Failed to GET source author" }, status=500)
+      print(f"Failed to get origin author from \"{url}\" using credentials.")
+      return Response({ "error": True, "message": "Failed to GET origin author" }, status=500)
 
-    source_author_serializer = InboxAuthorSerializer(data=res.json())
-    if not source_author_serializer.is_valid():
-      print(f"Failed to parse source author JSON from \"{url}\"")
-      return Response({ "error": True, "message": "Invalid source author JSON format" }, status=500)
+    origin_author_serializer = InboxAuthorSerializer(data=res.json())
+    if not origin_author_serializer.is_valid():
+      print(f"Failed to parse origin author JSON from \"{url}\"")
+      return Response({ "error": True, "message": "Invalid origin author JSON format" }, status=500)
     
-    source_author = get_or_create_remote_author_from_api_payload(source_author_serializer["data"])
+    origin_author = get_or_create_remote_author_from_api_payload(origin_author_serializer["data"])
 
-  # We now have origin_author and source_author
+  # Ensure source author also exists in our system
+  source_url = serializer.data["source"]
+  source_author = get_or_create_remote_author_from_api_payload(serializer.data["author"])
 
-  is_normal_post_propagation = origin_post_id == serializer.data["id"]
+  # Get origin post
+  origin_post_id = origin_url.split("/")[-1]
+  origin_post = Post.objects.filter(id=origin_post_id).first()
 
-  if is_normal_post_propagation:
-    # Normal post propagation, just create the post if it does not exist in our system
-    try:
-      post = Post.objects.get(id=serializer.data["id"])
-    except Post.DoesNotExist:
-      post = Post.objects.create(
-        id=serializer.data["id"],
-        title=serializer.data["title"],
-        source=serializer.data["source"],
-        origin=serializer.data["origin"],
-        description=serializer.data["description"],
-        content_type=serializer.data["contentType"],
-        content=serializer.data["content"],
-        author=origin_author,
-        published_date=serializer.data["published"],
-        visibility=serializer.data["visibility"]
+  if source_url == origin_url:
+
+    if origin_post != None:
+      # We are sharing a post that we wrote.
+      created_post = Post.objects.create(
+        origin_post=origin_post,
+        origin_author=origin_author,
+        title=origin_post.title,
+        source=source_url,
+        origin=origin_url,
+        description=origin_post.description,
+        content_type=origin_post.content_type,
+        content=origin_post.content,
+        author=source_author,
+        visibility=Post.Visibility.PUBLIC
       )
+    else:
+      # Does author match origin author?
+      author_and_origin_author_match = origin_author_id == source_author.id
+
+      if author_and_origin_author_match:
+        # Create NEW post
+        created_post = Post.objects.create(
+          id=origin_post_id,
+          title=serializer.data["title"],
+          source=source_url,
+          origin=origin_url,
+          description=serializer.data["description"],
+          content_type=serializer.data["contentType"],
+          content=serializer.data["content"],
+          author=source_author,
+          visibility=serializer.data["visibility"]
+        )
+      else:
+        # Create origin post from origin url and then create our shared post
+        origin_post = Post.objects.create(
+          id=origin_post_id,
+          title=serializer.data["title"],
+          source=source_url,
+          origin=origin_url,
+          description=serializer.data["description"],
+          content_type=serializer.data["contentType"],
+          content=serializer.data["content"],
+          author=origin_author,
+          visibility=serializer.data["visibility"]
+        )
+
+        created_post = Post.objects.create(
+          origin_post=origin_post,
+          origin_author=origin_author,
+          title=origin_post.title,
+          source=source_url,
+          origin=origin_url,
+          description=origin_post.description,
+          content_type=origin_post.content_type,
+          content=origin_post.content,
+          author=source_author,
+          visibility=Post.Visibility.PUBLIC
+        )
+
   else:
-    # Post propagation of a shared post
-    # Ensure origin post exists
-    try:
-      origin_post = Post.objects.get(id=origin_post_id)
-    except Post.DoesNotExist:
+    # We're sharing a post. 
+
+    # Create origin post.
+    if origin_post is None:
       origin_post = Post.objects.create(
         id=origin_post_id,
         title=serializer.data["title"],
-        source=serializer.data["source"],
-        origin=serializer.data["origin"],
+        source=source_url,
+        origin=origin_url,
         description=serializer.data["description"],
         content_type=serializer.data["contentType"],
         content=serializer.data["content"],
         author=origin_author,
-        published_date=serializer.data["published"],
         visibility=serializer.data["visibility"]
       )
 
-    # Create shared post if not exist
-    try:
-      post = Post.objects.get(id=serializer.data["id"])
-    except Post.DoesNotExist:
-      post = Post.objects.create(
-        id=serializer.data["id"],
-        title=serializer.data["title"],
-        source=serializer.data["source"],
-        origin=serializer.data["origin"],
-        description=serializer.data["description"],
-        content_type=serializer.data["contentType"],
-        content=serializer.data["content"],
-        author=source_author,
-        origin_author=origin_author,
-        origin_post=origin_post,
-        published_date=serializer.data["published"],
-        visibility=serializer.data["visibility"]
-      )
+    # Creat shared post.
+    created_post = Post.objects.create(
+      origin_post=origin_post,
+      origin_author=origin_author,
+      title=origin_post.title,
+      source=source_url,
+      origin=origin_url,
+      description=origin_post.description,
+      content_type=origin_post.content_type,
+      content=origin_post.content,
+      author=source_author,
+      visibility=Post.Visibility.PUBLIC
+    )
 
   target_author = Author.objects.get(id=target_author_id)
+  inbox_post_id = created_post.id if created_post.origin_post is None else created_post.origin_post.id
 
   # Create inbox message
   InboxMessage.objects.create(
     author=target_author,
-    content_id=post.id,
+    content_id=inbox_post_id,
     content_type=InboxMessage.ContentType.POST
   )
 

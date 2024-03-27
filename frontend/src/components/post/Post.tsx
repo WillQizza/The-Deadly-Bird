@@ -102,23 +102,23 @@ const Post: React.FC<PostOptions> = props => {
                 }}
             />);
         }
-        else if (props.originAuthor && extractAuthorIdFromApi(props.author.id) === getUserId()) {
-            // delete button if they shared the post
-            return(
-                <>
-                    <Trash 
-                        className={`${styles.postButton} ${styles.postDelete}`}
-                        onClick={() => setShowConfirm(true)}
-                    />
-                    <DeleteDialog
-                        show={showConfirm}
-                        setShow={setShowConfirm}
-                        postId={props.id}
-                        onDelete={props.refreshStream}
-                    />
-                </>
-            );
-        }
+        // else if (props.originAuthor && extractAuthorIdFromApi(props.author.id) === getUserId()) {
+        //     // delete button if they shared the post
+        //     return(
+        //         <>
+        //             <Trash 
+        //                 className={`${styles.postButton} ${styles.postDelete}`}
+        //                 onClick={() => setShowConfirm(true)}
+        //             />
+        //             <DeleteDialog
+        //                 show={showConfirm}
+        //                 setShow={setShowConfirm}
+        //                 postId={props.id}
+        //                 onDelete={props.refreshStream}
+        //             />
+        //         </>
+        //     );
+        // }
         else {
             return null;
         }

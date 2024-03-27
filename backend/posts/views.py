@@ -310,7 +310,6 @@ def post(request: HttpRequest, author_id: str, post_id: str):
 @api_view(["POST"])
 @permission_classes([ SessionAuthenticated ])
 def share_post(request: HttpRequest, author_id: str, post_id: str):
-  # TODO: Check that the user is allowed to share this post (Ritwik)
   try:
     post = Post.objects.get(id=post_id)
   except Post.DoesNotExist:
@@ -319,36 +318,26 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
       "message": "Post could not be found."
     }, status=404)
   
+  if post.origin_post is not None:
+    return Response({
+      "error": True,
+      "message": "Cannot share using the shared post id."
+    })
+  
   author = Author.objects.get(id=request.session["id"])
   
-  if post.origin_author != None:
-    # We're sharing a shared post
-    shared_post = Post.objects.create(
-      title=post.title,
-      origin=post.origin,
-      source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
-      description=post.description,
-      content_type=post.content_type,
-      content=post.content,
-      author=author,
-      origin_author=post.origin_author,
-      origin_post=post.origin_post,
-      visibility=post.visibility
-    )
-  else:
-    # We're sharing a post that has never been shared before
-    shared_post = Post.objects.create(
-      title=post.title,
-      origin=post.origin,
-      source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
-      description=post.description,
-      content_type=post.content_type,
-      content=post.content,
-      author=author,
-      origin_post=post,
-      origin_author=post.author,
-      visibility=post.visibility
-    )
+  shared_post = Post.objects.create(
+    title=post.title,
+    origin=post.origin,
+    source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
+    description=post.description,
+    content_type=post.content_type,
+    content=post.content,
+    author=author,
+    origin_post=post,
+    origin_author=post.author,
+    visibility=post.visibility
+  )
 
   send_post_to_inboxes(shared_post.id, author.id)
   return Response(PostSerializer(shared_post).data, status=201)
@@ -404,7 +393,7 @@ def post_stream(request: HttpRequest, stream_type: str):
 
     # Get all public posts
     posts = Post.objects.all() \
-      .filter(visibility=Post.Visibility.PUBLIC) \
+      .filter(visibility=Post.Visibility.PUBLIC, origin_post=None) \
       .order_by("-published_date")
     
     # Paginate and return serialized result
