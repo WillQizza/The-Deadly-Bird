@@ -19,6 +19,7 @@ from identity.serializers import AuthorSerializer
 import requests
 import json
 
+
 @extend_schema(
     parameters=[
         OpenApiParameter("author_id", type=str, location=OpenApiParameter.PATH, required=True, description="Author id to check for following"),
@@ -208,10 +209,8 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
 
         if not compare_domains(SITE_HOST_URL, author.host):
             # send to remote author
-            remote_route = resolve_remote_route(author.host, view="modify_follower", kwargs={
-                "author_id": author_id,
-                "foreign_author_id": foreign_author_id
-            })
+            remote_route = resolve_remote_route(author.host, view="modify_follower", args=[author_id, foreign_author_id])
+            
             auth = get_auth_from_host(author.host)
             response = requests.get(url=remote_route, auth=auth) 
 

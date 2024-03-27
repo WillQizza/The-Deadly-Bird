@@ -19,12 +19,12 @@ def generate_full_api_url(view: str, force_no_slash = False, kwargs: dict[str, s
   
   return dockerize_localhost(api_url)
 
-def resolve_remote_route(host: str, view: str, kwargs = None, force_no_slash = False):
+def resolve_remote_route(host: str, view: str, kwargs = None, args = None, force_no_slash = False):
   """
   Given the hostname of an author, we may have to swap the hostname to escape
   the dockercontainer and construct a url to the host. Only applicable to local dev.
   """    
-  route = reverse(viewname=view, kwargs=kwargs)
+  route = reverse(viewname=view, kwargs=kwargs, args=args)
   url = urljoin(dockerize_localhost(host), route)
 
   if url.endswith("/") and force_no_slash:
