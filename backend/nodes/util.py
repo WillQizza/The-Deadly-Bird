@@ -53,7 +53,8 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
         display_name=data["display_name"],
         host=normalize_author_host(data["host"]),
         profile_url=data["profile_url"],
-        last_github_check=timezone.now()
+        last_github_check=timezone.now(),
+        github=data["github"]
       )
 
     except IntegrityError:

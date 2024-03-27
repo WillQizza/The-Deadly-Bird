@@ -47,11 +47,15 @@ class AuthorSerializer(serializers.ModelSerializer):
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
     internal_data["id"] = internal_data["id"].split("/")[:-1]
+    if "github" in internal_data and internal_data["github"] is not None and internal_data["github"].startswith("https://github.com/"):
+      internal_data["github"] = internal_data["github"][len("https://github.com/"):]
     return internal_data
   
   def to_representation(self, instance):
     data = super().to_representation(instance)
     data["id"] = resolve_remote_route(data["host"], "author", kwargs={ "author_id": data["id"] }, force_no_slash=True)
+    if "github" in data and data["github"] is not None:
+      data["github"] = f"https://github.com/{data['github']}"
     return data
 
   class Meta:
@@ -95,6 +99,7 @@ class InboxAuthorSerializer(serializers.Serializer):
   """
   type = serializers.CharField(read_only=True, default="author")
   id = serializers.SerializerMethodField()
+  github = serializers.CharField(required=False)
   host = serializers.URLField()
   displayName = serializers.CharField(source="display_name")
   url = serializers.URLField(source="profile_url")
@@ -121,7 +126,9 @@ class InboxAuthorSerializer(serializers.Serializer):
   def to_internal_value(self, data):
     return_data = super().to_internal_value(data)
     return_data["profile_picture"] = data["profileImage"]
-    
+
+    if "github" in return_data and return_data["github"] is not None and return_data["github"].startswith("https://github.com/"):
+      return_data["github"] = return_data["github"][len("https://github.com/"):]
     return_data["id"] = data["id"].split("/")[-1]
 
     return return_data

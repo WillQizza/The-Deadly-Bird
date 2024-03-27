@@ -67,7 +67,7 @@ const ProfilePage: React.FC = () => {
                 setBio(author.bio);
 
                 if (author.github) {
-                    setGithubUsername(author.github);
+                    setGithubUsername(author.github.substring("https://github.com/".length));
                 }
                 if (author.profileImage) {
                     setAvatarURL(author.profileImage);
