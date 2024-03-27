@@ -151,10 +151,10 @@ def handle_follow_response_inbox(request: HttpRequest):
       target_author_id=from_author.validated_data["id"],
   ).first()
   if follow_req:
-      inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
-      if inbox_msg:
-          inbox_msg.delete()
-      follow_req.delete()
+    inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
+    if inbox_msg:
+      inbox_msg.delete()
+    follow_req.delete()
 
   return Response("Successfuly created follow", status=201) 
       

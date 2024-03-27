@@ -310,6 +310,12 @@ def request_follower(request: HttpRequest, author_id: str, target_author_id: str
         ).first()
 
         if follow_req:
+            # delete inbox message
+            inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
+            if inbox_msg:
+                inbox_msg.delete()
+
+            # delete follow request
             follow_req.delete()
 
         # send follow response (can be remote or local)
