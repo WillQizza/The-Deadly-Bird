@@ -116,7 +116,7 @@ const Inbox = () => {
                 return renderLikeCard(message, idx);
             case 'comment':
                 return renderCommentCard(message, idx);
-            case 'follow_request':
+            case 'Follow':
                 return renderRequestCard(message, idx);
             case 'post':
                 return renderPostCard(message, idx);

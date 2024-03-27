@@ -25,7 +25,7 @@ class FollowRequestSerializer(serializers.Serializer):
     Serialize a single instance of a FollowRequest object. No support for
     many / paginated serialization for now.
     """
-    type = serializers.CharField(default="follow_request", read_only=True)
+    type = serializers.CharField(default="Follow", read_only=True)
     request_id = serializers.CharField(source="id")
     target_author = serializers.SerializerMethodField()
     author = serializers.SerializerMethodField()
