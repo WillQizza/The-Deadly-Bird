@@ -33,7 +33,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
 
         let newComments: CommentProps[] = [];
         for (const commentData of data.comments) {
-            const likeData = await apiGetCommentLikes(authorId, postId, commentData.id);
+            // const likeData = await apiGetCommentLikes(authorId, postId, commentData.id);
             newComments.push({
                 id: commentData.id,
                 postAuthorId: authorId,
@@ -44,8 +44,8 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
                 comment: commentData.comment,
                 contentType: commentData.contentType,
                 date: commentData.published,
-                likes: likeData.length,
-                liked: !!likeData.find(like => extractAuthorIdFromApi(like.author.id) === getUserId())
+                likes: 0, // likeData.length,
+                liked: false, // !!likeData.find(like => extractAuthorIdFromApi(like.author.id) === getUserId())
             });
         }
         reset ? setComments(newComments) : setComments([...comments, ...newComments]);

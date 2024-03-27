@@ -470,12 +470,19 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
   # Retrieve post, if allowed
   try:
     if can_see_friends:
-      post = Post.objects.get(id=post_id, author=author_id)
+      post = Post.objects.get(
+        Q(id=post_id, author=author_id) |
+        Q(origin_post=post_id, author=author_id)
+      )
     else:
       post = Post.objects.get(
           Q(id=post_id, author=author_id, visibility=Post.Visibility.PUBLIC) |
-          Q(id=post_id, author=author_id, visibility=Post.Visibility.UNLISTED)
+          Q(id=post_id, author=author_id, visibility=Post.Visibility.UNLISTED) |
+          Q(origin_post=post_id, author=author_id)
       )
+
+    if post.origin_post is not None:
+      post = post.origin_post
   except:
     return Response({
       "error": True,
@@ -534,8 +541,10 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
     author = get_object_or_404(Author, id=request.session["id"])
 
     # Check if the post is a remote post or not
-    if not compare_domains(post.author.host, SITE_HOST_URL):
+    if not compare_domains(post.origin, SITE_HOST_URL):
       remote_author = post.author
+      if post.origin_author is not None:
+        remote_author = post.origin_author
       # If it is a remote post, then send a inbox request to the remote node's inbox with the comment object
       # to the owner of the post
 
