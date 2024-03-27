@@ -65,7 +65,7 @@ class PostSerializer(serializers.ModelSerializer):
   
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
+    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[-1]
     internal_data["source"] = remove_trailing_slash(internal_data["source"])
     internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
     return internal_data
@@ -102,7 +102,7 @@ class InboxPostSerializer(serializers.Serializer):
 
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = internal_data["id"].split("/")[-1]
     internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
     internal_data["source"] = remove_trailing_slash(internal_data["source"])
     return internal_data
