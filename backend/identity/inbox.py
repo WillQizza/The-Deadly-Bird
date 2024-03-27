@@ -9,7 +9,7 @@ from following.models import Following, FollowingRequest
 from identity.util import check_authors_exist
 from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
-from deadlybird.util import resolve_remote_route, get_host_from_api_url
+from deadlybird.util import resolve_remote_route, get_host_from_api_url, generate_next_id
 from nodes.util import get_auth_from_host, get_or_create_remote_author_from_api_payload
 from posts.models import Post, Comment
 from likes.models import Like
@@ -464,7 +464,13 @@ def handle_comment_inbox(request: HttpRequest):
       "message": "Invalid comment payload."
     }, status=400)
   
-  post_id, _, comment_id = serializer.data["id"].split("/")[-3:]
+  post_id, arg, comment_id = serializer.data["id"].split("/")[-3:]
+  
+  # Temporary hack in case scenario of /posts/id instead of /posts/id/comments/id 
+  if arg.lower() == "posts":
+    post_id = comment_id
+    comment_id = generate_next_id()
+    
   post = Post.objects.get(id=post_id)
 
   if post.origin_post != None:
