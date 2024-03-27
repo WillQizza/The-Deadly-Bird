@@ -34,7 +34,7 @@ const CommentSection: React.FC<CommentSectionProps> = (props: CommentSectionProp
         console.log("FETHCED COMMENTS", data);
 
         let newComments: CommentProps[] = [];
-        for (const commentData of data.comments) {
+        for (const commentData of (data.comments || data.items)) {
             // const likeData = await apiGetCommentLikes(authorId, postId, commentData.id);
             newComments.push({
                 id: commentData.id,
