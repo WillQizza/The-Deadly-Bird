@@ -373,7 +373,13 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
 
   # Ensure the origin author exists in our systems
   origin_url = serializer.data["origin"]
+
+  if not ("posts" in origin_url):
+    # TODO: HACKY FIX
+    origin_url = remove_trailing_slash(origin_url) + f"/authors/{serializer.data['author']['id'].split('/')[-1]}/posts/{serializer.data['id']}"
+
   origin_author_id = origin_url.split("/")[-3]
+
   try:
     origin_author = Author.objects.get(id=origin_author_id)
   except Author.DoesNotExist:
@@ -401,6 +407,9 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
 
   # Ensure source author also exists in our system
   source_url = serializer.data["source"]
+  if not ("posts" in source_url):
+    # TODO: HACKY FIX
+    source_url = remove_trailing_slash(source_url) + f"/authors/{serializer.data['author']['id'].split('/')[-1]}/posts/{serializer.data['id']}"
   source_author = get_or_create_remote_author_from_api_payload(serializer.data["author"])
 
   # Get origin post
