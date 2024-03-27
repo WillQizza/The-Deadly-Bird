@@ -51,7 +51,7 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
                 </div>
             </div>
             {/** Inbox */}
-            <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end">
+            <Offcanvas show={showSidebar} onHide={() => {setShowSidebar(false);}} placement="end" data-bs-theme="dark">
                 <Offcanvas.Header closeButton>
                     <Offcanvas.Title>Inbox</Offcanvas.Title>
                 </Offcanvas.Header>
