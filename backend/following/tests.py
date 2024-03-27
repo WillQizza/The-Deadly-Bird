@@ -68,9 +68,7 @@ class FollowersTestCase(BaseTestCase):
 
         self.edit_session(id=author1.id)
         
-        response = self.client.get(reverse('modify_follower', kwargs={
-            'author_id': author1.id, 'foreign_author_id': author2.id
-            }))
+        response = self.client.get(reverse('modify_follower', args=[author1.id, author2.id]))
         self.assertEqual(response.status_code, 200)
 
     def test_get_follower_not_exists(self):
@@ -80,9 +78,7 @@ class FollowersTestCase(BaseTestCase):
 
         self.edit_session(id=author1.id)
 
-        response = self.client.get(reverse('modify_follower', kwargs={
-            'author_id': author1.id, 'foreign_author_id': author2.id
-            }))
+        response = self.client.get(reverse('modify_follower', args=[author1.id, author2.id]))
         self.assertEqual(response.status_code, 404)
 
     def test_following_request_get(self):
