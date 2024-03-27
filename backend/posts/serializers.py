@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
-from deadlybird.util import generate_full_api_url, resolve_remote_route, get_host_from_api_url
+from deadlybird.util import generate_full_api_url, remove_trailing_slash
 from .models import Post, Comment
 from identity.serializers import InboxAuthorSerializer
 from .pagination import generate_comments_pagination_schema
@@ -20,7 +20,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
     return internal_data
   
   def to_representation(self, instance):
@@ -65,7 +65,9 @@ class PostSerializer(serializers.ModelSerializer):
   
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
+    internal_data["source"] = remove_trailing_slash(internal_data["source"])
+    internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
     return internal_data
   
   def to_representation(self, instance):
@@ -98,6 +100,8 @@ class InboxPostSerializer(serializers.Serializer):
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
     internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
+    internal_data["source"] = remove_trailing_slash(internal_data["source"])
     return internal_data
 
 class InboxCommentSerializer(serializers.Serializer):
@@ -111,3 +115,8 @@ class InboxCommentSerializer(serializers.Serializer):
   comment = serializers.CharField(source="content")
   contentType = serializers.CharField(source="content_type")
   published = serializers.DateTimeField(source="published_date")
+
+  def to_internal_value(self, data):
+    internal_data = super().to_internal_value(data)
+    internal_data["id"] = remove_trailing_slash(internal_data["id"])
+    return internal_data

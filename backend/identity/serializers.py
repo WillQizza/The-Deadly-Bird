@@ -5,7 +5,7 @@ from likes.models import Like
 from following.models import Following, FollowingRequest
 from .models import Author, InboxMessage
 from nodes.models import Node
-from deadlybird.util import resolve_remote_route
+from deadlybird.util import resolve_remote_route, remove_trailing_slash
 from urllib.parse import urljoin
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -46,7 +46,7 @@ class AuthorSerializer(serializers.ModelSerializer):
     
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
     if "github" in internal_data and internal_data["github"] is not None and internal_data["github"].startswith("https://github.com/"):
       internal_data["github"] = internal_data["github"][len("https://github.com/"):]
     return internal_data
@@ -129,6 +129,6 @@ class InboxAuthorSerializer(serializers.Serializer):
 
     if "github" in return_data and return_data["github"] is not None and return_data["github"].startswith("https://github.com/"):
       return_data["github"] = return_data["github"][len("https://github.com/"):]
-    return_data["id"] = data["id"].split("/")[-1]
+    return_data["id"] = remove_trailing_slash(data["id"]).split("/")[-1]
 
     return return_data

@@ -13,7 +13,7 @@ from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSeriali
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
-from deadlybird.util import resolve_remote_route, compare_domains
+from deadlybird.util import resolve_remote_route, compare_domains, remove_trailing_slash
 from identity.util import check_author_is_remote
 from identity.serializers import AuthorSerializer
 import requests
@@ -126,7 +126,7 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
 
     # The foreign author id are meant to be an url encoded URL of the foreign author. So in the case scenario we receive a url encoded author, parse and extract last id.
     if foreign_author_id.startswith("http://") or foreign_author_id.startswith("https://"):
-        foreign_author_id = foreign_author_id.split("/")[-1]
+        foreign_author_id = remove_trailing_slash(foreign_author_id).split("/")[-1]
 
     # Check that request is not to self
     if author_id == foreign_author_id:

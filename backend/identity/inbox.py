@@ -9,7 +9,7 @@ from following.models import Following, FollowingRequest
 from identity.util import check_authors_exist
 from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
-from deadlybird.util import resolve_remote_route, get_host_from_api_url, generate_next_id
+from deadlybird.util import resolve_remote_route, get_host_from_api_url, generate_next_id, remove_trailing_slash
 from nodes.util import get_auth_from_host, get_or_create_remote_author_from_api_payload
 from posts.models import Post, Comment
 from likes.models import Like
@@ -323,6 +323,8 @@ def handle_like_inbox(request: HttpRequest):
       "error": True,
       "message": "Incomplete like payload"
     }, status=400)
+  
+  like_object = remove_trailing_slash(like_object)
   
   # Ensure the author sending the like exists
   # In the case the author does not exist within our system, it's a remote author who's liking it.

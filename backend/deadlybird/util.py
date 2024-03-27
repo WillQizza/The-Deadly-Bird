@@ -94,3 +94,6 @@ def compare_domains(url1, url2):
       return domain1 == domain2 and port1 == port2
     else: 
       return domain1 == domain2
+
+def remove_trailing_slash(input: str):
+  return input[:-1] if input.endswith("/") else input
