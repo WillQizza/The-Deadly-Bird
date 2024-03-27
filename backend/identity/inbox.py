@@ -95,7 +95,7 @@ def handle_follow_inbox(request: HttpRequest):
               author_id=from_author.id
             )
             print("Successfully sent remote follow request")
-            return Response( "error": False, "message": "Successfuly sent remote follow request" }, status=201)
+            return Response({ "error": False, "message": "Successfuly sent remote follow request" }, status=201)
           else:
             return Response({"error": True, "message": "Remote follow request failed"}, status=res.status_code)
         else:
