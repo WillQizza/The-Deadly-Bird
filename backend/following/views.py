@@ -211,8 +211,12 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             # send to remote author
             remote_route = resolve_remote_route(author.host, view="modify_follower", args=[author_id, foreign_author_id])
             
+            print(f"Checking remote node to see if we are following them. ({remote_route})")
+
             auth = get_auth_from_host(author.host)
-            response = requests.get(url=remote_route, auth=auth) 
+            response = requests.get(url=remote_route, auth=auth)
+
+            print(f"Status code = {response.status_code} and text {response.text}")
 
             if response.status_code == 200:
                 # synrchonize with remote
