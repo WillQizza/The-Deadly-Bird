@@ -122,6 +122,11 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
     GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
     """
+
+    # The foreign author id are meant to be an url encoded URL of the foreign author. So in the case scenario we receive a url encoded author, parse and extract last id.
+    if foreign_author_id.startswith("http://") or foreign_author_id.startswith("https://"):
+        foreign_author_id = foreign_author_id.split("/")[-1]
+
     # Check that request is not to self
     if author_id == foreign_author_id:
         return Response({
@@ -135,7 +140,7 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     if not foreign_author or not author:
         return Response({
             "error": True,
-            "message": "Can not indentify one or both provided authors"
+            "message": "Can not identify one or both provided authors"
         }, status=404)
    
     if request.method == "DELETE":
