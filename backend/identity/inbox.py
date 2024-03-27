@@ -27,17 +27,20 @@ def handle_follow_inbox(request: HttpRequest):
     """  
     to_author = InboxAuthorSerializer(data=request.data.get('object'))
     from_author = InboxAuthorSerializer(data=request.data.get('actor'))
+    print(f"CHECKING IF VALID {to_author.is_valid()} {from_author.is_valid()}")
     if not to_author.is_valid() or not from_author.is_valid():
       return Response({
         "error": True,
         "message": "Author payloads not valid"
       }, status=404)
     
+    print(f"checking target author exists")
     if not check_authors_exist(to_author.validated_data["id"]):
       return Response({
         "error": True, "message": "Target author provided does not exist"
       }, status=404)
 
+    print(f"Checking from author exists")
     if not check_authors_exist(from_author.validated_data["id"]):
       remote_author = get_or_create_remote_author_from_api_payload(from_author) 
       if not remote_author:
@@ -48,6 +51,7 @@ def handle_follow_inbox(request: HttpRequest):
     from_author = Author.objects.get(id=from_author.validated_data["id"])
     to_author = Author.objects.get(id=to_author.validated_data["id"])
 
+    print("Checking for existing following...")
     existing_following = Following.objects.filter(author__id=from_author.id, target_author__id=to_author.id).first()
     if existing_following is not None:
         print("from author:", from_author.id)
@@ -67,6 +71,7 @@ def handle_follow_inbox(request: HttpRequest):
     try:
       receiving_host = to_author.host
       if not compare_domains(SITE_HOST_URL, receiving_host):
+        print("Follow request came from remote domain")
         # Remote Following Request
         url = resolve_remote_route(receiving_host, "inbox", {
            "author_id": to_author.id
@@ -94,6 +99,7 @@ def handle_follow_inbox(request: HttpRequest):
            return Response("Failed to retrieve authentication and form url", status=500) 
 
       else:
+        print("Follow request came from local node")
         # Local Following Request
         follow_req = FollowingRequest.objects.create(
             target_author_id=to_author.id,
@@ -115,8 +121,10 @@ def handle_follow_inbox(request: HttpRequest):
       }, status=500) 
 
 def handle_unfollow_inbox(request: HttpRequest):
+  print("Unfollow Detected")
   to_author = InboxAuthorSerializer(data=request.data.get('object'))
   from_author = InboxAuthorSerializer(data=request.data.get('actor'))
+  print(f"Valid Check: {to_author.is_valid()} {from_author.is_valid()}")
   if not to_author.is_valid() or not from_author.is_valid():
     return Response({
       "error": True,
@@ -126,31 +134,39 @@ def handle_unfollow_inbox(request: HttpRequest):
   # delete follow object
   obj = Following.objects.filter(author_id=from_author.validated_data["id"], target_author_id=to_author.validated_data["id"]).first()
   if obj:
+    print("Deleting follow object...")
     obj.delete()
 
   return Response("Successfuly unfollwed", status=204) 
 
 def handle_follow_response_inbox(request: HttpRequest):
+  print("Got Follow Response")
   to_author = InboxAuthorSerializer(data=request.data.get('object'))
   from_author = InboxAuthorSerializer(data=request.data.get('actor'))
+
+  print(f"Checking FollowResponse authors {to_author.is_valid()} {from_author.is_valid()}")
   if not to_author.is_valid() or not from_author.is_valid():
     return Response({
       "error": True,
       "message": "Author payloads not valid"
     }, status=404)
 
+  print("checking approval")
   if request.data.get('accepted'):
+    print(f"accepted. Creating following... {to_author.validated_data['id']} and {from_author.validated_data['id']}")
     Following.objects.get_or_create(
         author_id=to_author.validated_data["id"],
         target_author_id=from_author.validated_data["id"],
     )
 
+  print("Deleting follow request")
   # delete follow request
   follow_req = FollowingRequest.objects.filter(
       author_id=to_author.validated_data["id"], 
       target_author_id=from_author.validated_data["id"],
   ).first()
   if follow_req:
+    print("Found follow request to delete.")
     inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
     if inbox_msg:
       inbox_msg.delete()
