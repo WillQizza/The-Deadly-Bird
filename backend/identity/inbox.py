@@ -71,7 +71,7 @@ def handle_follow_inbox(request: HttpRequest):
     try:
       receiving_host = to_author.host
       if not compare_domains(SITE_HOST_URL, receiving_host):
-        print("Follow request came from remote domain")
+        print("Follow request being sent to remote domain")
         # Remote Following Request
         url = resolve_remote_route(receiving_host, "inbox", {
            "author_id": to_author.id
@@ -92,6 +92,7 @@ def handle_follow_inbox(request: HttpRequest):
               target_author_id=to_author.id,
               author_id=from_author.id
             )
+            print("Successfully sent remote follow request")
             return Response("Successfuly sent remote follow request", status=201) 
           else:
             return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)
@@ -99,7 +100,7 @@ def handle_follow_inbox(request: HttpRequest):
            return Response("Failed to retrieve authentication and form url", status=500) 
 
       else:
-        print("Follow request came from local node")
+        print("Follow request being sent to local author")
         # Local Following Request
         follow_req = FollowingRequest.objects.create(
             target_author_id=to_author.id,
