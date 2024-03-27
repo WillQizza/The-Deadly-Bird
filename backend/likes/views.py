@@ -111,9 +111,12 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
                 "author_id": author_id,
                 "post_id": post_id
             })
+            print("CHECKING ERROR THING")
 
             auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
             res = requests.get(url=url, auth=auth)
+            print(res.text)
+            print(res.status_code)
             return Response(res.json(), status=res.status_code)
         
         # If we shared a post, instead return the original post

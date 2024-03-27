@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from .models import Node
 from identity.models import Author
 from .util import get_or_create_remote_author_from_api_payload, format_node_api_url
-from deadlybird.util import resolve_docker_host
+from deadlybird.util import resolve_docker_host, compare_domains
 
 @receiver(post_delete, sender=Node)
 def handle_delete_node(sender, instance: Node, **kwargs):
@@ -43,7 +43,7 @@ def import_public_posts_from_new_node(sender, instance: Node, **kwargs):
       break
     
     for member in members:
-      get_or_create_remote_author_from_api_payload(member)
+      author = get_or_create_remote_author_from_api_payload(member)
 
       # Retrieve all of their posts (both friends and public)
-      # TODO: fetch_all_posts()
+      import_public_posts_from_author(author, instance)

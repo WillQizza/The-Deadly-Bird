@@ -163,6 +163,8 @@ def handle_follow_response_inbox(request: HttpRequest):
     )
 
   print("Deleting follow request")
+  print(f"To Author")
+  print(to_author.validated_data)
   # delete follow request
   follow_req = FollowingRequest.objects.filter(
       author_id=to_author.validated_data["id"], 
