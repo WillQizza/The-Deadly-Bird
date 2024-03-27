@@ -144,6 +144,12 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
             "message": "Can not identify one or both provided authors"
         }, status=404)
    
+    if (not compare_domains(author.host, SITE_HOST_URL)) and (not compare_domains(foreign_author.host, SITE_HOST_URL)):
+        return Response({
+            "error": True,
+            "message": "One of the provided author ids MUST originate from this node."
+        }, status=400)
+
     if request.method == "DELETE":
         obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
         obj.delete()
@@ -206,62 +212,15 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
         return Response({"error": False, "message": "Follower added successfully."}, status=201)
     
     elif request.method == 'GET':
+        follow = Following.objects.filter(
+            author_id=foreign_author_id, target_author_id=author_id
+        ).first()
 
-        if not compare_domains(SITE_HOST_URL, author.host):
-            # send to remote author
-            remote_route = resolve_remote_route(author.host, view="modify_follower", args=[author_id, foreign_author_id])
-            
-            print(f"Checking remote node to see if we are following them. ({remote_route})")
-
-            auth = get_auth_from_host(author.host)
-            response = requests.get(url=remote_route, auth=auth)
-
-            print(f"Status code = {response.status_code} and text {response.text}")
-
-            if response.status_code == 200:
-                # synrchonize with remote
-                existing_request = FollowingRequest.objects.filter(
-                    author_id=foreign_author_id, target_author_id=author_id
-                ).first()
-                if existing_request:
-                    Following.objects.get_or_create(
-                        author_id=foreign_author_id,
-                        target_author_id=author_id
-                    )
-                    existing_request.delete()
-                    return Response(response.json())
-                else:
-                    existing_follow = Following.objects.filter(
-                        author_id=foreign_author_id,
-                        target_author_id=author_id
-                    ).first()
-                    if existing_follow is not None:
-                        # already replicated
-                        return Response(response.json())
-                    else:
-                        return Response({"message": "prerequisite follow request object missing."}, status=404)
-            elif response.status_code == 404:
-                existing_follow = Following.objects.filter(
-                    author_id=foreign_author_id, target_author_id=author_id
-                ).first()
-                if existing_follow:
-                    # synchronize with remote
-                    existing_follow.delete()
-                return Response({"error": True, "message": "Not following relationship found"}, status=404)
-            else:
-                return Response({"error": True, 
-                                 "message": f"Remote node failed with status {response.status_code}"
-                                }, status=response.status_code)
+        if follow is not None:
+            serializer = FollowingSerializer(follow)
+            return Response(serializer.data)
         else:
-            follow = Following.objects.filter(
-                author_id=foreign_author_id, target_author_id=author_id
-            ).first()
-
-            if follow is not None:
-                serializer = FollowingSerializer(follow)
-                return Response(serializer.data)
-            else:
-                return Response({"message": "No follow object found."}, status=404)
+            return Response({"message": "No follow object found."}, status=404)
  
 @extend_schema(
     parameters=[
