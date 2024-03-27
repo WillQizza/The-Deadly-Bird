@@ -58,7 +58,7 @@ def get_host_from_api_url(url: str) -> str|None:
   While hacky, this method will work.
   """
   
-  if url.startswith(SITE_HOST_URL):
+  if remove_trailing_slash(url).startswith(remove_trailing_slash(SITE_HOST_URL)):
      return SITE_HOST_URL
   
   if os.environ.get("DOCKER") is not None:
@@ -66,7 +66,7 @@ def get_host_from_api_url(url: str) -> str|None:
   
   from nodes.models import Node
   for node in Node.objects.all():
-    if url.startswith(node.host):
+    if remove_trailing_slash(url).startswith(remove_trailing_slash(node.host)):
       return node.host
   return None
 
