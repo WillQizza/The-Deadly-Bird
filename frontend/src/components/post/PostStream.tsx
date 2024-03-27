@@ -72,7 +72,8 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
                         <Post
                             key={`${postResponse.author.id}/${postResponse.id}`}
                             {...postResponse} 
-                            likes={likes.length}
+                            //@ts-ignore
+                            likes={(likes.items || likes).length}
                             isLiked={isLikedByUs}
                             refreshStream={() => {
                                 currentPage.current = 1;
