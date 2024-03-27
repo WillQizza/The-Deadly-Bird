@@ -25,6 +25,8 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   const [showingAvatarModal, setShowingAvatarModal] = useState(false);
   const [avatarURL, setAvatarURL] = useState("");
 
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
   /** Get's the user's profile information */
   useEffect(() => {
     if (author) {
@@ -45,29 +47,61 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
   async function onSaveClicked(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    // Send request to update profile
-    const formData = new URLSearchParams({
-      email,
-      bio,
-      profileImage,
-      github,
-      displayName: displayName
-    })
-    if (password !== "") {
-      formData.append("password", password);
-    }
-  
-    await apiRequest(`${baseURL}/api/authors/${getUserId()}/`, {
-        method:"PUT",
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData.toString()
-    });
+    if (validateForm()) {
+      // Send request to update profile
+      const formData = new URLSearchParams({
+        email,
+        bio,
+        profileImage,
+        github,
+        displayName: displayName
+      })
+      if (password !== "") {
+        formData.append("password", password);
+      }
+    
+      await apiRequest(`${baseURL}/api/authors/${getUserId()}/`, {
+          method:"PUT",
+          headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: formData.toString()
+      });
 
-    // Return to profile page
-    window.location.href = "/profile";
+      // Return to profile page
+      window.location.href = "/profile";
+    }
   }
+
+  /** Function for validating form input */
+  const validateForm = () => {
+    let isValid = true;
+    const newFormErrors: { [key: string]: string } = {};
+
+    if (!email) {
+      isValid = false;
+      newFormErrors['email'] = 'Email is required';
+    }
+    if (email.length > 255) {
+      isValid = false;
+      newFormErrors['email'] = 'Email is too long (255 characters maximum)';
+    }
+    if (!displayName) {
+      isValid = false;
+      newFormErrors['displayName'] = 'Display name is required';
+    }
+    if (displayName.length > 255) {
+      isValid = false;
+      newFormErrors['displayName'] = 'Display name is too long (255 characters maximum)'
+    }
+    if (!password) {
+      isValid = false;
+      newFormErrors['password'] = 'Password is required';
+    }
+
+    setFormErrors(newFormErrors);
+    return isValid;
+  };
 
   /** Function to handle avatar prompt opened */
   function onAvatarPromptOpen() {
@@ -102,11 +136,13 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
             <SettingsInput
               title="Email"name="email" type="email"
               value={email} valueSetter={setEmail} disabled={!loadedContent}
+              formErrors={formErrors} formErrorKey="email"
             />
             {/** Display name */}
             <SettingsInput
               title="Display Name" name="displayName" type="text"
               value={displayName} valueSetter={setDisplayName} disabled={!loadedContent}
+              formErrors={formErrors} formErrorKey="displayName"
             />
             {/** Home server */}
             <SettingsInput
@@ -119,6 +155,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
             <SettingsInput
               title="Password" name="password" type="password"
               value="" valueSetter={setPassword} placeholder="*********"
+              formErrors={formErrors} formErrorKey="password"
             />
             {/** Bio */}
             <SettingsInput
@@ -147,6 +184,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       size="xl"
       centered
       style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}
+      data-bs-theme="dark"
       >
         <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>
           <Modal.Title>Avatar Upload</Modal.Title>

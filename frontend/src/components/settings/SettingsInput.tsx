@@ -11,6 +11,8 @@ type SettingsInputOptions = {
   valueSetter?: React.Dispatch<React.SetStateAction<string>>;
   disabled?: boolean;
   placeholder?: string;
+  formErrors?: { [key: string]: string },
+  formErrorKey?: string,
 };
 
 const SettingsInput: React.FC<SettingsInputOptions> = options => {
@@ -35,7 +37,18 @@ const SettingsInput: React.FC<SettingsInputOptions> = options => {
         placeholder={options.placeholder}
         value={options.value}
         onChange={onChange}
+        isInvalid={
+          (options.formErrors && options.formErrorKey) ? (
+            !!options.formErrors[options.formErrorKey]
+          ) : (
+            false
+          )}
       />
+      {(options.formErrors && options.formErrorKey) ? (
+        <Form.Control.Feedback type='invalid'>
+          {options.formErrors[options.formErrorKey]}
+        </Form.Control.Feedback>
+      ): null}
     </Form.Group>
   );
 };
