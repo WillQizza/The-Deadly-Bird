@@ -63,12 +63,12 @@ const Comment: React.FC<CommentProps> = (props: CommentProps) => {
                 )}
             </div>
             {/** Like for comment */}
-            <div className={styles.likeContainer}>
+            {/* <div className={styles.likeContainer}>
                 {isLiked
                     ? <HeartFilled className={`${styles.liked}`} />
                     : <Heart className={`${styles.like}`} onClick={handleLike}/>}
                 <span>{likeCount}</span>
-            </div>
+            </div> */}
         </div>
     );
 }
