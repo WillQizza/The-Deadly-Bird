@@ -167,7 +167,7 @@ const Post: React.FC<PostOptions> = props => {
                         onClick={() => {
                             // Copy post link to user clipboard
                             if (navigator.clipboard) {
-                                navigator.clipboard.writeText(`${window.location.origin}/profile/${extractAuthorIdFromApi(props.author.id)}/posts/${props.id}`);
+                                navigator.clipboard.writeText(`${window.location.origin}/profile/${extractAuthorIdFromApi(props.author.id)}/posts/${extractPostIdFromApi(props.id)}`);
                                 setLinkTooltipShow(true);
                             }
                         }}
