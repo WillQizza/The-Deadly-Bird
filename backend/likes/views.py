@@ -115,6 +115,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
             print(url)
 
             auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
+            print(auth)
             res = requests.get(url=url, auth=auth)
             print(res.status_code)
             return Response(res.json(), status=res.status_code)
