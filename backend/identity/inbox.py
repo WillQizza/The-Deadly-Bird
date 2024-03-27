@@ -86,18 +86,20 @@ def handle_follow_inbox(request: HttpRequest):
             data=json.dumps(request.data), 
             auth=auth
           )
-          if res.status_code == 201:
+
+          print(f"request status = {res.status_code} with text {res.text}")
+          if res.ok:
             # create local following request to synrchonize
             follow_req = FollowingRequest.objects.create(
               target_author_id=to_author.id,
               author_id=from_author.id
             )
             print("Successfully sent remote follow request")
-            return Response("Successfuly sent remote follow request", status=201) 
+            return Response( "error": False, "message": "Successfuly sent remote follow request" }, status=201)
           else:
-            return Response({"error": True, "message": "Remote post Failed"}, status=res.status_code)
+            return Response({"error": True, "message": "Remote follow request failed"}, status=res.status_code)
         else:
-           return Response("Failed to retrieve authentication and form url", status=500) 
+           return Response({ "error": True, "message": "Failed to retrieve authentication and form url" }, status=500) 
 
       else:
         print("Follow request being sent to local author")
