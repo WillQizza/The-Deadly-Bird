@@ -9,13 +9,11 @@ import { extractAuthorIdFromApi } from "./utils";
  * @param id author id to retrieve
  */
 export const apiGetFollowers = async (
-    authorID: string,
-    page: number,
-    size: number
+    authorID: string
 ): Promise<FollowersResponse> => {
     
     const response = await apiRequest(
-        `${baseURL}/api/authors/${authorID}/followers?page=${page}&size=${size}`
+        `${baseURL}/api/authors/${authorID}/followers`
 
     );    
     const data: FollowersResponse = await response.json(); 
@@ -30,8 +28,6 @@ export const apiGetFollowers = async (
  */
 export const apiGetFollowing = async (
     authorID: string,
-    page: number,
-    size: number,
     includeAuthorIDs?: string[],
     excludeAuthorIDs?: string[]
 ): Promise<FollowersResponse> => {
@@ -39,13 +35,10 @@ export const apiGetFollowing = async (
     const url = new URL(`${baseURL}/api/authors/${authorID}/followers`);
     const params = new URLSearchParams(url.search);
 
-    params.set('page', page.toString());
-    params.set('size', size.toString());
-
-    if (includeAuthorIDs?.length) {
+    if (includeAuthorIDs && includeAuthorIDs.length) {
         params.set('include_author_ids', includeAuthorIDs.join(','));
     }
-    if (excludeAuthorIDs?.length) {
+    if (excludeAuthorIDs && excludeAuthorIDs.length) {
         params.set('exclude_author_ids', excludeAuthorIDs.join(','));
     }
     url.search = params.toString();
@@ -70,7 +63,7 @@ export const apiInboxFollowRequest = async (
         const fromAuthor = (await apiGetAuthor(fromAuthorID))!;
         const toAuthor = (await apiGetAuthor(toAuthorID))!;
         
-        const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(toAuthor.id)}/inbox/`, {
+        const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(toAuthor.id)}/inbox`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -95,6 +88,20 @@ export const apiGetFollowRequest = async(
 )
 : Promise<any> => { 
     const init: RequestInit = {method: "GET",}
+    const response = await apiRequest(
+        `${baseURL}/api/authors/request-follower/${extractAuthorIdFromApi(authorId)}/${extractAuthorIdFromApi(targetAuthorId)}`,
+        init
+    );
+    const data = await response.json();
+    return data;
+}
+
+export const apiDeleteFollowRequest = async (
+    authorId: string, 
+    targetAuthorId: string
+)
+: Promise<any> => {
+    const init: RequestInit = {method: "DELETE",}
     const response = await apiRequest(
         `${baseURL}/api/authors/request-follower/${extractAuthorIdFromApi(authorId)}/${extractAuthorIdFromApi(targetAuthorId)}`,
         init

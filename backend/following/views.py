@@ -13,11 +13,12 @@ from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSeriali
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
-from deadlybird.util import resolve_remote_route, compare_domains
+from deadlybird.util import resolve_remote_route, compare_domains, remove_trailing_slash
 from identity.util import check_author_is_remote
 from identity.serializers import AuthorSerializer
 import requests
 import json
+
 
 @extend_schema(
     parameters=[
@@ -44,30 +45,19 @@ def following(request, author_id: str):
 
     # Search a subset of author ids if target_author_ids parameter is present
     if include_author_ids: 
-        queryset = Following.objects.filter(
+        following = Following.objects.filter(
             target_author_id__in=include_author_ids, author_id=author_id
         ).select_related('author')\
          .order_by('id')
     # Otherwise search author ids
     else:
-        queryset = Following.objects.filter(target_author_id=author_id)\
+        following = Following.objects.filter(target_author_id=author_id)\
             .select_related('author')\
             .order_by('id')
 
-    # Paginate results
-    paginator = Pagination("following")
-    page = paginator.paginate_queryset(queryset, request)
-    
     # Return serialized results
-    #TODO: refactor this
-    if page is not None:
-        authors = [following.author for following in page]
-        serializer = FollowingSerializer(authors)
-        return paginator.get_paginated_response(serializer.data)
-    else:
-        authors = [following.author for following in queryset]
-        serializer = FollowingSerializer(authors)
-        return Response(serializer.data)
+    serializer = FollowingSerializer([f.author for f in following])
+    return Response(serializer.data)
 
 @extend_schema(
     operation_id="api_authors_followers_retrieve_all",
@@ -85,23 +75,12 @@ def followers(request, author_id: str):
     GET [local, remote]: get a list of authors who are AUTHOR_ID's followers       
     """
     # Get authors who are following author id
-    queryset = Following.objects.filter(target_author_id=author_id)\
+    followers = [f.author for f in Following.objects.filter(target_author_id=author_id)\
         .select_related('author')\
-        .order_by('id')
-
-    # Paginate results
-    paginator = Pagination("followers")
-    page = paginator.paginate_queryset(queryset, request)
+        .order_by('id')]
     
     # Return serialized results
-    if page is not None:
-        authors = [following.author for following in page]
-        serializer = FollowingSerializer(authors)
-        return paginator.get_paginated_response(serializer.data)
-    else:
-        authors = [following.author for following in queryset]
-        serializer = FollowingSerializer(authors)
-        return Response(serializer.data)  
+    return Response(FollowingSerializer(followers).data)
 
 @extend_schema(
     parameters=[
@@ -144,6 +123,11 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     PUT [local]: Add FOREIGN_AUTHOR_ID as a follower of AUTHOR_ID (must be authenticated)
     GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
     """
+
+    # The foreign author id are meant to be an url encoded URL of the foreign author. So in the case scenario we receive a url encoded author, parse and extract last id.
+    if foreign_author_id.startswith("http://") or foreign_author_id.startswith("https://"):
+        foreign_author_id = remove_trailing_slash(foreign_author_id).split("/")[-1]
+
     # Check that request is not to self
     if author_id == foreign_author_id:
         return Response({
@@ -157,9 +141,15 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
     if not foreign_author or not author:
         return Response({
             "error": True,
-            "message": "Can not indentify one or both provided authors"
+            "message": "Can not identify one or both provided authors"
         }, status=404)
    
+    if (not compare_domains(author.host, SITE_HOST_URL)) and (not compare_domains(foreign_author.host, SITE_HOST_URL)):
+        return Response({
+            "error": True,
+            "message": "One of the provided author ids MUST originate from this node."
+        }, status=400)
+
     if request.method == "DELETE":
         obj = get_object_or_404(Following, author_id=foreign_author_id, target_author_id=author_id)
         obj.delete()
@@ -199,63 +189,38 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
                 inbox_msg.delete()
             follow_req.delete()
 
+        # send follow response (can be remote or local)
+        if not compare_domains(foreign_author.host, SITE_HOST_URL):
+            route = resolve_remote_route(foreign_author.host, view="inbox", kwargs={
+                "author_id": foreign_author_id,
+            })
+            auth = get_auth_from_host(foreign_author.host)
+            post_json = {
+                "type": "FollowResponse",
+                "summary": f"{author.display_name} accepted your follow request",
+                "actor": AuthorSerializer(author).data,
+                "object": AuthorSerializer(foreign_author).data,
+                "accepted": True,
+            }
+            requests.post(
+                url=route,
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(post_json),
+                auth=auth,
+            )
+
         return Response({"error": False, "message": "Follower added successfully."}, status=201)
     
     elif request.method == 'GET':
+        follow = Following.objects.filter(
+            author_id=foreign_author_id, target_author_id=author_id
+        ).first()
 
-        if not compare_domains(SITE_HOST_URL, author.host):
-            # send to remote author
-            remote_route = resolve_remote_route(author.host, view="modify_follower", kwargs={
-                "author_id": author_id,
-                "foreign_author_id": foreign_author_id
-            })
-            auth = get_auth_from_host(author.host)
-            response = requests.get(url=remote_route, auth=auth) 
-
-            if response.status_code == 200:
-                # synrchonize with remote
-                existing_request = FollowingRequest.objects.filter(
-                    author_id=foreign_author_id, target_author_id=author_id
-                ).first()
-                if existing_request:
-                    Following.objects.get_or_create(
-                        author_id=foreign_author_id,
-                        target_author_id=author_id
-                    )
-                    existing_request.delete()
-                    return Response(response.json())
-                else:
-                    existing_follow = Following.objects.filter(
-                        author_id=foreign_author_id,
-                        target_author_id=author_id
-                    ).first()
-                    if existing_follow is not None:
-                        # already replicated
-                        return Response(response.json())
-                    else:
-                        return Response({"message": "prerequisite follow request object missing."}, status=404)
-            elif response.status_code == 404:
-                existing_follow = Following.objects.filter(
-                    author_id=foreign_author_id, target_author_id=author_id
-                ).first()
-                if existing_follow:
-                    # synchronize with remote
-                    existing_follow.delete()
-                return Response({"error": True, "message": "Not following relationship found"}, status=404)
-            else:
-                return Response({"error": True, 
-                                 "message": f"Remote node failed with status {response.status_code}"
-                                }, status=response.status_code)
+        if follow is not None:
+            serializer = FollowingSerializer(follow)
+            return Response(serializer.data)
         else:
-            follow = Following.objects.filter(
-                author_id=foreign_author_id, target_author_id=author_id
-            ).first()
-
-            if follow is not None:
-                serializer = FollowingSerializer(follow)
-                return Response(serializer.data)
-            else:
-                return Response({"message": "No follow object found."}, status=404)
+            return Response({"message": "No follow object found."}, status=404)
  
 @extend_schema(
     parameters=[
@@ -282,19 +247,65 @@ def modify_follower(request, author_id: str, foreign_author_id: str):
         200: FollowRequestSerializer
     }
 )
-@api_view(["GET"])
+@api_view(["GET", "DELETE"])
 @permission_classes([RemoteOrSessionAuthenticated])
 def request_follower(request: HttpRequest, author_id: str, target_author_id: str):
     """
     Request a follower on local or foreign host.
     URL: None specified
     """
-    follow_req = FollowingRequest.objects.filter(
-        author_id=author_id, target_author_id=target_author_id
-    ).first()
+    if request.method == "GET":
+        follow_req = FollowingRequest.objects.filter(
+            author_id=author_id, target_author_id=target_author_id
+        ).first()
 
-    if follow_req is not None:
-        serializer = FollowRequestSerializer(follow_req)
-        return Response(serializer.data)
-    else:
-        return Response({"message": "Follow Request not found", "status": 404}, status=404) 
+        if follow_req is not None:
+            serializer = FollowRequestSerializer(follow_req)
+            return Response(serializer.data)
+        else:
+            return Response({"message": "Follow Request not found", "status": 404}, status=404) 
+    elif request.method == "DELETE":
+        author = Author.objects.filter(id=author_id).first()
+        target_author = Author.objects.filter(id=target_author_id).first()
+        if not target_author or not author:
+            return Response({
+                "error": True,
+                "message": "Can not indentify one or both provided authors"
+            }, status=404)
+
+        follow_req = FollowingRequest.objects.filter(
+            author_id=author_id, target_author_id=target_author_id
+        ).first()
+
+        if follow_req:
+            # delete inbox message
+            inbox_msg = InboxMessage.objects.filter(content_id=follow_req.id).first()
+            if inbox_msg:
+                inbox_msg.delete()
+
+            # delete follow request
+            follow_req.delete()
+
+        # send follow response (can be remote or local)
+        if check_author_is_remote(author_id):
+            route = resolve_remote_route(author.host, view="inbox", kwargs={
+                "author_id": author_id,
+            })
+            auth = get_auth_from_host(author.host)
+            post_json = {
+                "type": "FollowResponse",
+                "summary": f"{target_author.display_name} rejected your follow request",
+                "actor": AuthorSerializer(target_author).data,
+                "object": AuthorSerializer(author).data,
+                "accepted": False,
+            }
+            requests.post(
+                url=route,
+                headers={'Content-Type': 'application/json'},
+                data=json.dumps(post_json),
+                auth=auth,
+            )
+
+        return Response({
+            "message": "Successfully deleted follow request"
+        }, status=204)

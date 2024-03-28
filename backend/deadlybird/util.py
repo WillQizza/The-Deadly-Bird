@@ -2,11 +2,11 @@ from django.urls import reverse
 from django.conf import settings
 from deadlybird.settings import SITE_HOST_URL
 from urllib.parse import urljoin, urlparse
-import secrets
 import os
+import uuid
 
 def generate_next_id():
-  return secrets.token_urlsafe(10)
+  return str(uuid.uuid4())
 
 def generate_full_api_url(view: str, force_no_slash = False, kwargs: dict[str, str] = None):
   if settings.SITE_HOST_URL.endswith("/"):
@@ -19,12 +19,12 @@ def generate_full_api_url(view: str, force_no_slash = False, kwargs: dict[str, s
   
   return dockerize_localhost(api_url)
 
-def resolve_remote_route(host: str, view: str, kwargs = None, force_no_slash = False):
+def resolve_remote_route(host: str, view: str, kwargs = None, args = None, force_no_slash = False):
   """
   Given the hostname of an author, we may have to swap the hostname to escape
   the dockercontainer and construct a url to the host. Only applicable to local dev.
   """    
-  route = reverse(viewname=view, kwargs=kwargs)
+  route = reverse(viewname=view, kwargs=kwargs, args=args)
   url = urljoin(dockerize_localhost(host), route)
 
   if url.endswith("/") and force_no_slash:
@@ -57,16 +57,14 @@ def get_host_from_api_url(url: str) -> str|None:
   Retrieve the base host associated with the url.
   While hacky, this method will work.
   """
-  
-  if url.startswith(SITE_HOST_URL):
+  url = remove_trailing_slash(dockerize_localhost(url))
+
+  if url.startswith(dockerize_localhost(remove_trailing_slash(SITE_HOST_URL))):
      return SITE_HOST_URL
-  
-  if os.environ.get("DOCKER") is not None:
-    url = url.replace("localhost", "host.docker.internal")
   
   from nodes.models import Node
   for node in Node.objects.all():
-    if url.startswith(node.host):
+    if url.startswith(remove_trailing_slash(node.host)):
       return node.host
   return None
 
@@ -94,3 +92,6 @@ def compare_domains(url1, url2):
       return domain1 == domain2 and port1 == port2
     else: 
       return domain1 == domain2
+
+def remove_trailing_slash(input: str):
+  return input[:-1] if input.endswith("/") else input

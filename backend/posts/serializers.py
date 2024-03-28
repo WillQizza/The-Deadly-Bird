@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
-from deadlybird.util import generate_full_api_url, resolve_remote_route, get_host_from_api_url
+from deadlybird.util import generate_full_api_url, remove_trailing_slash, resolve_remote_route
 from .models import Post, Comment
 from identity.serializers import InboxAuthorSerializer
 from .pagination import generate_comments_pagination_schema
@@ -20,7 +20,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
     return internal_data
   
   def to_representation(self, instance):
@@ -65,13 +65,18 @@ class PostSerializer(serializers.ModelSerializer):
   
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[-1]
+    internal_data["source"] = remove_trailing_slash(internal_data["source"])
+    internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
     return internal_data
   
-  def to_representation(self, instance):
+  def to_representation(self, instance: Post):
     author_id = instance.author.id
     data = super().to_representation(instance)
-    data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
+    if instance.origin_post is not None:
+      data["id"] = resolve_remote_route(instance.author.host, "post", kwargs={ "author_id": instance.origin_post.author.id, "post_id": instance.origin_post.id }, force_no_slash=True)
+    else:
+      data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
     return data
 
   class Meta:
@@ -97,5 +102,24 @@ class InboxPostSerializer(serializers.Serializer):
 
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
-    internal_data["id"] = internal_data["id"].split("/")[:-1]
+    internal_data["id"] = internal_data["id"].split("/")[-1]
+    internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
+    internal_data["source"] = remove_trailing_slash(internal_data["source"])
+    return internal_data
+
+class InboxCommentSerializer(serializers.Serializer):
+  """
+  Validate a payload is a inbox comment payload with the
+  unique constraints of the models getting in the way.
+  """
+  type = serializers.CharField(read_only=True, default="comment")
+  id = serializers.CharField()
+  author = InboxAuthorSerializer()
+  comment = serializers.CharField(source="content")
+  contentType = serializers.CharField(source="content_type")
+  published = serializers.DateTimeField(source="published_date")
+
+  def to_internal_value(self, data):
+    internal_data = super().to_internal_value(data)
+    internal_data["id"] = remove_trailing_slash(internal_data["id"])
     return internal_data

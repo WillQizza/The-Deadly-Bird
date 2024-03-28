@@ -186,10 +186,10 @@ class InboxMessageTests(BaseTestCase):
     """
     self.edit_session(id=self.authors[0].id)
 
-    url = reverse('inbox', kwargs={
-      "author_id": self.authors[0].id 
+    url = generate_full_api_url('inbox', kwargs={
+      "author_id": self.authors[0].id
     })
-    
+
     target_author = self.create_author()
     author = self.create_author()
 

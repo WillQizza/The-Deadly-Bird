@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
 from django.http import HttpRequest
 from .models import Like
@@ -14,6 +15,7 @@ from identity.models import Author
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .serializers import LikeSerializer, APIDocsLikeManySerializer
 import requests
+
 
 @extend_schema(
         responses={
@@ -93,7 +95,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
     if request.method == "GET":        
         # Get the post specified by the url 
         author_post = Post.objects\
-            .filter(id=post_id, author_id=author_id)\
+            .filter(Q(origin_post=post_id, author=author_id) | Q(id=post_id, author=author_id))\
             .first()
 
         if author_post is None:
@@ -109,9 +111,13 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
                 "author_id": author_id,
                 "post_id": post_id
             })
+            print("CHECKING ERROR THING")
+            print(url)
 
             auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
+            print(auth)
             res = requests.get(url=url, auth=auth)
+            print(res.status_code)
             return Response(res.json(), status=res.status_code)
         
         # If we shared a post, instead return the original post

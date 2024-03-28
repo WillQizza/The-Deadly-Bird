@@ -367,6 +367,8 @@ def inbox(request: HttpRequest, author_id: str):
   if request.method == "POST":
     # Check request data
     content_type = request.data.get("type")
+    print("INBOX REQUEST RECEIVED WITH TYPE " + content_type)
+    print(request.data)
 
     if content_type == None:
       return Response({
@@ -389,6 +391,10 @@ def inbox(request: HttpRequest, author_id: str):
     elif content_type == "Unfollow":
       from .inbox import handle_unfollow_inbox
       return handle_unfollow_inbox(request)
+
+    elif content_type == "FollowResponse":
+      from .inbox import handle_follow_response_inbox
+      return handle_follow_response_inbox(request)
 
     elif content_type == "comment":
       from .inbox import handle_comment_inbox

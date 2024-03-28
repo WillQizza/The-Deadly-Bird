@@ -5,6 +5,7 @@ import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { Image } from "react-bootstrap";
 import { apiCreateCommentLike } from "../../api/likes";
+import { extractAuthorIdFromApi } from "../../api/utils";
 
 export interface CommentProps {
     id: string,
@@ -54,16 +55,15 @@ const Comment: React.FC<CommentProps> = (props: CommentProps) => {
             </div>
             {/** Comment info of comment  */}
             <div className={styles.commentInfoContainer}>
-                <a href={`/profile/${authorId}`} className={styles.author}>@{authorName}</a>
+                <a href={`/profile/${extractAuthorIdFromApi(authorId)}`} className={styles.author}>@{authorName}</a>
                 <p className={date}>{date}</p>
-                {contentType == "text/markdown"? (
+                {contentType === "text/markdown" ? (
                     <Markdown className={styles.comment}>{comment}</Markdown>
                 ) : (
                     <p className={styles.comment}>{comment}</p>
                 )}
             </div>
             {/** Like for comment */}
-            {/* TODO: part 3 */}
             {/* <div className={styles.likeContainer}>
                 {isLiked
                     ? <HeartFilled className={`${styles.liked}`} />

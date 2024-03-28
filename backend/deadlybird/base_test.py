@@ -12,6 +12,7 @@ from following.models import Following, FollowingRequest
 from django.contrib.auth.models import User
 from likes.models import Like
 from deadlybird.util import generate_full_api_url, generate_next_id
+from deadlybird.settings import SITE_HOST_URL
 
 class BaseTestCase(TestCase):
 
@@ -40,7 +41,7 @@ class BaseTestCase(TestCase):
             author = Author.objects.create(id=id,
                                            user=user, 
                                            display_name=f'user{i}', 
-                                           host=generate_full_api_url(view="api", force_no_slash=True),
+                                           host=SITE_HOST_URL,
                                            profile_url=generate_full_api_url("author", kwargs={ "author_id": id }))
             authors.append(author)
         return authors
@@ -129,7 +130,7 @@ class BaseTestCase(TestCase):
         author = Author.objects.create(id=id,
                                        user=user,
                                        display_name=default_username, 
-                                       host=generate_full_api_url(view="api", force_no_slash=True),
+                                       host=SITE_HOST_URL,
                                        profile_url=generate_full_api_url(view="author", kwargs={ "author_id": id })) 
         self.authors.append(author)
 

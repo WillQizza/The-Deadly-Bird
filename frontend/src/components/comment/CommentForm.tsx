@@ -30,7 +30,7 @@ const CommentForm: React.FC<CommentFormProps> = (props: CommentFormProps) => {
             const data = await apiPostComment(authorId, postId, { comment, contentType: type });
 
             // Handle response
-            if (data["error"]) {
+            if (!data["error"]) {
                 setComment("");
                 refreshCommentStream();
             } else {
