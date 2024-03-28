@@ -32,6 +32,8 @@
     flex-direction: column;
     padding: 0.5rem;
     overflow-y: auto;
+    margin: auto;
+    animation: fadeIn 1s ease-in-out;
 }
 
 .imageColumn img {
@@ -41,21 +43,42 @@
 
 .loginTitle {
     font-family: 'Roboto Flex', sans-serif;
-    font-size: 90px;
+    font-size: 80px;
+    font-weight: 100;
     text-align: center;
     color: var(--yellow);
     margin-bottom: 20px;
+}
+
+.imageColumn img {
+    animation: slideDown 1s ease-out forwards;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @media only screen and (max-width: 768px) {
     .imageColumn, .imageColorColumn {
         display: none;
     }
-
     .loginColumn {
         width: 100%;
     }
-
     .loginTitle {
         font-size: 70px;
     }

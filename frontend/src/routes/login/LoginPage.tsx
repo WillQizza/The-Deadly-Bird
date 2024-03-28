@@ -34,7 +34,7 @@ const LoginPage: React.FC = () => {
                 {/** Login/registration form column */}
                 <div className={styles.loginColumn}>
                     <div className={styles.loginTitle}>
-                        The Deadly Bird
+                       The Deadly Bird
                     </div>
                     { showLogin 
                         ? <LoginForm/> 
