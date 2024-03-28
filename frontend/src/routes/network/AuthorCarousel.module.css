@@ -33,7 +33,7 @@
 }
 
 .cardDisplayname {
-    color: teal;
+    color: var(--teal);
     font-size: 20px;
     white-space: nowrap;
     overflow: hidden;
