@@ -80,7 +80,7 @@
 #github {
   display: flex;
   height: 40px;
-  justify-content: end;
+  justify-content: flex-end;
   padding: 7px;
 }
 
