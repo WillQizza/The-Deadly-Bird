@@ -181,9 +181,9 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       <Modal
       show={showingAvatarModal}
       onHide={() => setShowingAvatarModal(false)}
-      size="xl"
+      size={"lg"}
       centered
-      style={{ width: "calc(100% - 14%)", marginLeft: "14%" }}
+      id={styles.uploadModal}
       data-bs-theme="dark"
       >
         <Modal.Header closeButton onHide={() => setShowingAvatarModal(false)}>

@@ -32,7 +32,6 @@
     flex-direction: column;
     padding: 0.5rem;
     overflow-y: auto;
-    margin: auto;
     animation: fadeIn 1s ease-in-out;
 }
 

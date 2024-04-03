@@ -38,6 +38,11 @@
   border-color: var(--darker-teal) !important;
 }
 
+#uploadModal {
+  color: white;
+  text-align: center;
+}
+
 #uploadModalBody {
   display: flex;
   flex-direction: column;
