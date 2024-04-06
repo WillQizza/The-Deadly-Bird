@@ -26,6 +26,7 @@ const ProfilePage: React.FC = () => {
     const [followingCount, setFollowingCount] = useState(-1);
     const [followerCount, setFollowerCount] = useState(-1);
     const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
+    const [subdomain, setSubdomain] = useState("");
 
     const loggedInAuthorId : string = getUserId()!; 
     const params = useParams();
@@ -73,6 +74,14 @@ const ProfilePage: React.FC = () => {
                 if (author.profileImage) {
                     setAvatarURL(author.profileImage);
                 }
+
+                let subdomain = author.host.split(".")[0];
+                if (subdomain.indexOf("//") === -1) {
+                    subdomain = "Invalid Origin URL";
+                } else {
+                    subdomain = subdomain.substring(subdomain.indexOf("//") + 2);
+                }
+                setSubdomain(subdomain);
             });
         
         if (userId) { 
@@ -149,7 +158,10 @@ const ProfilePage: React.FC = () => {
                 </div>
                 {/** About the user */}
                 <div id={styles.identityContainer}>
-                    <h1 id={styles.username}>{username}</h1>
+                    <h1 id={styles.username}>
+                        {username}
+                        <span id={styles.subdomain}> {subdomain}</span>
+                    </h1>
                     <h5 id={styles.bio}>{bio}</h5>
                 </div>
                 {/** Post statistics */}

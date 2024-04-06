@@ -128,6 +128,13 @@ const Post: React.FC<PostOptions> = props => {
         }
     }
 
+    let subdomain = props.origin.split(".")[0];
+    if (subdomain.indexOf("//") === -1) {
+        subdomain = "Invalid Origin URL";
+    } else {
+        subdomain = subdomain.substring(subdomain.indexOf("//") + 2);
+    }
+
     /** Post */
     return (
         <div className={styles.postContainer}>
@@ -148,6 +155,8 @@ const Post: React.FC<PostOptions> = props => {
                         <div className={styles.postSubInfo}>
                             {/* Date */}
                             <div className={styles.postSubInfoItem}>{postDate}</div>
+                            {/* Debug Domain */}
+                            <div className={styles.postSubInfoItem}>{subdomain}</div>
                         </div>
                     </div>
                 </Col>

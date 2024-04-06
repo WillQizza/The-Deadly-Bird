@@ -54,6 +54,11 @@
   overflow-wrap: break-word;
 }
 
+#subdomain {
+  opacity: 0.5;
+  font-size: 0.5em;
+}
+
 #stats {
   display: flex;
   gap: 20px;
