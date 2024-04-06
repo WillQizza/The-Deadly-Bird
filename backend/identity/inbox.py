@@ -42,7 +42,7 @@ def handle_follow_inbox(request: HttpRequest):
 
     print(f"Checking from author exists")
     if not check_authors_exist(from_author.validated_data["id"]):
-      remote_author = get_or_create_remote_author_from_api_payload(from_author) 
+      remote_author = get_or_create_remote_author_from_api_payload(from_author.data) 
       if not remote_author:
         return Response({
           "error": True, "message": "Failed to create remote author"
