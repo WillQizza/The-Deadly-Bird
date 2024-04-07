@@ -16,6 +16,7 @@ import PostCreationPage from './routes/post/PostCreationPage';
 import { getUserId } from './utils/auth';
 import SettingsPage from './routes/settings/SettingsPage';
 import PostEditPage from './routes/post/PostEditPage';
+import { SubscriptionPage } from './routes/blue/SubscriptionPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -33,6 +34,7 @@ root.render(
       <Route path="/profile/:author/posts/:post" Component={PostPage} />
       <Route path="/post" Component={PostCreationPage} />
       <Route path="/post/:id" Component={PostEditPage} />
+      <Route path="/subscription" Component={SubscriptionPage} />
     </Routes>
   </BrowserRouter>
 );

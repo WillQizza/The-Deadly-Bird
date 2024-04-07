@@ -12,7 +12,7 @@ type NavItem = {
     icon: React.ReactNode;
 };
 
-export type SelectedNavigation = "Home" | "Profile" | "Network" | "Settings";
+export type SelectedNavigation = "Home" | "Profile" | "Network" | "Settings" | "Premium";
 
 
 const Navigation = ({ items, selected }: { items: NavItem[], selected?: SelectedNavigation }) => {

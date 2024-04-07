@@ -9,6 +9,7 @@ import { ReactComponent as House } from 'bootstrap-icons/icons/house.svg';
 import { ReactComponent as Person } from 'bootstrap-icons/icons/person.svg';
 import { ReactComponent as Globe } from 'bootstrap-icons/icons/globe.svg';
 import { ReactComponent as Gear } from 'bootstrap-icons/icons/gear.svg';
+import { ReactComponent as Star } from 'bootstrap-icons/icons/star-fill.svg';
 import { setUserId } from "../../utils/auth";
 import { apiRequest } from "../../utils/request";
 import { baseURL } from "../../constants";
@@ -35,7 +36,8 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
                     { name: "Home", icon: <House />, path: "/home" },
                     { name: "Profile", icon: <Person />, path: "/profile" },
                     { name: "Network", icon: <Globe />, path: "/network" },
-                    { name: "Settings", icon: <Gear />, path: "/profile/settings" }
+                    { name: "Premium", icon: <Star />, path: "/subscription" },
+                    { name: "Settings", icon: <Gear />, path: "/profile/settings" },
                 ]} selected={selected} />
                 {/** Content */}
                 <div id={styles.contentAndUpperNav}>

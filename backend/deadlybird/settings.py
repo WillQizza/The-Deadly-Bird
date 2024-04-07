@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'posts',
     'nodes',
     'drf_spectacular',
+    'blue'
 ]
 
 MIDDLEWARE = [
