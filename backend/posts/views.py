@@ -80,6 +80,9 @@ def posts(request: HttpRequest, author_id: str):
                 .filter(author=author_id, visibility=Post.Visibility.PUBLIC) \
                 .order_by("-published_date")
     
+    if request.is_node_authenticated:
+      posts = posts.filter(origin__startswith=SITE_HOST_URL)
+
     # Paginate and serialize results
     posts_on_page = paginator.paginate_queryset(posts, request)
     serialized_posts = PostSerializer(posts_on_page, many=True)
