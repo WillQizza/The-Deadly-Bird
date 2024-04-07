@@ -22,7 +22,7 @@ def checkout(request: HttpRequest):
   subscription_price_id = MONTHLY_SUBSCRIPTION_ITEM_ID if request.GET["type"] == "monthly" else YEARLY_SUBSCRIPTION_ITEM_ID
 
   session = stripe.checkout.Session.create(
-    success_url=f"{remove_trailing_slash(SITE_HOST_URL)}/subscription/success?session={{CHECKOUT_SESSION_ID}}",
+    success_url=f"{remove_trailing_slash(SITE_HOST_URL)}/subscription?success=1",
     cancel_url=f"{remove_trailing_slash(SITE_HOST_URL)}/subscription",
     mode="subscription",
     line_items=[
@@ -42,11 +42,6 @@ def checkout(request: HttpRequest):
   return Response({
     "url": session.url
   })
-
-@api_view(["DELETE"])
-@permission_classes([ SessionAuthenticated ])
-def subscription_cancel(request: HttpRequest):
-  pass
 
 @api_view(["GET"])
 @permission_classes([ SessionAuthenticated ])

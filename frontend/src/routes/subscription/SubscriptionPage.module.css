@@ -1,10 +1,19 @@
 @keyframes fade-in-bottom {
   from {
-      opacity: 0;
-      transform: translateY(100%);
+    opacity: 0;
+    transform: translateY(100%);
   }
   to { 
-      opacity: 1;
+    opacity: 1;
+  }
+}
+
+@keyframes partial-fade-in {
+  from {
+    opacity: 0;
+  }
+  to { 
+    opacity: 0.75;
   }
 }
 
@@ -169,4 +178,83 @@
   text-align: right;
   margin-right: 20px;
   color: #fff;
+  cursor: default;
+}
+
+#items > .item > .itemContent > h4 {
+  text-align: right;
+  margin-right: 10px;
+  color: #fff;
+  cursor: default;
+}
+
+#successOverlay {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  background-color: black;
+  animation: partial-fade-in 1s;
+  animation-fill-mode: forwards;
+
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#successPrompt {
+  position: fixed;
+  width: 35%;
+  min-width: 300px;
+  min-height: 50vh;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff;
+  border-radius: 20px;
+  z-index: 101;
+  padding: 20px;
+
+  opacity: 0;
+  animation: fade-in 1s;
+  animation-delay: 1s;
+  animation-fill-mode: forwards;
+}
+
+#successPrompt h1 {
+  text-align: center;
+}
+
+#successPromptImageContainer {
+  width: 128px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 40px;
+}
+
+#successPromptSubtitle {
+  text-align: center;
+  margin-top: 20px;
+}
+
+#successPromptCompleteButton {
+  margin-top: 40px;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  border: 1px solid rgb(81, 81, 81);
+  box-shadow: rgba(78, 78, 78, 0.35) 0px 5px 15px;
+  border-radius: 10px;
+  background-color: var(--dark-teal);
+  color: #fff;
+  height: 48px;
+  font-weight: bolder;
+  padding: 10px;
+}
+
+#successPromptCompleteButton:hover {
+  filter: brightness(90%);
+  cursor: pointer;
 }
