@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from deadlybird.settings import SITE_HOST_URL, WEBHOOK_SUBSCRIPTION_SECRET, MONTHLY_SUBSCRIPTION_ITEM_ID, YEARLY_SUBSCRIPTION_ITEM_ID
 from deadlybird.util import remove_trailing_slash
 from deadlybird.permissions import SessionAuthenticated
+from identity.models import Author
+from .models import Subscription, PaymentSession
 
 # Create your views here.
 
@@ -29,6 +31,12 @@ def checkout(request: HttpRequest):
         "quantity": 1
       }
     ]
+  )
+
+  author = Author.objects.get(id=request.session["id"])
+  PaymentSession.objects.create(
+    id=session.id,
+    author=author
   )
 
   return Response({
@@ -66,15 +74,39 @@ def subscription_event(request: HttpRequest):
     customer_id = purchase.customer.id
 
     # Process subscription
+    try:
+      payment_session = PaymentSession.objects.get(id=checkout_session_id)
+      author = payment_session.author
+      payment_session.delete()
+    except PaymentSession.DoesNotExist:
+      pass
+
+    Subscription.objects.create(
+      id=customer_id,
+      author=author,
+      type=(Subscription.Type.ANNUAL if subscription_purchase_id == YEARLY_SUBSCRIPTION_ITEM_ID else Subscription.Type.MONTHLY)
+    )
 
   elif event.type == "checkout.session.expired":
     # Payment cancelled
     checkout_session_id = event.data.object["id"]
+    
+    try:
+      payment_session = PaymentSession.objects.get(id=checkout_session_id)
+      payment_session.delete()
+    except PaymentSession.DoesNotExist:
+      pass
 
   elif event.type == "customer.subscription.deleted":
     # Subscription cancelled
     subscription_purchase_id = event.data.object.id
     customer_id = event.data.object.customer
+    
+    try:
+      subscription = Subscription.objects.get(id=customer_id)
+      subscription.delete()
+    except Subscription.DoesNotExist:
+      pass
 
   return Response({
     "error": False,
