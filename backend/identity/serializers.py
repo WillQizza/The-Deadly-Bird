@@ -1,5 +1,6 @@
 from django.conf import settings
 from rest_framework import serializers
+from blue.models import Subscription
 from posts.models import Post, Comment
 from likes.models import Like
 from following.models import Following, FollowingRequest
@@ -20,6 +21,7 @@ class AuthorSerializer(serializers.ModelSerializer):
   followers = serializers.SerializerMethodField()
   following = serializers.SerializerMethodField()
   email = serializers.SerializerMethodField()
+  subscribed = serializers.SerializerMethodField()
 
   def get_posts(self, obj: Author) -> int:
     return Post.objects.filter(author=obj).count()
@@ -44,6 +46,13 @@ class AuthorSerializer(serializers.ModelSerializer):
       # Return default avatar
       return urljoin(settings.SITE_HOST_URL, "/static/default-avatar.png")
     
+  def get_subscribed(self, obj: Author) -> bool:
+    try:
+      Subscription.objects.get(author=obj)
+      return True
+    except Subscription.DoesNotExist:
+      return False
+    
   def to_internal_value(self, data):
     internal_data = super().to_internal_value(data)
     internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
@@ -60,7 +69,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = Author
-    fields = ['type', 'id', 'url', 'host', 'email', 'bio', 'displayName', 'github', 'profileImage', 'posts', 'followers', 'following']
+    fields = ['type', 'id', 'url', 'host', 'email', 'subscribed', 'bio', 'displayName', 'github', 'profileImage', 'posts', 'followers', 'following']
 
 class InboxMessageSerializer(serializers.Serializer):
   """

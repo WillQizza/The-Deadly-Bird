@@ -7,6 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import LoginPage from './routes/login/LoginPage';
 import HomePage from './routes/home/HomePage';
 import NetworkPage from './routes/network/NetworkPage';
+import SubscriptionPage from './routes/subscription/SubscriptionPage';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
@@ -16,7 +17,6 @@ import PostCreationPage from './routes/post/PostCreationPage';
 import { getUserId } from './utils/auth';
 import SettingsPage from './routes/settings/SettingsPage';
 import PostEditPage from './routes/post/PostEditPage';
-import { SubscriptionPage } from './routes/blue/SubscriptionPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

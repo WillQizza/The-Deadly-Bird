@@ -2,14 +2,13 @@ import React, { useState, useRef } from 'react';
 import Markdown from 'react-markdown';
 import styles from './Post.module.css';
 import { ContentType, Post as PostTy } from '../../api/types'
-import { baseURL, publicDir } from "../../constants";
+import { Colors, baseURL, publicDir } from "../../constants";
 import { ReactComponent as ArrowRepeat } from 'bootstrap-icons/icons/arrow-repeat.svg';
 import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
 import { ReactComponent as LinkIcon} from 'bootstrap-icons/icons/link-45deg.svg';
 import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
-import { ReactComponent as Trash } from 'bootstrap-icons/icons/trash3.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreatePostLike } from '../../api/likes';
 import { Row, Col, Offcanvas, Overlay, Tooltip } from 'react-bootstrap';
@@ -17,8 +16,8 @@ import { Link } from 'react-router-dom';
 import { apiSharePost } from '../../api/posts';
 import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
-import DeleteDialog from './DeleteDialog';
 import { extractAuthorIdFromApi, extractPostIdFromApi } from '../../api/utils';
+import SubscriptionCheckmark from '../subscription/Checkmark';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -88,9 +87,6 @@ const Post: React.FC<PostOptions> = props => {
     const [showComments, setShowComments] = useState(false);
     const [refreshComments, setRefreshComments] = useState(false);
 
-    // Handle edit
-    const [showConfirm, setShowConfirm] = useState(false);
-
     /** Function rendering edit button (or lack thereof) depending on the user */
     const EditButton = () => {
         if (extractAuthorIdFromApi(postAuthor.id) === getUserId()) {
@@ -150,7 +146,23 @@ const Post: React.FC<PostOptions> = props => {
                 <Col className={"flex-grow-1"}>
                     <div className={styles.postInfo}>
                         {/* Author */}
-                        <Link to={`/profile/${extractAuthorIdFromApi(extractAuthorIdFromApi(postAuthor.id))}`} className={styles.postAuthor}>@{postAuthor.displayName}</Link>
+                        <span className={styles.postAuthor}>
+                            <Link to={`/profile/${extractAuthorIdFromApi(extractAuthorIdFromApi(postAuthor.id))}`}>
+                                @{postAuthor.displayName}
+                            </Link>
+                            {
+                                postAuthor.subscribed ?
+                                    <div style={{
+                                        display: "inline-block",
+                                        marginLeft: 10,
+                                        marginRight: 10,
+                                        height: "1em"
+                                    }}>
+                                        <SubscriptionCheckmark style={{ color: Colors.teal, marginBottom: 5 }} />
+                                    </div>
+                                : null
+                            }
+                        </span>
                         {/* Sub info */}
                         <div className={styles.postSubInfo}>
                             {/* Date */}

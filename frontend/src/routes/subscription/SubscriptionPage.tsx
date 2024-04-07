@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { ReactComponent as Checkmark } from 'bootstrap-icons/icons/patch-check-fill.svg';
 import Page from '../../components/layout/Page';
 import styles from './SubscriptionPage.module.css'; 
 import { Colors, publicDir } from '../../constants';
+import { apiGetSubscriptionURL } from '../../api/subscription';
+import SubscriptionCheckmark from '../../components/subscription/Checkmark';
 
 type SubscriptionType = "annual" | "monthly";
 
-export const SubscriptionPage: React.FC = () => {
+const SubscriptionPage: React.FC = () => {
   const [paymentType, setPaymentType] = useState<SubscriptionType | "">("");
   const [isPaying, setIsPaying] = useState(false);
 
-  const onSubscribe = () => {
+  const onSubscribe = async () => {
     setIsPaying(true);
+    const subscriptionURL = await apiGetSubscriptionURL(paymentType as SubscriptionType);
+    window.location.href = subscriptionURL;
   };
 
   return <Page>
@@ -25,10 +28,9 @@ export const SubscriptionPage: React.FC = () => {
           marginTop: 20,
           marginBottom: 20
         }}>
-          <Checkmark style={{
-            height: "100%",
-            width: "100%",
-            color: Colors.teal
+          <SubscriptionCheckmark style={{
+            color: Colors.teal,
+            cursor: "default"
           }} />
         </div>
 
@@ -76,7 +78,7 @@ export const SubscriptionPage: React.FC = () => {
             <h2>Block Users</h2>
           </div>
         </div>
-        <div className={styles.item} style={{ backgroundImage: `url("${publicDir}/static/premium/noads.png")` }}>
+        <div className={styles.item} style={{ backgroundImage: `url("${publicDir}/static/premium/bluecheckmark.png")` }}>
           <div className={styles.itemContent}>
             <h2>Stand Out</h2>
           </div>
@@ -85,3 +87,5 @@ export const SubscriptionPage: React.FC = () => {
     </div>
   </Page>;
 };
+
+export default SubscriptionPage;

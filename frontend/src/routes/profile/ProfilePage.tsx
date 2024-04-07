@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { publicDir } from "../../constants";
 import Page from '../../components/layout/Page';
 import styles from './ProfilePage.module.css';
@@ -8,6 +8,7 @@ import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiInboxFollowRequest, apiGetFollower, apiGetFollowRequest} from '../../api/following';
 import PostStream, { PostStreamTy } from '../../components/post/PostStream';
 import { Col, Row } from 'react-bootstrap';
+import SubscriptionCheckmark from '../../components/subscription/Checkmark';
 
 enum FollowState {
     FOLLOWING="following",
@@ -27,13 +28,14 @@ const ProfilePage: React.FC = () => {
     const [followerCount, setFollowerCount] = useState(-1);
     const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
     const [subdomain, setSubdomain] = useState("");
+    const [subscribed, setSubscribed] = useState(false);
 
     const loggedInAuthorId : string = getUserId()!; 
     const params = useParams();
     const userId = params["id"]!;
 
     /** Function to update the user's following */
-    const updateFollowingState = async (userId: string) => {
+    const updateFollowingState = useCallback(async (userId: string) => {
         const followRequestRes = await apiGetFollowRequest(loggedInAuthorId, userId);
         apiGetFollower(userId, loggedInAuthorId)
             .then(async response => {
@@ -47,7 +49,7 @@ const ProfilePage: React.FC = () => {
                     }
                 } 
             });
-    }
+    }, [loggedInAuthorId]);
 
     /** Gets user profile */
     useEffect(() => {
@@ -67,6 +69,7 @@ const ProfilePage: React.FC = () => {
                 setFollowingCount(author.following);
                 setAuthorId(author.id);
                 setBio(author.bio);
+                setSubscribed(author.subscribed);
 
                 if (author.github) {
                     setGithubUsername(author.github.substring("https://github.com/".length));
@@ -88,7 +91,7 @@ const ProfilePage: React.FC = () => {
             updateFollowingState(userId);
         }
          
-    }, [params]);
+    }, [params, updateFollowingState, userId]);
 
     /** Function to render the follow button based on following state */
     const renderButton = () => {
@@ -160,6 +163,19 @@ const ProfilePage: React.FC = () => {
                 <div id={styles.identityContainer}>
                     <h1 id={styles.username}>
                         {username}
+                        {
+                            subscribed ?
+                                <div style={{
+                                    display: "inline-block",
+                                    height: 32,
+                                    width: 32,
+                                    marginLeft: 10,
+                                    marginRight: 10
+                                }}>
+                                    <SubscriptionCheckmark />
+                                </div>
+                            : null
+                        }
                         <span id={styles.subdomain}> {subdomain}</span>
                     </h1>
                     <h5 id={styles.bio}>{bio}</h5>

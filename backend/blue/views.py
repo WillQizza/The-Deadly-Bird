@@ -48,6 +48,21 @@ def checkout(request: HttpRequest):
 def subscription_cancel(request: HttpRequest):
   pass
 
+@api_view(["GET"])
+@permission_classes([ SessionAuthenticated ])
+def subscription_check(request: HttpRequest):
+  author = Author.objects.get(id=request.session["id"])
+
+  try:
+    Subscription.objects.get(author=author)
+    return Response({
+      "status": True
+    })
+  except Subscription.DoesNotExist:
+    return Response({
+      "status": False
+    })
+
 @api_view(["POST"])
 def subscription_event(request: HttpRequest):
   try:

@@ -138,6 +138,8 @@
 
   border: 2px solid rgb(81, 81, 81);
   box-shadow: rgba(78, 78, 78, 0.35) 0px 5px 15px;
+
+  min-height: 100px;
 }
 
 #items > .item:nth-child(1) {
