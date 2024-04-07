@@ -13,4 +13,4 @@ class Subscription(models.Model):
     ANNUAL = "annual"
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
-  type = models.TextChoices(choices=Type.choices, max_length=7, blank=False, null=False)
+  type = models.CharField(choices=Type.choices, max_length=7, blank=False, null=False)
