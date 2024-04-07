@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 import sys
 import dj_database_url
+import stripe
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -214,3 +215,9 @@ SITE_REMOTE_AUTH_PASSWORD = os.environ.get("REMOTE_AUTH_PASSWORD", "password")
 SESSION_COOKIE_NAME = os.environ.get("COOKIE_NAME", "sessionid")
 
 GITHUB_API_TOKEN = None if len(os.environ.get("GITHUB_API_TOKEN", "")) == 0 else os.environ.get("GITHUB_API_TOKEN")
+
+# Stripe related details
+stripe.api_key = os.environ.get("STRIPE_API_KEY", "sk_test_51OIZXzLmClgbbAeLhE6c2Ji2YmVtNSSGWq91H8xBDl7BKGwKz5QaeutsBEXWtL495ysuRBXDHypPiBQvzGyPo5Hb00RIPGJiOU")
+WEBHOOK_SUBSCRIPTION_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+MONTHLY_SUBSCRIPTION_ITEM_ID = os.environ.get("STRIPE_MONTHLY_PRICE_ID", "price_1P2fzcLmClgbbAeLjS9LdyXx")
+YEARLY_SUBSCRIPTION_ITEM_ID = os.environ.get("STRIPE_YEARLY_PRICE_ID", "price_1P2oY2LmClgbbAeL92dGotVx")
