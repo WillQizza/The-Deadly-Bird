@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.settings import SITE_HOST_URL
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
-from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
+from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, RemoteNodeAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.util import generate_full_api_url, generate_next_id, resolve_remote_route, get_host_from_api_url, compare_domains
 from following.util import is_friends
 from likes.models import Like
@@ -396,7 +396,7 @@ def post_stream(request: HttpRequest, stream_type: str):
       .filter(visibility=Post.Visibility.PUBLIC, origin_post=None) \
       .order_by("-published_date")
 
-    if request.is_node_authenticated:
+    if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
       posts = posts.filter(origin__startswith=SITE_HOST_URL)
 
     # Paginate and return serialized result
