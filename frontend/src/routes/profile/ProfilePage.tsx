@@ -148,6 +148,7 @@ const ProfilePage: React.FC = () => {
     return <Page selected="Profile">
         <div id={styles.container}>
             <div id={styles.header}>
+                {/** Github */}
                 <div id={styles.github}>
                     {githubUsername ? (
                         <a href={`https://github.com/${githubUsername}`}>
@@ -155,10 +156,15 @@ const ProfilePage: React.FC = () => {
                         </a>
                     ) : null}
                 </div>
-                {/** Avatar */}
-                <div id={styles.avatarContainer}>
-                    <img alt="Profile Avatar" src={avatarURL} />
-                </div>
+                {/** Avatar and follow button */}
+                <Row className={"align-items-end"}>
+                    <Col id={styles.avatarContainer}>
+                        <img alt="Profile Avatar" src={avatarURL} />
+                    </Col>
+                    <Col id={styles.followButton}>
+                        {renderButton()}
+                    </Col>
+                </Row>
                 {/** About the user */}
                 <div id={styles.identityContainer}>
                     <h1 id={styles.username}>
@@ -201,10 +207,6 @@ const ProfilePage: React.FC = () => {
                         </div>
                     </Col>
                 </Row>
-                {/** Follow and github section */}
-                <div id={styles.followButton}>
-                    {renderButton()}
-                </div>
             </div>
             {/** Users feed */}
             <div id={styles.feed}>
