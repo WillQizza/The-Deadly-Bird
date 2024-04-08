@@ -16,6 +16,13 @@ const AuthorCard: React.FC<{author: Author, host: string}> = ({author, host}) =>
         navigate(`/profile/${authorId}`);
     };
 
+    let subdomain = author.host.split(".")[0];
+    if (subdomain.indexOf("//") === -1) {
+        subdomain = "Invalid Host URL";
+    } else {
+        subdomain = subdomain.substring(subdomain.indexOf("//") + 2);
+    }
+
     return (
         <div className={styles.author_card}
             onClick={() => handleCardClick(extractAuthorIdFromApi(author.id))}
@@ -33,6 +40,13 @@ const AuthorCard: React.FC<{author: Author, host: string}> = ({author, host}) =>
                 }}
             >
                 {!author.host.includes(host) ? "Remote" : "Local"}
+            </div>
+
+            <div className={styles.remote}
+                style={{ 
+                    backgroundColor: "rgb(123, 136, 136)"
+                }}>
+                {subdomain}
             </div>
         </div>
     );
