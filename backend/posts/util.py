@@ -3,7 +3,7 @@ from following.util import is_friends
 from identity.models import InboxMessage, Author
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
-from deadlybird.util import resolve_remote_route, generate_full_api_url
+from deadlybird.util import resolve_remote_route, generate_full_api_url, compare_domains
 from .serializers import InboxPostSerializer
 from .models import Post, FollowingFeedPost
 import requests
@@ -19,7 +19,7 @@ def send_post_to_inboxes(post_id: str, author_id: str):
     if post.visibility == Post.Visibility.FRIENDS and not is_friends(author_id, follower.author.id):
       continue  # Friend posts should only be sent to the inboxes of friends
 
-    if SITE_HOST_URL not in follower.author.host:
+    if not compare_domains(follower.author.host, SITE_HOST_URL):
       print(f"PUBLISHING MESSAGE FROM {author_id} OF {post_id} TO {follower.author.id}")
       # Remote follower, we have to publish the post to their inbox
       url = resolve_remote_route(follower.author.host, "inbox", {
