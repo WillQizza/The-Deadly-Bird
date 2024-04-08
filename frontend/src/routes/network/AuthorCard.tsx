@@ -46,6 +46,8 @@ const AuthorCard: React.FC<{author: Author, host: string}> = ({author, host}) =>
                 style={{ 
                     backgroundColor: "rgb(123, 136, 136)"
                 }}>
+            </div>
+            <div className={styles.subDomain}>
                 {subdomain}
             </div>
         </div>
