@@ -8,7 +8,6 @@
     padding: 1rem;
     gap: 10px;
     border-radius: 10px;
-    border: 1px solid var(--darker-teal);
     background-color: var(--lightish-teal);
     box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
     margin: 0 5px;
@@ -39,7 +38,7 @@
 
 .postAuthor {
     display: flex;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: var(--light-teal);
     padding: 10px;
     font-size: 24px;
@@ -61,7 +60,7 @@
 }
 
 .postSubInfoItem {
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: var(--light-teal);
     padding-left: 10px;
     padding-right: 10px;
@@ -71,7 +70,7 @@
 .postBody {
     display: flex;
     flex-direction: column;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: var(--light-teal);
     padding: 15px;
     width: 100%;
