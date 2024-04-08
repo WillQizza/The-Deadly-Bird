@@ -48,6 +48,8 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
       created_user.save()
 
       # Create author object from user object
+      print("Creating user")
+      print(data)
       return Author.objects.create(
         id=data["id"], #same id as remote object          
         user=created_user,
