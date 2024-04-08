@@ -53,6 +53,6 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       )
       FollowingFeedPost.objects.create(
         post=post,
-        follower=follower,
+        follower=follower.author,
         from_author_id=author_id
       )
