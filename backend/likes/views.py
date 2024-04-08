@@ -95,7 +95,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
     if request.method == "GET":        
         # Get the post specified by the url 
         author_post = Post.objects\
-            .filter(Q(origin_post=post_id, author=author_id) | Q(id=post_id, author=author_id))\
+            .filter(id=post_id, author=author_id)\
             .first()
 
         if author_post is None:
@@ -119,11 +119,7 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
             res = requests.get(url=url, auth=auth)
             print(res.status_code)
             return Response(res.json(), status=res.status_code)
-        
-        # If we shared a post, instead return the original post
-        if author_post.origin_post != None:
-            author_post = author_post.origin_post
-        
+                
         # Get the likes for the post
         likes = Like.objects.all()\
             .filter(content_type=Like.ContentType.POST)\

@@ -19,7 +19,6 @@ class Post(models.Model):
 
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
   # Original post object (used only when sharing posts)
-  origin_post = models.ForeignKey("Post", blank=True, null=True, on_delete=models.CASCADE)
   title = models.CharField(max_length=255, blank=False, null=False)
   source = models.URLField(blank=False, null=False)
   origin = models.URLField(blank=False, null=False)
@@ -27,8 +26,6 @@ class Post(models.Model):
   content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
   content = models.TextField(blank=False, null=False)
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
-  # Original author (used only when sharing posts)
-  origin_author = models.ForeignKey(Author, blank=True, null=True, on_delete=models.CASCADE, related_name="origin_author")
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
   visibility = models.CharField(choices=Visibility.choices, max_length=8, blank=False, null=False)
 
@@ -42,4 +39,11 @@ class Comment(models.Model):
   author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE)
   content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
   content = models.TextField(blank=False, null=False)
+  published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
+
+class FollowingFeedPost(models.Model):
+  id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
+  post = models.ForeignKey(Post, blank=False, null=False, on_delete=models.CASCADE)
+  follower = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE, related_name="feed_follower")
+  from_author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE, related_name="feed_from_author")
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)

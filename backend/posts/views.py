@@ -15,7 +15,7 @@ from following.util import is_friends
 from likes.models import Like
 from identity.models import InboxMessage
 from nodes.util import get_auth_from_host
-from .models import Post, Author, Following, Comment
+from .models import Post, Author, Following, Comment, FollowingFeedPost
 from .serializers import CommentSerializer, PostSerializer
 from .util import send_post_to_inboxes
 from .pagination import CommentsPagination, generate_comments_pagination_schema, generate_comments_pagination_query_schema
@@ -283,15 +283,6 @@ def post(request: HttpRequest, author_id: str, post_id: str):
     post.content = request.POST["content"]
     post.save()
 
-    # Update all local posts that were shared from this original post
-    for shared_post in Post.objects.all().filter(origin_post=post):
-      shared_post.title = request.POST["title"]
-      shared_post.description = request.POST["description"]
-      shared_post.content_type = request.POST["contentType"]
-      shared_post.visibility = request.POST["visibility"]
-      shared_post.content = request.POST["content"]
-      shared_post.save()
-
     return Response({
       "error": False,
       "message": "Post updated successfully."
@@ -318,29 +309,9 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
       "message": "Post could not be found."
     }, status=404)
   
-  if post.origin_post is not None:
-    return Response({
-      "error": True,
-      "message": "Cannot share using the shared post id."
-    })
-  
   author = Author.objects.get(id=request.session["id"])
-  
-  shared_post = Post.objects.create(
-    title=post.title,
-    origin=post.origin,
-    source=generate_full_api_url("post", kwargs={ "author_id": post.author.id, "post_id": post.id }),
-    description=post.description,
-    content_type=post.content_type,
-    content=post.content,
-    author=author,
-    origin_post=post,
-    origin_author=post.author,
-    visibility=post.visibility
-  )
-
-  send_post_to_inboxes(shared_post.id, author.id)
-  return Response(PostSerializer(shared_post).data, status=201)
+  send_post_to_inboxes(post.id, author.id)
+  return Response(PostSerializer(post).data, status=201)
 
 @extend_schema(
     parameters=[
@@ -393,7 +364,7 @@ def post_stream(request: HttpRequest, stream_type: str):
 
     # Get all public posts
     posts = Post.objects.all() \
-      .filter(visibility=Post.Visibility.PUBLIC, origin_post=None) \
+      .filter(visibility=Post.Visibility.PUBLIC) \
       .order_by("-published_date")
 
     if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
@@ -418,15 +389,16 @@ def post_stream(request: HttpRequest, stream_type: str):
     not_friends = [follow for follow in following if not is_friends(follow, request.session["id"])]
 
     # Get all posts all posts from authors following
-    posts = Post.objects.all() \
-        .filter(author__in=following) \
-        .exclude(visibility=Post.Visibility.UNLISTED) \
-        .exclude(visibility=Post.Visibility.FRIENDS, author__in=not_friends) \
-        .order_by("-published_date")
+    feed_messages = FollowingFeedPost.objects.filter(from_author__in=following).order_by("-published_date") \
+      .exclude(post__visibility=Post.Visibility.UNLISTED) \
+      .exclude(post__visibility=Post.Visibility.FRIENDS, from_author__in=not_friends)
     
-    # Paginate and return serialized result
-    posts_on_page = paginator.paginate_queryset(posts, request)
-    serialized_posts = PostSerializer(posts_on_page, many=True)
+    # paginate results
+    feed_messages_on_page = paginator.paginate_queryset(feed_messages, request)
+    posts = list(map(lambda fm: fm.post, feed_messages_on_page))
+    
+    # return serialized result
+    serialized_posts = PostSerializer(posts, many=True)
 
     return paginator.get_paginated_response(serialized_posts.data)
   
@@ -474,18 +446,13 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
   try:
     if can_see_friends:
       post = Post.objects.get(
-        Q(id=post_id, author=author_id) |
-        Q(origin_post=post_id, author=author_id)
+        id=post_id, author=author_id
       )
     else:
       post = Post.objects.get(
           Q(id=post_id, author=author_id, visibility=Post.Visibility.PUBLIC) |
-          Q(id=post_id, author=author_id, visibility=Post.Visibility.UNLISTED) |
-          Q(origin_post=post_id, author=author_id)
+          Q(id=post_id, author=author_id, visibility=Post.Visibility.UNLISTED)
       )
-
-    if post.origin_post is not None:
-      post = post.origin_post
   except Post.DoesNotExist:
     return Response({
       "error": True,
@@ -507,9 +474,6 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
 
       res = requests.get(url=url, auth=auth, params=request.GET.dict())
       return Response(res.json(), status=res.status_code)
-    
-    if post.origin_post is not None:
-      post = post.origin_post
 
     comments = Comment.objects.all() \
           .filter(post=post) \
@@ -545,12 +509,8 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
 
     # Check if the post is a remote post or not
     if not compare_domains(post.origin, SITE_HOST_URL):
+      # Remote post
       remote_author = post.author
-      if post.origin_author is not None:
-        remote_author = post.origin_author
-      # If it is a remote post, then send a inbox request to the remote node's inbox with the comment object
-      # to the owner of the post
-
       url = resolve_remote_route(remote_author.host, "inbox", {
           "author_id": remote_author.id
       })
@@ -576,9 +536,22 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
     else:
 
-      # Send inbox message to post's owner (or origin post's owner if shared post)
-      if post.origin_author is None:
-        # The post is not shared, so that means that the author is on our node
+      # Send inbox message to post's owner
+      if compare_domains(post.author.host, SITE_HOST_URL):
+        # Local post
+        comment = Comment.objects.create(
+          post=post,
+          author=author,
+          content_type=request.POST["contentType"],
+          content=request.POST["comment"]
+        )
+        InboxMessage.objects.create(
+            author=comment.post.author,
+            content_id=comment.id,
+            content_type=InboxMessage.ContentType.COMMENT
+        )
+      else:
+        # Remote post
         comment = Comment.objects.create(
           post=post,
           author=author,
@@ -587,55 +560,25 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         )
         payload = CommentSerializer(comment).data
 
-        InboxMessage.objects.create(
-            author=comment.post.author,
-            content_id=comment.id,
-            content_type=InboxMessage.ContentType.COMMENT
+        # The original author did not originate from our node... What's the source for this post?
+        # Find the quickest post to get to the origin
+        earliest_non_remote_post = Post.objects.all().filter(origin=post.origin).order_by("published_date").first()
+        source_author = earliest_non_remote_post.author
+        
+        url = resolve_remote_route(source_author.host, "inbox", {
+          "author_id": source_author.id
+        })
+
+        auth = get_auth_from_host(source_author.host)
+        response = requests.post(
+          url=url,
+          headers={'Content-Type': 'application/json'}, 
+          data=json.dumps(payload), 
+          auth=auth
         )
-      else:
-        # The post is shared. Is the original author a user we own?
-        if compare_domains(post.origin_author.host, SITE_HOST_URL):
-          comment = Comment.objects.create(
-            post=post.origin_post,
-            author=author,
-            content_type=request.POST["contentType"],
-            content=request.POST["comment"]
-          )
-          payload = CommentSerializer(comment).data
-          # They are! Send a inbox message to the original author
-          InboxMessage.objects.create(
-            author=comment.post.author,
-            content_id=comment.id,
-            content_type=InboxMessage.ContentType.COMMENT
-          )
-        else:
-          comment = Comment.objects.create(
-            post=post,
-            author=author,
-            content_type=request.POST["contentType"],
-            content=request.POST["comment"]
-          )
-          payload = CommentSerializer(comment).data
 
-          # The original author did not originate from our node... What's the source for this post?
-          # Find the quickest post to get to the origin
-          earliest_non_remote_post = Post.objects.all().filter(origin=post.origin).order_by("published_date").first()
-          source_author = earliest_non_remote_post.author
-          
-          url = resolve_remote_route(source_author.host, "inbox", {
-            "author_id": source_author.id
-          })
-
-          auth = get_auth_from_host(source_author.host)
-          response = requests.post(
-            url=url,
-            headers={'Content-Type': 'application/json'}, 
-            data=json.dumps(payload), 
-            auth=auth
-          )
-
-          if not response.ok:
-            return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
+        if not response.ok:
+          return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
 
 
     return Response({

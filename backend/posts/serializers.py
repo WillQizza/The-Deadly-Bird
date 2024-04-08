@@ -34,17 +34,10 @@ class PostSerializer(serializers.ModelSerializer):
   type = serializers.CharField(read_only=True, default="post")
   contentType = serializers.CharField(source="content_type")
   author = AuthorSerializer()
-  originAuthor = AuthorSerializer(source="origin_author")
-  originId = serializers.SerializerMethodField()
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
   published = serializers.DateTimeField(source="published_date")
-
-  def get_originId(self, object: Post) -> str:
-    if object.origin_post != None:
-      return object.origin_post.id
-    return None
     
   def get_count(self, object: Post) -> int:
     return Comment.objects.filter(post=object).count()
@@ -73,15 +66,13 @@ class PostSerializer(serializers.ModelSerializer):
   def to_representation(self, instance: Post):
     author_id = instance.author.id
     data = super().to_representation(instance)
-    if instance.origin_post is not None:
-      data["id"] = resolve_remote_route(instance.author.host, "post", kwargs={ "author_id": instance.origin_post.author.id, "post_id": instance.origin_post.id }, force_no_slash=True)
-    else:
-      data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
+    data["source"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
+    data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
     return data
 
   class Meta:
     model = Post
-    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility', 'originAuthor', 'originId']
+    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
 
 class InboxPostSerializer(serializers.Serializer):
   """

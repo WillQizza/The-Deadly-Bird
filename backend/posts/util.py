@@ -1,12 +1,11 @@
 from following.models import Following
 from following.util import is_friends
-from identity.models import InboxMessage
+from identity.models import InboxMessage, Author
 from deadlybird.settings import SITE_HOST_URL
 from nodes.util import get_auth_from_host
 from deadlybird.util import resolve_remote_route, generate_full_api_url
 from .serializers import InboxPostSerializer
-from .models import Post, Comment
-from nodes.models import Node
+from .models import Post, FollowingFeedPost
 import requests
 import json
 
@@ -28,9 +27,10 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       })
       auth = get_auth_from_host(follower.author.host)
 
-      if post.origin_author != None:
+      if post.author.id != author_id:
         # This is a shared post, we need to update the author of the post
-        post.source = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": post.origin_post.id })
+        post.author = Author.objects.get(id=author_id)
+        post.source = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": post.id })
 
       payload = InboxPostSerializer(post).data
       response = requests.post(
@@ -46,11 +46,13 @@ def send_post_to_inboxes(post_id: str, author_id: str):
 
     else:
       # Local follower, so we can just publish the inbox message and be done 
-      if post.origin_post is not None:
-        post_id = post.origin_post.id
-
       InboxMessage.objects.create(
         author=follower.author,
         content_id=post_id,
         content_type=InboxMessage.ContentType.POST
+      )
+      FollowingFeedPost.objects.create(
+        post=post,
+        follower=follower,
+        from_author_id=author_id
       )

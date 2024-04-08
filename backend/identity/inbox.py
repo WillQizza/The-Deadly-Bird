@@ -11,7 +11,7 @@ from identity.serializers import InboxAuthorSerializer
 from deadlybird.settings import SITE_HOST_URL
 from deadlybird.util import resolve_remote_route, get_host_from_api_url, generate_next_id, remove_trailing_slash
 from nodes.util import get_auth_from_host, get_or_create_remote_author_from_api_payload
-from posts.models import Post, Comment
+from posts.models import Post, Comment, FollowingFeedPost
 from likes.models import Like
 from posts.serializers import InboxPostSerializer, InboxCommentSerializer
 from deadlybird.util import resolve_remote_route, get_host_with_slash, compare_domains
@@ -189,9 +189,6 @@ def _like_post(request: HttpRequest, post_id, source_author):
       "message": "Post was not found"
     }, status=404)
   
-  if post.origin_post is not None:
-    post = post.origin_post
-  
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote post, forward inbox like to origin
     origin_author_id, _, origin_post_id = post.origin.split("/")[-3:]
@@ -261,9 +258,6 @@ def _like_comment(request: HttpRequest, post_id, comment_id, source_author):
       "error": True,
       "message": "Post was not found"
     }, status=404)
-  
-  if post.origin_post is not None:
-    post = post.origin_post
 
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote comment, forward inbox like to origin
@@ -383,7 +377,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   try:
     origin_author = Author.objects.get(id=origin_author_id)
   except Author.DoesNotExist:
-    # Source author does not exist in our systems. Register them
+    # Origin author does not exist in our systems. Register them
     origin_host = get_host_from_api_url(origin_url)
     url = resolve_remote_route(origin_host, "author", {
       "author_id": origin_author_id
@@ -403,117 +397,72 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
       print(f"Failed to parse origin author JSON from \"{url}\"")
       return Response({ "error": True, "message": "Invalid origin author JSON format" }, status=500)
     
-    origin_author = get_or_create_remote_author_from_api_payload(origin_author_serializer["data"])
+    origin_author = get_or_create_remote_author_from_api_payload(origin_author_serializer.data)
 
   # Ensure source author also exists in our system
   source_url = serializer.data["source"]
-  if not ("posts" in source_url):
-    # TODO: HACKY FIX
-    source_url = origin_url
-  source_author = get_or_create_remote_author_from_api_payload(serializer.data["author"])
+  source_author_id = source_url.split("/")[-3]
+
+  try:
+    source_author = Author.objects.get(id=source_author_id)
+  except Author.DoesNotExist:
+    # Source auth does not exist in our system, register them
+    source_host = get_host_from_api_url(source_url)
+    url = resolve_remote_route(source_host, "author", {
+      "author_id": source_author_id
+    })
+    auth = get_auth_from_host(source_host)    
+    res = requests.get(
+      url=url,
+      auth=auth
+    )
+
+    if not res.ok:
+      print(f"Failed to get source author from \"{url}\" using credentials.")
+      return Response({ "error": True, "message": "Failed to GET source author" }, status=500)
+    
+    source_author_serializer = InboxAuthorSerializer(data=res.json())
+    if not source_author_serializer.is_valid():
+      print(f"Failed to parse source author JSON from \"{url}\"")
+      return Response({ "error": True, "message": "Invalid source author JSON format" }, status=500)
+
+    source_author = get_or_create_remote_author_from_api_payload(source_author_serializer.data)
+
+  try:
+    target_author = Author.objects.get(id=target_author_id)
+  except Author.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Unknown author inbox"
+    }, status=400)
 
   # Get origin post
   origin_post_id = origin_url.split("/")[-1]
   origin_post = Post.objects.filter(id=origin_post_id).first()
-
-  if source_url == origin_url:
-
-    if origin_post != None:
-      # We are sharing a post that we wrote.
-      created_post = Post.objects.create(
-        origin_post=origin_post,
-        origin_author=origin_author,
-        title=origin_post.title,
-        source=source_url,
-        origin=origin_url,
-        description=origin_post.description,
-        content_type=origin_post.content_type,
-        content=origin_post.content,
-        author=source_author,
-        visibility=Post.Visibility.PUBLIC
-      )
-    else:
-      # Does author match origin author?
-      author_and_origin_author_match = origin_author_id == source_author.id
-
-      if author_and_origin_author_match:
-        # Create NEW post
-        created_post = Post.objects.create(
-          id=origin_post_id,
-          title=serializer.data["title"],
-          source=source_url,
-          origin=origin_url,
-          description=serializer.data["description"],
-          content_type=serializer.data["contentType"],
-          content=serializer.data["content"],
-          author=source_author,
-          visibility=serializer.data["visibility"]
-        )
-      else:
-        # Create origin post from origin url and then create our shared post
-        origin_post = Post.objects.create(
-          id=origin_post_id,
-          title=serializer.data["title"],
-          source=source_url,
-          origin=origin_url,
-          description=serializer.data["description"],
-          content_type=serializer.data["contentType"],
-          content=serializer.data["content"],
-          author=origin_author,
-          visibility=serializer.data["visibility"]
-        )
-
-        created_post = Post.objects.create(
-          origin_post=origin_post,
-          origin_author=origin_author,
-          title=origin_post.title,
-          source=source_url,
-          origin=origin_url,
-          description=origin_post.description,
-          content_type=origin_post.content_type,
-          content=origin_post.content,
-          author=source_author,
-          visibility=Post.Visibility.PUBLIC
-        )
-
-  else:
-    # We're sharing a post. 
-
-    # Create origin post.
-    if origin_post is None:
-      origin_post = Post.objects.create(
-        id=origin_post_id,
-        title=serializer.data["title"],
-        source=source_url,
-        origin=origin_url,
-        description=serializer.data["description"],
-        content_type=serializer.data["contentType"],
-        content=serializer.data["content"],
-        author=origin_author,
-        visibility=serializer.data["visibility"]
-      )
-
-    # Creat shared post.
-    created_post = Post.objects.create(
-      origin_post=origin_post,
-      origin_author=origin_author,
-      title=origin_post.title,
+  if origin_post is None:
+    origin_post = Post.objects.create(
+      id=origin_post_id,
+      title=serializer.data["title"],
       source=source_url,
       origin=origin_url,
-      description=origin_post.description,
-      content_type=origin_post.content_type,
-      content=origin_post.content,
-      author=source_author,
-      visibility=Post.Visibility.PUBLIC
+      description=serializer.data["description"],
+      content_type=serializer.data["contentType"],
+      content=serializer.data["content"],
+      author=origin_author,
+      visibility=serializer.data["visibility"]
     )
-
-  target_author = Author.objects.get(id=target_author_id)
-  inbox_post_id = created_post.id if created_post.origin_post is None else created_post.origin_post.id
+  
+  # Add post to feed
+  FollowingFeedPost.objects.create(
+    post=origin_post,
+    follower=target_author,
+    from_author=source_author
+  )
 
   # Create inbox message
   InboxMessage.objects.create(
     author=target_author,
-    content_id=inbox_post_id,
+    content_id=origin_post.id,
     content_type=InboxMessage.ContentType.POST
   )
 
@@ -538,10 +487,6 @@ def handle_comment_inbox(request: HttpRequest):
     comment_id = generate_next_id()
     
   post = Post.objects.get(id=post_id)
-
-  if post.origin_post != None:
-    # This is a shared post!
-    post = post.origin_post
 
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote post. Redirect to proper remote host
