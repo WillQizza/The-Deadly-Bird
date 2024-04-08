@@ -10,6 +10,7 @@ import RadioButtonGroup from './RadioButtonGroup';
 import ImageUpload from './ImageUpload';
 import { apiDeletePosts } from '../../api/posts';
 import DeleteDialog from './DeleteDialog';
+import { extractPostIdFromApi } from '../../api/utils';
 
 interface PostFormProps {
     image?: boolean,
@@ -198,7 +199,7 @@ const PostForm: React.FC<PostFormProps> = (props: PostFormProps) => {
                         formErrors={formErrors}
                         setFormErrors={setFormErrors}
                         formErrorKey={'content'}
-                        value={postId ? (`${baseURL}/api/authors/${getUserId()}/posts/${postId}/image`) : (content)}
+                        value={postId ? (`${baseURL}/api/authors/${getUserId()}/posts/${extractPostIdFromApi(postId)}/image`) : (content)}
                         setValue={setContent}
                         setType={setContentType}
                     />

@@ -389,7 +389,7 @@ def post_stream(request: HttpRequest, stream_type: str):
     not_friends = [follow for follow in following if not is_friends(follow, request.session["id"])]
 
     # Get all posts all posts from authors following
-    feed_messages = FollowingFeedPost.objects.filter(from_author__in=following).order_by("-published_date") \
+    feed_messages = FollowingFeedPost.objects.filter(from_author__in=following, follower_id=request.session["id"]).order_by("-published_date") \
       .exclude(post__visibility=Post.Visibility.UNLISTED) \
       .exclude(post__visibility=Post.Visibility.FRIENDS, from_author__in=not_friends)
     
