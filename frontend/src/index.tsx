@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import reportWebVitals from './reportWebVitals';
 
@@ -14,9 +14,9 @@ import './index.css';
 import ProfilePage from './routes/profile/ProfilePage';
 import PostPage from './routes/post/PostPage';
 import PostCreationPage from './routes/post/PostCreationPage';
-import { getUserId } from './utils/auth';
 import SettingsPage from './routes/settings/SettingsPage';
 import PostEditPage from './routes/post/PostEditPage';
+import RedirectProfilePage from './routes/profile/RedirectProfilePage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -28,7 +28,7 @@ root.render(
       <Route path="/" Component={LoginPage} />
       <Route path="/home" Component={HomePage} />
       <Route path="/network" Component={NetworkPage} />
-      <Route path="/profile" element={<Navigate to={`/profile/${getUserId()}`} />} />
+      <Route path="/profile" Component={RedirectProfilePage} />
       <Route path="/profile/settings" Component={SettingsPage} />
       <Route path="/profile/:id" Component={ProfilePage} />
       <Route path="/profile/:author/posts/:post" Component={PostPage} />
