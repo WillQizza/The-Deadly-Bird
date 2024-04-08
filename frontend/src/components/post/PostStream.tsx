@@ -6,12 +6,67 @@ import { apiGetPostLikes } from '../../api/likes';
 import { getUserId } from '../../utils/auth';
 import { PostsResponse } from '../../api/types';
 import { extractAuthorIdFromApi } from '../../api/utils';
+import { Link } from 'react-router-dom';
 
 export enum PostStreamTy {
     Public,
     Author,
     Following,
     Single,
+}
+
+export type EmptyStreamMessageArgs = {
+    type: PostStreamTy,
+    authorID: string | null,
+}
+
+const EmptyStreamMessage: React.FC<EmptyStreamMessageArgs> = (props: EmptyStreamMessageArgs) => {
+    return (
+        <div className={styles.emptyMessageContainer}>
+            {/* Message */}
+            <div className={styles.emptyMessageTitle}>
+                No posts here.
+            </div>
+
+            {/* Following stream */}
+            {props.type === PostStreamTy.Following && <>
+                <div>
+                    Grow your feed by following new authors:
+                </div>
+                <Link to={"/network"}>Explore Authors</Link>
+            </>}
+
+            {/* Public stream */}
+            {props.type === PostStreamTy.Public && <>
+                <div>
+                    No one has made any posts. Make a public post:
+                </div>
+                <Link to={"/post"}>New Post</Link>
+            </>}
+
+            {/* Author streams */}
+            {/* This author */}
+            {props.type === PostStreamTy.Author && props.authorID !== null && extractAuthorIdFromApi(props.authorID) === getUserId() && <>
+                <div>
+                    You have not made any posts. Make a post:
+                </div>
+                <Link to={"/post"}>New Post</Link>
+            </>}
+            {/* Other authors */}
+            {props.type === PostStreamTy.Author && props.authorID !== null && extractAuthorIdFromApi(props.authorID) !== getUserId() && <>
+                <div>
+                    This author has no posts.
+                </div>
+            </>}
+
+            {/* Single post */}
+            {props.type === PostStreamTy.Single && <>
+                <div>
+                    This post doesn't exist or is private.
+                </div>
+            </>}
+        </div>
+    )
 }
 
 export type PostStreamArgs = {
@@ -131,11 +186,16 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     /** Post stream */
     return (
         <div className={styles.postStream}>
-            {posts.map((post, index) => (
+            {posts.length > 0 ? 
+                (posts.map((post, index) => (
                 <div className={styles.postStreamPostContainer} key={post.key} ref={index === posts.length - 1 ? postRef : null}>
                     {post}
+                </div>))
+                ) : (
+                <div className={styles.postStreamPostContainer}>
+                    <EmptyStreamMessage type={props.type} authorID={props.authorID} />
                 </div>
-            ))}
+            )}
         </div>
     )
 }
