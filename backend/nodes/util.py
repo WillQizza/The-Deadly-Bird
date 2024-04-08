@@ -54,6 +54,7 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
         display_name=data["display_name"],
         host=normalize_author_host(data["host"]),
         profile_url=data["profile_url"],
+        profile_picture=data["profile_picture"],
         last_github_check=timezone.now(),
         github=data["github"]
       )
