@@ -13,7 +13,7 @@ class Author(models.Model):
   last_github_check = models.DateTimeField(auto_now_add=True, blank=False, null=False)
   bio = models.CharField(max_length=255, blank=True, null=False, default="")
   profile_url = models.CharField(max_length=255, blank=False, null=False)
-  profile_picture = models.CharField(max_length=255, blank=True, null=True)
+  profile_picture = models.URLField(blank=True, null=True)
 
   def __str__(self):
     return f"Author (displayName: {self.display_name}) [username: {self.user.username}]"
