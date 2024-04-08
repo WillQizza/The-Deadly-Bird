@@ -11,3 +11,38 @@
     display: flex;
     justify-content: center;
 }
+
+.emptyMessageContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    padding: 3rem;
+    gap: 10px;
+    border-radius: 10px;
+    background-color: var(--lightish-grey);
+    box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
+    margin: 0 5px;
+    color: var(--light-grey);
+    font-size: 20px;
+}
+
+.emptyMessageContainer a {
+    background-color: var(--teal);
+    padding: 1rem;
+    border-radius: 10px;
+    color: white;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.emptyMessageContainer a:hover {
+    filter: brightness(0.8);
+}
+
+.emptyMessageTitle {
+    font-size: 30px;
+    font-weight: bold;
+}
