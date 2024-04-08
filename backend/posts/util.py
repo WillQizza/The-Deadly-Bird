@@ -28,8 +28,6 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       auth = get_auth_from_host(follower.author.host)
 
       if post.author.id != author_id:
-        # This is a shared post, we need to update the author of the post
-        post.author = Author.objects.get(id=author_id)
         post.source = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": post.id })
 
       payload = InboxPostSerializer(post).data
