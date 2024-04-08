@@ -4,11 +4,10 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    max-width: 600px;
+    max-width: 800px;
     padding: 1rem;
     gap: 10px;
     border-radius: 10px;
-    border: 1px solid var(--darker-teal);
     background-color: var(--lightish-teal);
     box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
     margin: 0 5px;
@@ -39,7 +38,7 @@
 
 .postAuthor {
     display: flex;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: var(--light-teal);
     padding: 10px;
     font-size: 24px;
@@ -50,6 +49,10 @@
     color: black;
 }
 
+.postAuthor a:hover, .postAuthor a:focus {
+    color: var(--teal);
+}
+
 .postSubInfo {
     display: flex;
     gap: 10px;
@@ -57,16 +60,17 @@
 }
 
 .postSubInfoItem {
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: var(--light-teal);
     padding-left: 10px;
     padding-right: 10px;
+    overflow-wrap: break-word;
 }
 
 .postBody {
     display: flex;
     flex-direction: column;
-    border-radius: 20px;
+    border-radius: 10px;
     background-color: var(--light-teal);
     padding: 15px;
     width: 100%;
