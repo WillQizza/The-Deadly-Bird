@@ -50,6 +50,10 @@
     color: black;
 }
 
+.postAuthor a:hover, .postAuthor a:focus {
+    color: var(--teal);
+}
+
 .postSubInfo {
     display: flex;
     gap: 10px;
@@ -61,6 +65,7 @@
     background-color: var(--light-teal);
     padding-left: 10px;
     padding-right: 10px;
+    overflow-wrap: break-word;
 }
 
 .postBody {
