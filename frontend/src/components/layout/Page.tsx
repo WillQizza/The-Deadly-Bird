@@ -13,6 +13,7 @@ import { ReactComponent as Star } from 'bootstrap-icons/icons/star-fill.svg';
 import { setUserId } from "../../utils/auth";
 import { apiRequest } from "../../utils/request";
 import { baseURL } from "../../constants";
+import { ReactComponent as InboxIcon } from 'bootstrap-icons/icons/inboxes-fill.svg';
 
 const Page = ({ children, selected, overflowScrollOff } : { children: React.ReactNode, selected?: SelectedNavigation, overflowScrollOff?: Boolean }) => {
      
@@ -43,7 +44,14 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
                 <div id={styles.contentAndUpperNav}>
                     {/** Toolbar containing inbox and logout buttons */}
                     <div id={styles.thinNavbar}>
-                        <button onClick={() => {toggleSidebar()}}>Inbox</button>
+
+                        <div className={styles.inboxButtonContainer}
+                            onClick={() => {toggleSidebar()}} 
+                        >
+                            <InboxIcon className={styles.inboxButton}/>
+                            Inbox
+                        </div>  
+
                         <button onClick={() => {logOut()}}>Log Out</button>
                     </div>
                     {/** Page content */}

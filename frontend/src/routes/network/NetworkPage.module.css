@@ -57,7 +57,41 @@
     }
 }
 
+
 .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    color: white;
+}
+
+.pagination button {
+    padding: 8px 12px; /* Increased padding for a larger clickable area */
+    cursor: pointer;
+    background-color: #424242; /* Darker shade for a sleek look */
+    color: #FFFFFF; /* Light text color for contrast */
+    border: none;
+    border-radius: 5px;
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transition for color and press effect */
+}
+
+.pagination button:hover {
+    background-color: #444444; /* Slightly lighter shade on hover */
+}
+
+.pagination button:active {
+    transform: scale(0.95); /* Simulate a button press effect */
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed; /* Ensure it's clear the button is disabled */
+    background-color: #3A3A3A; /* Slightly different shade for disabled state */
+}
+
+/* .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -78,4 +112,4 @@
     opacity: 0.5;
     cursor: default;
 }
-
+ */
