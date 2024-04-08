@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from .models import Author, InboxMessage
 from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
-from deadlybird.util import generate_next_id, generate_full_api_url
+from deadlybird.util import generate_next_id, generate_full_api_url, remove_trailing_slash
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from deadlybird.settings import SITE_HOST_URL
 from likes.serializers import APIDocsLikeSerializer
@@ -40,7 +40,7 @@ def authors(request: HttpRequest):
     authors = authors.exclude(host__icontains=exclude_host_filter)
 
   if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
-    authors = authors.filter(host__icontains=SITE_HOST_URL)
+    authors = authors.filter(host__icontains=remove_trailing_slash(SITE_HOST_URL))
 
   # Paginate the queryset
   paginator = Pagination("authors")
