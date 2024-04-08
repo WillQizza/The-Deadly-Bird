@@ -8,9 +8,10 @@
     padding: 1rem;
     gap: 10px;
     border-radius: 10px;
-    background-color: var(--lightish-teal);
+    background-color: var(--dark-grey);
     box-shadow: 4px 4px 6px rgba(0, 0, 0, 0.5);
     margin: 0 5px;
+    color: white;
 }
 
 .postHeader {
@@ -26,7 +27,7 @@
     height: 100px;
     overflow: hidden;
     object-fit: cover;
-    background-color: var(--light-teal);
+    background-color: var(--lightish-grey);
 }
 
 .postInfo {
@@ -39,14 +40,14 @@
 .postAuthor {
     display: flex;
     border-radius: 10px;
-    background-color: var(--light-teal);
+    background-color: var(--lightish-grey);
     padding: 10px;
     font-size: 24px;
 }
 
 .postAuthor a {
     text-decoration: none;
-    color: black;
+    color: white;
 }
 
 .postAuthor a:hover, .postAuthor a:focus {
@@ -61,7 +62,7 @@
 
 .postSubInfoItem {
     border-radius: 10px;
-    background-color: var(--light-teal);
+    background-color: var(--lightish-grey);
     padding-left: 10px;
     padding-right: 10px;
     overflow-wrap: break-word;
@@ -71,7 +72,7 @@
     display: flex;
     flex-direction: column;
     border-radius: 10px;
-    background-color: var(--light-teal);
+    background-color: var(--lightish-grey);
     padding: 15px;
     width: 100%;
 }
@@ -92,6 +93,7 @@
     width: 30px;
     height: 30px;
     margin: 10px;
+    color: white;
 }
 
 .postButton:hover {
@@ -116,7 +118,7 @@
 }
 
 .likeCount {
-    color: var(--teal);
+    color: white;
     font-size: 20px;
     cursor: default;
 }
