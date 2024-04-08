@@ -40,7 +40,7 @@ def authors(request: HttpRequest):
     authors = authors.exclude(host__icontains=exclude_host_filter)
 
   if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
-    authors = authors.filter(host=SITE_HOST_URL)
+    authors = authors.filter(host__icontains=SITE_HOST_URL)
 
   # Paginate the queryset
   paginator = Pagination("authors")
