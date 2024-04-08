@@ -58,7 +58,7 @@ class AuthorSerializer(serializers.ModelSerializer):
     internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
     if "github" in internal_data and internal_data["github"] is not None and internal_data["github"].startswith("https://github.com/"):
       internal_data["github"] = internal_data["github"][len("https://github.com/"):]
-    internal_data["host"] = remove_trailing_slash(internal_data["host"])
+    internal_data["host"] = remove_trailing_slash(internal_data["host"]) + "/"
     return internal_data
   
   def to_representation(self, instance):
@@ -66,7 +66,7 @@ class AuthorSerializer(serializers.ModelSerializer):
     data["id"] = resolve_remote_route(data["host"], "author", kwargs={ "author_id": data["id"] }, force_no_slash=True)
     if "github" in data and data["github"] is not None:
       data["github"] = f"https://github.com/{data['github']}"
-    data["host"] = remove_trailing_slash(data["host"])
+    data["host"] = remove_trailing_slash(data["host"]) + "/"
     return data
 
   class Meta:
@@ -136,13 +136,13 @@ class InboxAuthorSerializer(serializers.Serializer):
     
   def to_representation(self, instance):
     data = super().to_representation(instance)
-    data["host"] = remove_trailing_slash(data["host"])
+    data["host"] = remove_trailing_slash(data["host"]) + "/"
     return data
 
   def to_internal_value(self, data):
     return_data = super().to_internal_value(data)
     return_data["profile_picture"] = data["profileImage"]
-    return_data["host"] = remove_trailing_slash(return_data["host"])
+    return_data["host"] = remove_trailing_slash(return_data["host"]) + "/"
 
     if "github" in return_data and return_data["github"] is not None and return_data["github"].startswith("https://github.com/"):
       return_data["github"] = return_data["github"][len("https://github.com/"):]
