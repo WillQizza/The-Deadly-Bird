@@ -41,6 +41,8 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       if not response.ok:
         print(f"Failed to send inbox message {post_id} to {url}")
         print(response.text)
+        print("Sent payload is")
+        print(json.dumps(payload))
 
     else:
       # Local follower, so we can just publish the inbox message and be done 
