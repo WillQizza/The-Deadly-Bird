@@ -474,6 +474,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
 def handle_comment_inbox(request: HttpRequest):
   serializer = InboxCommentSerializer(data=request.data)
   if not serializer.is_valid():
+    print(serializer.errors)
     return Response({
       "error": True,
       "message": "Invalid comment payload."
