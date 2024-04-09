@@ -119,8 +119,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
             const newPosts = (await Promise.all(response.items.map(async (postResponse) => {
                 try {
                     const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
-                    //@ts-ignore    - HACKY WORKAROUND FOR NOW
-                    const isLikedByUs = !!(likes.items || likes).find(like => extractAuthorIdFromApi(like.author.id) === getUserId());
+                    const isLikedByUs = !!likes.items.find(like => extractAuthorIdFromApi(like.author.id) === getUserId());
                     return (
                         <Post
                             key={`${postResponse.author.id}/${postResponse.id}`}

@@ -22,6 +22,7 @@ class Post(models.Model):
   title = models.CharField(max_length=255, blank=False, null=False)
   source = models.URLField(blank=False, null=False)
   origin = models.URLField(blank=False, null=False)
+  origin_author = models.ForeignKey(Author, on_delete=models.CASCADE, blank=True, null=True, related_name="post_origin_author")
   description = models.CharField(max_length=255, blank=False, null=False)
   content_type = models.CharField(choices=ContentType.choices, max_length=30, blank=False, null=False)
   content = models.TextField(blank=False, null=False)

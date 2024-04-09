@@ -309,9 +309,33 @@ def share_post(request: HttpRequest, author_id: str, post_id: str):
       "message": "Post could not be found."
     }, status=404)
   
+  if post.visibility != Post.Visibility.PUBLIC:
+    return Response({
+      "error": True,
+      "message": "Cannot share a non-public post"
+    }, status=400)
+  
   author = Author.objects.get(id=request.session["id"])
-  send_post_to_inboxes(post.id, author.id)
-  return Response(PostSerializer(post).data, status=201)
+
+  origin_author = post.origin_author if post.origin_author != None else post.author
+
+  # Create a copy of the post that we can share
+  shared_post_id = generate_next_id()
+  shared_post = Post.objects.create(
+    id=shared_post_id,
+    title=post.title,
+    source=generate_full_api_url("post", kwargs={ "author_id": author.id, "post_id": shared_post_id }), # This is modified anyway on send_post_to_inboxes
+    origin=post.origin,
+    description=post.description,
+    content_type=post.content_type,
+    content=post.content,
+    author=author,
+    origin_author=origin_author,
+    visibility=post.visibility
+  )
+  
+  send_post_to_inboxes(shared_post.id, author.id)
+  return Response(PostSerializer(shared_post).data, status=201)
 
 @extend_schema(
     parameters=[

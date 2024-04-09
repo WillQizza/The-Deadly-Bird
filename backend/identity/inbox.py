@@ -435,26 +435,66 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
       "error": True,
       "message": "Unknown author inbox"
     }, status=400)
-
-  # Get origin post
-  origin_post_id = origin_url.split("/")[-1]
-  origin_post = Post.objects.filter(id=origin_post_id).first()
-  if origin_post is None:
-    origin_post = Post.objects.create(
-      id=origin_post_id,
-      title=serializer.data["title"],
-      source=source_url,
-      origin=origin_url,
-      description=serializer.data["description"],
-      content_type=serializer.data["contentType"],
-      content=serializer.data["content"],
-      author=origin_author,
-      visibility=serializer.data["visibility"]
-    )
   
+
+  # we have origin_author, source_author, and target_author
+
+  # Check if origin id matches received post id (checks if shared)
+  received_post_id = serializer.validated_data["id"]
+  origin_post_id = origin_url.split("/")[-1]
+
+  post_in_question = None
+  if received_post_id == origin_post_id:
+    print("==============================\n")
+    print("==============================\n")
+    print("==============================\n")
+    print("new post")
+    print("==============================\n")
+    print("==============================\n")
+    print("==============================\n")
+    # New post. Create if not exists
+    post_in_question = Post.objects.filter(id=origin_post_id).first()
+    if post_in_question is None:
+      post_in_question = Post.objects.create(
+        id=origin_post_id,
+        title=serializer.data["title"],
+        source=source_url,
+        origin=origin_url,
+        description=serializer.data["description"],
+        content_type=serializer.data["contentType"],
+        content=serializer.data["content"],
+        author=origin_author,
+        visibility=serializer.data["visibility"]
+      )
+
+  else:
+    # Shared post
+    print("==============================\n")
+    print("==============================\n")
+    print("==============================\n")
+    print(f"Creating shared post that originated from {origin_author.display_name} with the shared author as {source_author.display_name}")
+    print(f"source={source_url}\norigin={origin_url}")
+    print("==============================\n")
+    print("==============================\n")
+    print("==============================\n")
+    post_in_question = Post.objects.filter(id=received_post_id).first()
+    if post_in_question is None:
+      post_in_question = Post.objects.create(
+        id=received_post_id,
+        title=serializer.data["title"],
+        source=source_url,
+        origin=origin_url,
+        description=serializer.data["description"],
+        content_type=serializer.data["contentType"],
+        content=serializer.data["content"],
+        author=source_author,
+        origin_author=origin_author,
+        visibility=serializer.data["visibility"]
+      )
+
   # Add post to feed
   FollowingFeedPost.objects.create(
-    post=origin_post,
+    post=post_in_question,
     follower=target_author,
     from_author=source_author
   )
@@ -462,7 +502,7 @@ def handle_post_inbox(request: HttpRequest, target_author_id: str):
   # Create inbox message
   InboxMessage.objects.create(
     author=target_author,
-    content_id=origin_post.id,
+    content_id=post_in_question.id,
     content_type=InboxMessage.ContentType.POST
   )
 

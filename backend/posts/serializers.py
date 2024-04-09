@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
 from identity.serializers import AuthorSerializer
+from deadlybird.settings import SITE_HOST_URL
 from deadlybird.util import generate_full_api_url, remove_trailing_slash, resolve_remote_route
 from .models import Post, Comment
 from identity.serializers import InboxAuthorSerializer
@@ -34,6 +35,7 @@ class PostSerializer(serializers.ModelSerializer):
   type = serializers.CharField(read_only=True, default="post")
   contentType = serializers.CharField(source="content_type")
   author = AuthorSerializer()
+  origin_author = AuthorSerializer(allow_null=True)
   count = serializers.SerializerMethodField()
   comments = serializers.SerializerMethodField()
   commentsSrc = serializers.SerializerMethodField()
@@ -61,6 +63,7 @@ class PostSerializer(serializers.ModelSerializer):
     internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[-1]
     internal_data["source"] = remove_trailing_slash(internal_data["source"])
     internal_data["origin"] = remove_trailing_slash(internal_data["origin"])
+    internal_data["origin_author"] = internal_data.pop("originAuthor")
     return internal_data
   
   def to_representation(self, instance: Post):
@@ -68,11 +71,12 @@ class PostSerializer(serializers.ModelSerializer):
     data = super().to_representation(instance)
     data["source"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
     data["id"] = generate_full_api_url("post", kwargs={ "author_id": author_id, "post_id": data["id"] }, force_no_slash=True)
+    data["originAuthor"] = data.pop("origin_author")
     return data
 
   class Meta:
     model = Post
-    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility']
+    fields = ['type', 'title', 'id', 'source', 'origin', 'description', 'contentType', 'content', 'author', 'count', 'comments', 'commentsSrc', 'published', 'visibility', 'origin_author']
 
 class InboxPostSerializer(serializers.Serializer):
   """
