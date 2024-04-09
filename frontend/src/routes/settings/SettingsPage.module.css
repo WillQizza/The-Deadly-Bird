@@ -15,6 +15,8 @@
   display: flex;
   margin-bottom: 25px;
   padding: 1rem;
+  position:relative;
+  text-align: center;
 }
 
 #header .headerItem {
@@ -24,6 +26,7 @@
   justify-content: flex-end;
   flex-direction: column;
   cursor: default;
+  font-weight:bold;
 }
 
 #header .headerItem .headerItemAmount {

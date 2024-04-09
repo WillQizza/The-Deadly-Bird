@@ -12,12 +12,14 @@
 }
 
 #avatarContainer #avatar {
+  position: relative;
   height: 168px;
   width: 168px;
   border: 1.5px solid var(--dark-teal);
   box-shadow: 0px 2px 0px var(--darker-teal);
   padding: 0.5rem;
 }
+
 
 #avatarContainer #avatar:hover {
   filter: brightness(50%);

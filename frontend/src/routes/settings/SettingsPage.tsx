@@ -27,13 +27,16 @@ const SettingsPage: React.FC = () => {
         {/* Header Stats */}
         <Row id={styles.header}>
           <Col className={styles.headerItem}>
-            <span>Posts</span> <span className={styles.headerItemAmount}>{author ? author.posts : ""}</span>
+            <span className = "posts-column">Posts</span> 
+            <span className = "posts-number">{author ? author.posts : ""}</span>
           </Col>
           <Col className={styles.headerItem}>
-            <span>Following</span> <span className={styles.headerItemAmount}>{author ? author.following : ""}</span>
+            <span className = "following-column">Following</span> 
+            <span className = "following-number">{author ? author.following : ""}</span>
           </Col>
           <Col className={styles.headerItem}>
-            <span>Followers</span> <span className={styles.headerItemAmount}>{author ? author.followers : ""}</span>
+            <span className = "followers-column">Followers</span> 
+            <span className = "followers-number">{author ? author.followers : ""}</span>
           </Col>
         </Row>
 
