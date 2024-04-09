@@ -20,7 +20,7 @@ class LikeTests(BaseTestCase):
             'post_id': post.id
         })
         json = self.client.get(url).json()
-        self.assertTrue(len(json) == 0)
+        self.assertTrue(len(json["items"]) == 0)
 
         self.create_likes()  
 
