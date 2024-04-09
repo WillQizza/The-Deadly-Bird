@@ -128,7 +128,10 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
 
         # return serialized results
         serialized_likes = LikeSerializer(likes, many=True)
-        return Response(serialized_likes.data)
+        return Response({
+            "type": "Likes",
+            "items": serialized_likes.data
+        })
 
 @extend_schema(
         responses=inline_serializer("Liked", fields={

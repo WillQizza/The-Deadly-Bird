@@ -98,7 +98,10 @@ export type LikedResponse = {
     items: Like[]
 };
 
-export type LikesResponse = Like[];
+export type LikesResponse = {
+    type: "likes",
+    items: Like[]
+};
 
 //url ://service/authors/{AUTHOR_ID}/inbox 
 export type InboxResponse = {
