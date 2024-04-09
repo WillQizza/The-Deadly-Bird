@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { publicDir } from "../../constants";
 import styles from "./Navigation.module.css";
 import { ReactComponent as CreatePost } from 'bootstrap-icons/icons/plus-circle.svg';
+import { ReactComponent as ArrowLeft } from 'bootstrap-icons/icons/arrow-left.svg';
+import { ReactComponent as List } from 'bootstrap-icons/icons/list.svg';
 import { Link, useNavigate } from 'react-router-dom';
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import { Button } from 'react-bootstrap';
@@ -35,7 +37,7 @@ const Navigation = ({ items, selected }: { items: NavItem[], selected?: Selected
                             variant={"outline-light"}
                             onClick={() => setCollapsed(!collapsed)}
                         >
-                            ☰
+                            <List/>
                         </Button>
                     </div>
                 ) : (
@@ -45,7 +47,7 @@ const Navigation = ({ items, selected }: { items: NavItem[], selected?: Selected
                             variant={"outline-light"}
                             onClick={() => setCollapsed(!collapsed)}
                         >
-                            🡰
+                            <ArrowLeft/>
                         </Button>
                         <img src={`${publicDir}/static/small-logo.png`} alt="Logo" />
                     </div>
