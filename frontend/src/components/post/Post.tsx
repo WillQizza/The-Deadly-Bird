@@ -166,7 +166,14 @@ const Post: React.FC<PostOptions> = props => {
                         {/* Sub info */}
                         <div className={styles.postSubInfo}>
                             {/* Date */}
-                            <div className={styles.postSubInfoItem}>{postDate}</div>
+                            <div className={styles.postSubInfoItem}>{postDate} {props.originAuthor
+                                ? <i style={{ marginLeft: 10 }}>
+                                    shared by <Link
+                                         to={`/profile/${extractAuthorIdFromApi(props.author.id)}`} 
+                                         style={{ textDecoration: "none", color: "white" }}
+                                        >{props.author.displayName}</Link>
+                                </i> 
+                                : null}</div>
                             {/* Debug Domain */}
                             <div className={styles.postSubInfoItem}>{subdomain}</div>
                         </div>
