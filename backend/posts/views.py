@@ -558,7 +558,7 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
       payload = CommentSerializer(comment).data
 
       if "y-com" in url:
-        payload["id"] = resolve_remote_route(post.author.host, "comments", kwargs={ "author_id": post.author.id, "post_id": post.id }, force_no_slash=True)
+        payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": post.author.id, "post_id": post.id }, force_no_slash=True)
 
       auth = get_auth_from_host(remote_author.host)
       response = requests.post(
