@@ -5,7 +5,7 @@ on:
       - dev
 
 concurrency:
-  group: heroku
+  group: heroku2
   cancel-in-progress: false
 
 jobs:
