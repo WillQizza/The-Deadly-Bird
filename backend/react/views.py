@@ -27,5 +27,5 @@ def index(request: HttpRequest):
                 request.session.clear()
                 return redirect(_UNAUTHORIZED_REDIRECT_PATH)
             break
-
+        
     return render(request, "index.html")

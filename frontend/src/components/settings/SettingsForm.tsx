@@ -82,7 +82,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       isValid = false;
       newFormErrors['email'] = 'Email is required';
     }
-    if (email.length > 255) {
+    else if (email.length > 255) {
       isValid = false;
       newFormErrors['email'] = 'Email is too long (255 characters maximum)';
     }
@@ -90,14 +90,14 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
       isValid = false;
       newFormErrors['displayName'] = 'Display name is required';
     }
-    if (displayName.length > 255) {
+    else if (displayName.length > 255) {
       isValid = false;
       newFormErrors['displayName'] = 'Display name is too long (255 characters maximum)'
     }
-    if (!password) {
-      isValid = false;
-      newFormErrors['password'] = 'Password is required';
-    }
+    // if (!password) {
+    //   isValid = false;
+    //   newFormErrors['password'] = 'Password is required';
+    // }
 
     setFormErrors(newFormErrors);
     return isValid;
@@ -131,6 +131,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
                 onClick={onAvatarPromptOpen}
                 roundedCircle
               />
+              
             </div>
             {/** Email */}
             <SettingsInput
@@ -154,7 +155,7 @@ const SettingsForm: React.FC<SettingsFormOptions> = ({ author }) => {
             {/** Password */}
             <SettingsInput
               title="Password" name="password" type="password"
-              value="" valueSetter={setPassword} placeholder="*********"
+              value={password} valueSetter={setPassword} placeholder="*********"
               formErrors={formErrors} formErrorKey="password"
             />
             {/** Bio */}
