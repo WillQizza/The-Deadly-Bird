@@ -203,6 +203,9 @@ def _like_post(request: HttpRequest, post_id, source_author):
         "author_id": origin_author_id
     })
 
+    print("pushing remote like payload")
+    print(payload)
+
     auth = get_auth_from_host(get_host_from_api_url(post.origin))
     response = requests.post(
       url=url,
