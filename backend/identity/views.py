@@ -3,7 +3,7 @@ from django.http import HttpRequest
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from .models import Author, InboxMessage
+from .models import Author, InboxMessage, BlockedAuthor
 from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
 from deadlybird.util import generate_next_id, generate_full_api_url, remove_trailing_slash
@@ -423,3 +423,48 @@ def inbox(request: HttpRequest, author_id: str):
       return Response({"error": False, "message": "inbox deleted"}, status=204)
     except:
       return Response({"error": True, "message": "unable to delete inbox"}, status=404)
+
+@api_view(["POST", "DELETE"])
+@permission_classes([ SessionAuthenticated ])
+def block(request: HttpRequest, author_id: str):
+  try:
+    target_author = Author.objects.get(id=author_id)
+  except Author.DoesNotExist:
+    return Response({
+      "error": True,
+      "message": "Target author does not exist"
+    }, status=400)
+
+  block = BlockedAuthor.objects.filter(author_id=request.session["id"], blocked_author=target_author).first()
+  block_exists = block != None
+
+  if request.method == "POST":
+    # Add block
+    if block_exists:
+      return Response({
+        "error": True,
+        "message": "Author is already blocked"
+      }, status=400)
+    
+    BlockedAuthor.objects.create(
+      author_id=request.session["id"],
+      blocked_author=target_author
+    )
+
+    return Response({
+      "error": False,
+      "message": "Blocked Author"
+    })
+  else:
+    # Delete block
+    if not block_exists:
+      return Response({
+        "error": True,
+        "message": "Author is not blocked"
+      }, status=400)
+    
+    block.delete()
+    return Response({
+      "error": False,
+      "message": "Unblocked Author"
+    })

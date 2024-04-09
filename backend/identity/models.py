@@ -18,6 +18,14 @@ class Author(models.Model):
   def __str__(self):
     return f"Author (displayName: {self.display_name}) [username: {self.user.username}]"
 
+class BlockedAuthor(models.Model):
+  id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
+  author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE, related_name="blocked_origin_author")
+  blocked_author = models.ForeignKey(Author, blank=False, null=False, on_delete=models.CASCADE, related_name="blocked_author")
+
+  class Meta:
+    unique_together = ("author", "blocked_author")
+
 class InboxMessage(models.Model):
   class ContentType(models.TextChoices):
     POST="post"

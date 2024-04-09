@@ -13,7 +13,7 @@ from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenti
 from deadlybird.util import generate_full_api_url, generate_next_id, resolve_remote_route, get_host_from_api_url, compare_domains
 from following.util import is_friends
 from likes.models import Like
-from identity.models import InboxMessage
+from identity.models import InboxMessage, BlockedAuthor
 from nodes.util import get_auth_from_host
 from .models import Post, Author, Following, Comment, FollowingFeedPost
 from .serializers import CommentSerializer, PostSerializer
@@ -387,9 +387,16 @@ def post_stream(request: HttpRequest, stream_type: str):
     paginator = Pagination("posts")
 
     # Get all public posts
+
+    blocked_authors = []
+    if "id" in request.session:
+      blocked_authors = list(map(lambda b: b.blocked_author, list(BlockedAuthor.objects.filter(author=request.session["id"]))))
+
     posts = Post.objects.all() \
       .filter(visibility=Post.Visibility.PUBLIC) \
+      .exclude(Q(author__in=blocked_authors) | Q(origin_author__in=blocked_authors)) \
       .order_by("-published_date")
+      
 
     if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
       posts = posts.filter(origin__startswith=SITE_HOST_URL)
@@ -412,10 +419,13 @@ def post_stream(request: HttpRequest, stream_type: str):
     # Get all not friends from those following
     not_friends = [follow for follow in following if not is_friends(follow, request.session["id"])]
 
+    blocked_authors = list(map(lambda b: b.blocked_author, list(BlockedAuthor.objects.filter(author=request.session["id"]))))
+
     # Get all posts all posts from authors following
     feed_messages = FollowingFeedPost.objects.filter(from_author__in=following, follower_id=request.session["id"]).order_by("-published_date") \
       .exclude(post__visibility=Post.Visibility.UNLISTED) \
-      .exclude(post__visibility=Post.Visibility.FRIENDS, from_author__in=not_friends)
+      .exclude(post__visibility=Post.Visibility.FRIENDS, from_author__in=not_friends) \
+      .exclude(post__origin_author__in=blocked_authors)
     
     # paginate results
     feed_messages_on_page = paginator.paginate_queryset(feed_messages, request)
