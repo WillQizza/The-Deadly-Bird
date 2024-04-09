@@ -118,7 +118,9 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
             print(auth)
             res = requests.get(url=url, auth=auth)
             print(res.status_code)
-            return Response(res.json(), status=res.status_code)
+            likes_json = res.json()
+            print(likes_json)
+            return Response(likes_json, status=res.status_code)
                 
         # Get the likes for the post
         likes = Like.objects.all()\
