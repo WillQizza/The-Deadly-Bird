@@ -521,6 +521,9 @@ def handle_comment_inbox(request: HttpRequest):
     }, status=400)
   
   post_id, arg, comment_id = serializer.data["id"].split("/")[-3:]
+
+  print("sending comment")
+  print(serializer.data)
   
   # Temporary hack in case scenario of /posts/id instead of /posts/id/comments/id 
   if arg.lower() == "posts":
@@ -531,6 +534,7 @@ def handle_comment_inbox(request: HttpRequest):
 
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote post. Redirect to proper remote host
+    print("comment to remote node")
     url = resolve_remote_route(post.author.host, "inbox", {
         "author_id": post.author.id
     })
@@ -544,6 +548,12 @@ def handle_comment_inbox(request: HttpRequest):
       "contentType": serializer.data["contentType"],
       "published": serializer.data["published"]
     }
+
+    if "y-com" in url:
+      payload["id"] = resolve_remote_route(post.author.host, "comments", kwargs={ "author_id": post.author.id, "post_id": post.id })
+
+    print("payload to remote")
+    print(payload)
 
     response = requests.post(
       url=url,
