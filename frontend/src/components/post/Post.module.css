@@ -105,7 +105,7 @@
 }
 
 .postLink:hover {
-    color: dodgerblue;
+    color: deepskyblue;
 }
 
 .postLike:hover {
@@ -124,15 +124,15 @@
 }
 
 .postEdit:hover {
-    color: goldenrod;
+    color: orchid;
 }
 
 .postComment:hover {
-    color: mediumslateblue;   
+    color: goldenrod;   
 }
 
 .postDelete:hover {
-    color: indianred;
+    color: coral;
 }
 
 .postTitle {
