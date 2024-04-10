@@ -78,10 +78,21 @@ export type PostStreamArgs = {
 
 const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
     const [posts, setPosts] = useState<React.ReactElement[]>([]);
+    const currentAuthorId = useRef<string|null>(null);
     const postRef = useRef<HTMLDivElement>(null);
     const currentPage = useRef(1);
     const failedToLoadPosts = useRef(0);
     const pageSize = 5;
+
+    useEffect(() => {
+        if (props.authorID !== currentAuthorId.current) {
+            currentAuthorId.current = props.authorID;
+            setPosts([]);
+            currentPage.current = 1;
+            failedToLoadPosts.current = 0;
+            generatePosts(true);
+        }
+    }, [currentAuthorId, props.authorID]);
 
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = async (reset?: boolean) => {
