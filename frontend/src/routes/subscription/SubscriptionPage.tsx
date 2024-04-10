@@ -100,7 +100,7 @@ const SubscriptionPage: React.FC = () => {
             <h4>Get rid of those pesky ads!</h4>
           </div>
         </div>
-        <div className={styles.item} style={{ backgroundImage: `url("${publicDir}/static/premium/noads.png")` }}>
+        <div className={styles.item} style={{ backgroundImage: `url("${publicDir}/static/premium/block.png")` }}>
           <div className={styles.itemContent}>
             <h2>Block Users</h2>
             <h4>Hide users from your feed!</h4>

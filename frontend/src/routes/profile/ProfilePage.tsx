@@ -58,7 +58,7 @@ const ProfilePage: React.FC = () => {
     }, [loggedInAuthorId]);
 
     const onBlock = async () => {
-        if (!subscribed) {
+        if (!weAreSubscribed) {
             toast.error("This is a Deadly Blue feature! Subscribe to access");
             return;
         }
@@ -176,7 +176,7 @@ const ProfilePage: React.FC = () => {
     };
 
     const renderBlockButton = () => {
-        if (!userId) {
+        if (!userId || followState !== FollowState.NOT_FOLLOWING) {
             return;
         }
 
@@ -210,13 +210,13 @@ const ProfilePage: React.FC = () => {
                     </Col>
                     <Col id={styles.profileButtons}>
                         {renderFollowButton()}
-                        {extractAuthorIdFromApi(authorId) === userId ? renderBlockButton() : null}
+                        {userId !== loggedInAuthorId ? renderBlockButton() : null}
                     </Col>
                 </Row>
                 {/** About the user */}
                 <div id={styles.identityContainer}>
                     <h1 id={styles.username}>
-                        {username}
+                        <span style={{ textDecoration: blocked ? "line-through" : "none" }}>{username}</span>
                         {
                             subscribed ?
                                 <div style={{
