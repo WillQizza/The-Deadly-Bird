@@ -3,13 +3,14 @@ import { publicDir } from "../../constants";
 import Page from '../../components/layout/Page';
 import styles from './ProfilePage.module.css';
 import { useParams } from 'react-router-dom';
-import { apiGetAuthor } from '../../api/authors';
+import { apiBlockAuthor, apiGetAuthor, apiUnblockAuthor } from '../../api/authors';
 import { getUserId } from '../../utils/auth';
 import { apiDeleteFollower, apiInboxFollowRequest, apiGetFollower, apiGetFollowRequest} from '../../api/following';
 import PostStream, { PostStreamTy } from '../../components/post/PostStream';
 import { Col, Row } from 'react-bootstrap';
 import SubscriptionCheckmark from '../../components/subscription/Checkmark';
 import { toast } from 'react-toastify';
+import { extractAuthorIdFromApi } from '../../api/utils';
 
 enum FollowState {
     FOLLOWING="following",
@@ -31,6 +32,7 @@ const ProfilePage: React.FC = () => {
     const [subdomain, setSubdomain] = useState("");
     const [subscribed, setSubscribed] = useState(false);
     const [blocked, setBlocked] = useState(false);
+    const [inBlockingRequest, setInBlockingRequest] = useState(false);
 
     const loggedInAuthorId : string = getUserId()!; 
     const params = useParams();
@@ -52,6 +54,26 @@ const ProfilePage: React.FC = () => {
                 } 
             });
     }, [loggedInAuthorId]);
+
+    const onBlock = async () => {
+        if (!subscribed) {
+            toast.error("This is a Deadly Blue feature! Subscribe to access");
+            return;
+        }
+
+        setInBlockingRequest(true);
+        if (blocked) {
+            // Unblock the author
+            await apiUnblockAuthor(userId);
+            toast.success("Unblocked! You will see their posts in your public feed again.");
+        } else {
+            // Block the author
+            await apiBlockAuthor(userId);
+            toast.success("Blocked! You will no longer see their posts in your public feed.");
+        }
+        setInBlockingRequest(false);
+        setBlocked(!blocked);
+    };
 
     /** Gets user profile */
     useEffect(() => {
@@ -153,11 +175,11 @@ const ProfilePage: React.FC = () => {
         }
 
         if (subscribed) {
-            return <button className="btn btn-secondary block-btn">
+            return <button className="btn btn-secondary block-btn" onClick={onBlock} disabled={inBlockingRequest}>
                 {blocked ? "Unblock" : "Block"}
             </button>;
         } else {
-            return <button className="btn btn-secondary block-btn" disabled>
+            return <button className="btn btn-secondary block-btn" onClick={onBlock} disabled>
                 {blocked ? "Unblock" : "Block"}
             </button>;
         }
@@ -182,7 +204,7 @@ const ProfilePage: React.FC = () => {
                     </Col>
                     <Col id={styles.profileButtons}>
                         {renderFollowButton()}
-                        {renderBlockButton()}
+                        {extractAuthorIdFromApi(authorId) === userId ? renderBlockButton() : null}
                     </Col>
                 </Row>
                 {/** About the user */}

@@ -42,3 +42,17 @@ export const apiGetAuthor = async (id: string): Promise<Author|null> => {
     const data: Author = await response.json();
     return data;
 };
+
+export const apiBlockAuthor = async (id: string) => {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(id)}/block`, {
+        method: "POST"
+    });
+    return response.ok;
+};
+
+export const apiUnblockAuthor = async (id: string) => {
+    const response = await apiRequest(`${baseURL}/api/authors/${extractAuthorIdFromApi(id)}/block`, {
+        method: "DELETE"
+    });
+    return response.ok;
+};

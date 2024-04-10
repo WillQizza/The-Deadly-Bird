@@ -541,14 +541,19 @@ def handle_comment_inbox(request: HttpRequest):
   if not compare_domains(post.origin, SITE_HOST_URL):
     # Remote post. Redirect to proper remote host
     print("comment to remote node")
-    url = resolve_remote_route(post.author.host, "inbox", {
-        "author_id": post.author.id
+    remote_author = post.author
+    if post.origin_author != None:
+      remote_author = post.origin_author
+    url = resolve_remote_route(remote_author.host, "inbox", {
+        "author_id": remote_author.id
     })
-    auth = get_auth_from_host(post.author.host)
+    auth = get_auth_from_host(remote_author.host)
+
+    post_origin_id = post.origin.split("/")[-1]
 
     payload = {
       "type": serializer.data["type"],
-      "id": f'{resolve_remote_route(post.author.host, "comments", kwargs={ "author_id": post.author.id, "post_id": post.id })}/{comment_id}',
+      "id": f'{resolve_remote_route(remote_author.host, "comments", kwargs={ "author_id": remote_author.id, "post_id": post_origin_id })}/{comment_id}',
       "author": serializer.data["author"],
       "comment": serializer.data["comment"],
       "contentType": serializer.data["contentType"],
@@ -556,7 +561,7 @@ def handle_comment_inbox(request: HttpRequest):
     }
 
     if "y-com" in url:
-      payload["id"] = resolve_remote_route(post.author.host, "comments", kwargs={ "author_id": post.author.id, "post_id": post.id }, force_no_slash=True)
+      payload["id"] = resolve_remote_route(post.author.host, "comments", kwargs={ "author_id": remote_author.id, "post_id": post_origin_id }, force_no_slash=True)
 
     print("payload to remote")
     print(payload)
@@ -579,8 +584,12 @@ def handle_comment_inbox(request: HttpRequest):
     content=serializer.data["comment"]
   )
 
+  local_author = post.author
+  if post.origin_author != None:
+    local_author = post.origin_author
+
   InboxMessage.objects.create(
-    author=post.author,
+    author=local_author,
     content_id=comment.id,
     content_type=InboxMessage.ContentType.COMMENT
   )
