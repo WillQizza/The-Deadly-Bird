@@ -560,6 +560,7 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         content=request.POST["comment"]
       )
       payload = CommentSerializer(comment).data
+      comment.delete()  # Delete dummy comment object
 
       if "y-com" in url:
         payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": remote_author.id, "post_id": post.id }, force_no_slash=True)
@@ -574,6 +575,9 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
 
       # Print error if response failed
       if not response.ok:
+        print("Failed to create remote comment")
+        print(url)
+        print(json.dumps(payload))
         return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
     else:
 
@@ -619,7 +623,7 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         )
 
         if not response.ok:
-          print("Failed to create remote comment")
+          print("Failed to create local comment")
           print(url)
           print(json.dumps(payload))
           return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)

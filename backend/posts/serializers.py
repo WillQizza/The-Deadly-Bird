@@ -24,9 +24,14 @@ class CommentSerializer(serializers.ModelSerializer):
     internal_data["id"] = remove_trailing_slash(internal_data["id"]).split("/")[:-1]
     return internal_data
   
-  def to_representation(self, instance):
+  def to_representation(self, instance: Comment):
     post_author_id = instance.post.author.id
     post_id = instance.post.id
+
+    if instance.post.origin_author != None:
+      post_author_id = instance.post.origin_author.id
+      post_id = instance.post.origin.split("/")[-1]
+
     data = super().to_representation(instance)
     data["id"] = f'{generate_full_api_url("comments", kwargs={ "author_id": post_author_id, "post_id": post_id }, force_no_slash=True)}/{data["id"]}'
     return data
