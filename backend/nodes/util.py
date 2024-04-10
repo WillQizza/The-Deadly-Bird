@@ -70,5 +70,6 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
         github=data["github"]
       )
 
-    except IntegrityError:
-      pass
+    except IntegrityError as e:
+      print("integrity error")
+      print(e)

@@ -347,6 +347,9 @@ def handle_like_inbox(request: HttpRequest):
   # Ensure the author sending the like exists
   # In the case the author does not exist within our system, it's a remote author who's liking it.
   author_who_created_like = get_or_create_remote_author_from_api_payload(author_payload)
+  print("author who created like is")
+  print(author_who_created_like)
+  print(author_payload)
   
   like_type, id = like_object.split("/")[-2:]
   like_type = Like.ContentType.POST if like_type.lower() == "posts" else Like.ContentType.COMMENT
