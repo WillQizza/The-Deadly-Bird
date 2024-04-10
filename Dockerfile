@@ -17,7 +17,7 @@ FROM node:20 AS frontend
 RUN corepack enable pnpm
 WORKDIR /app/frontend
 COPY frontend/*.json .
-RUN npm install
+RUN pnpm install
 
 # Receive args from compose file, default to port 8000 for prod.
 ARG LIVE_HOST_URL "http://localhost:8000"

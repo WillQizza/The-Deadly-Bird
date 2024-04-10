@@ -58,8 +58,7 @@ const ImageUpload: React.FC<ImageUploadProps> = (props: ImageUploadProps) => {
                     // if image type is valid
                     if (allowedTypes.has(mediaType)) {
                         setImage(base64data);
-                        const newValue = await fileToBase64(file);
-                        setValue(newValue);
+                        setValue(base64data);
                         setType(mediaType);
                         newFormErrors[formErrorKey] = '';
                     }

@@ -369,7 +369,24 @@ def post_image(_: HttpRequest, author_id: str, post_id: str):
         "message": "This post is not an image post."
       }, status=400)
 
-  return HttpResponse(base64.b64decode(post.content), content_type="image/*")
+  comma_index = post.content.index(",")
+  if comma_index == -1:
+    return Response({
+      "error": True,
+      "message": "Invalid image content format (missing comma)"
+    }, status=400)
+
+  image_portion = post.content[comma_index + 1:]
+  
+  try:
+    image_base64 = base64.b64decode(image_portion)
+  except:
+    return Response({
+      "error": True,
+      "message": "Invalid image content format (base64)"
+    }, status=400)
+  
+  return HttpResponse(image_base64, content_type="image/*")
 
 @extend_schema(
     parameters=[

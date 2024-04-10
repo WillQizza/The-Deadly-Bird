@@ -68,7 +68,7 @@ const Post: React.FC<PostOptions> = props => {
         case ContentType.APPLICATION_BASE64:
         case ContentType.PNG_BASE64:
         case ContentType.JPEG_BASE64:
-            content = <img style={{ maxWidth: "100%" }} src={`${baseURL}/api/authors/${extractAuthorIdFromApi(postAuthor.id)}/posts/${extractPostIdFromApi(props.id)}/image`} alt="Image Post" />;
+            content = <img style={{ maxWidth: "100%" }} src={props.content} alt="Image Post" />;
             break;
         default:
             content = <span>{props.content}</span>;
