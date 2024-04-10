@@ -11,6 +11,7 @@ import { Col, Row } from 'react-bootstrap';
 import SubscriptionCheckmark from '../../components/subscription/Checkmark';
 import { toast } from 'react-toastify';
 import { extractAuthorIdFromApi } from '../../api/utils';
+import { apiCheckSubscriptionStatus } from '../../api/subscription';
 
 enum FollowState {
     FOLLOWING="following",
@@ -31,6 +32,7 @@ const ProfilePage: React.FC = () => {
     const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
     const [subdomain, setSubdomain] = useState("");
     const [subscribed, setSubscribed] = useState(false);
+    const [weAreSubscribed, setWeAreSubscribed] = useState(false);
     const [blocked, setBlocked] = useState(false);
     const [inBlockingRequest, setInBlockingRequest] = useState(false);
 
@@ -118,6 +120,10 @@ const ProfilePage: React.FC = () => {
          
     }, [params, updateFollowingState, userId]);
 
+    useEffect(() => {
+        apiCheckSubscriptionStatus().then(setWeAreSubscribed);
+    }, []);
+
     /** Function to render the follow button based on following state */
     const renderFollowButton = () => {
         // Check that the user's profile is not the current user's
@@ -174,7 +180,7 @@ const ProfilePage: React.FC = () => {
             return;
         }
 
-        if (subscribed) {
+        if (weAreSubscribed) {
             return <button className="btn btn-secondary block-btn" onClick={onBlock} disabled={inBlockingRequest}>
                 {blocked ? "Unblock" : "Block"}
             </button>;
