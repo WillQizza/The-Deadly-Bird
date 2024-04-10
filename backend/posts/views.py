@@ -6,6 +6,7 @@ from rest_framework import serializers
 from django.db.models import Q
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404
+from django.views.decorators.gzip import gzip_page
 from deadlybird.serializers import GenericSuccessSerializer, GenericErrorSerializer
 from deadlybird.settings import SITE_HOST_URL
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
@@ -382,6 +383,7 @@ def post_image(_: HttpRequest, author_id: str, post_id: str):
 )
 @api_view(["GET"])
 @permission_classes([ RemoteOrSessionAuthenticated ])
+@gzip_page
 def post_stream(request: HttpRequest, stream_type: str):
   # Public stream
   if stream_type == "public":
