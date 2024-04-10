@@ -104,17 +104,17 @@ def post_likes(request: HttpRequest, author_id: str, post_id: str):
                 "message": "author post not found"
             }, 404)
 
-        if not compare_domains(author_post.origin, SITE_HOST_URL):
-            # Fetch from origin node
-            author_id, _, post_id = author_post.origin.split("/")[-3:]
-            url = resolve_remote_route(get_host_from_api_url(author_post.origin), "post_likes", {
+        if not compare_domains(author_post.source, SITE_HOST_URL):
+            # Fetch from source node
+            author_id, _, post_id = author_post.source.split("/")[-3:]
+            url = resolve_remote_route(get_host_from_api_url(author_post.source), "post_likes", {
                 "author_id": author_id,
                 "post_id": post_id
             })
             print("CHECKING ERROR THING")
             print(url)
 
-            auth = get_auth_from_host(get_host_from_api_url(author_post.origin))
+            auth = get_auth_from_host(get_host_from_api_url(author_post.source))
             print(auth)
             res = requests.get(url=url, auth=auth)
             print(res.status_code)

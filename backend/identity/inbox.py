@@ -189,24 +189,24 @@ def _like_post(request: HttpRequest, post_id, source_author):
       "message": "Post was not found"
     }, status=404)
   
-  if not compare_domains(post.origin, SITE_HOST_URL):
-    # Remote post, forward inbox like to origin
-    origin_author_id, _, origin_post_id = post.origin.split("/")[-3:]
+  if not compare_domains(post.source, SITE_HOST_URL):
+    # Remote post, forward inbox like to source
+    source_author_id, _, source_post_id = post.source.split("/")[-3:]
     payload = {
       "summary": f"{source_author.display_name} liked your post",
       "type": "Like",
       "author": InboxAuthorSerializer(source_author).data,
-      "object": resolve_remote_route(get_host_from_api_url(post.origin), view="post", kwargs={ "author_id": origin_author_id, "post_id": origin_post_id })
+      "object": resolve_remote_route(get_host_from_api_url(post.source), view="post", kwargs={ "author_id": source_author_id, "post_id": source_post_id })
     }
 
-    url = resolve_remote_route(get_host_from_api_url(post.origin), "inbox", {
-        "author_id": origin_author_id
+    url = resolve_remote_route(get_host_from_api_url(post.source), "inbox", {
+        "author_id": source_author_id
     })
 
     print("pushing remote like payload")
     print(payload)
 
-    auth = get_auth_from_host(get_host_from_api_url(post.origin))
+    auth = get_auth_from_host(get_host_from_api_url(post.source))
     response = requests.post(
       url=url,
       headers={'Content-Type': 'application/json'}, 
@@ -228,7 +228,7 @@ def _like_post(request: HttpRequest, post_id, source_author):
 
     return Response(response.json(), status=response.status_code)
 
-  # We are the origin, like the post.
+  # We are the source, like the post.
 
   # Check if like already exists
   existing_like = Like.objects.filter(content_type=Like.ContentType.POST, 
