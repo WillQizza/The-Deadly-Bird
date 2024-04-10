@@ -110,10 +110,12 @@ const Post: React.FC<PostOptions> = props => {
             // delete button if they shared the post
             return(
                 <>
-                    <Trash 
-                        className={`${styles.postButton} ${styles.postDelete}`}
-                        onClick={() => setShowConfirm(true)}
-                    />
+                    <Col className={styles.postButtonContainer}>
+                        <Trash 
+                            className={`${styles.postButton} ${styles.postDelete}`}
+                            onClick={() => setShowConfirm(true)}
+                        />
+                    </Col>
                     <DeleteDialog
                         show={showConfirm}
                         setShow={setShowConfirm}
