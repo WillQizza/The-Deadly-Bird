@@ -43,6 +43,8 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
     if author.display_name != data["display_name"]:
       author.display_name = data["display_name"]
       author.save()
+
+    return author
   except Author.DoesNotExist:
    
     try: 
