@@ -2,6 +2,7 @@ import { Modal, Button } from "react-bootstrap";
 import { apiDeletePosts } from "../../api/posts";
 import { getUserId } from "../../utils/auth";
 import { useNavigate } from "react-router-dom";
+import { toast } from 'react-toastify';
 
 interface DeleteDialogProps {
     show: boolean,
@@ -24,9 +25,9 @@ const DeleteDialog: React.FC<DeleteDialogProps> = (props: DeleteDialogProps) => 
 
                     navigate("/home");
                 } else if (response.status == 404) {
-                    alert("Post not found");
+                    toast.error("Post not found");
                 } else if (response.status == 500) {
-                    alert("Failed to delete: Internal server error");
+                    toast.error("Failed to delete: Internal server error");
                 }
             });
         setShow(false);

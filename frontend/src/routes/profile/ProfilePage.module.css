@@ -100,11 +100,12 @@
   font-size: 1.5em;
 }
 
-#followButton {
+#profileButtons {
   display: flex;
   flex-grow: 0;
   padding: 10px;
   margin-left: 10px;
+  gap: 5px;
   height: fit-content;
 }
 

@@ -4,7 +4,7 @@ import styles from "./Navigation.module.css";
 import { ReactComponent as CreatePost } from 'bootstrap-icons/icons/plus-circle.svg';
 import { ReactComponent as ArrowLeft } from 'bootstrap-icons/icons/arrow-left.svg';
 import { ReactComponent as List } from 'bootstrap-icons/icons/list.svg';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Sidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import { Button } from 'react-bootstrap';
 

@@ -9,6 +9,7 @@ import { apiDeleteFollower, apiInboxFollowRequest, apiGetFollower, apiGetFollowR
 import PostStream, { PostStreamTy } from '../../components/post/PostStream';
 import { Col, Row } from 'react-bootstrap';
 import SubscriptionCheckmark from '../../components/subscription/Checkmark';
+import { toast } from 'react-toastify';
 
 enum FollowState {
     FOLLOWING="following",
@@ -122,7 +123,7 @@ const ProfilePage: React.FC = () => {
             case FollowState.PENDING:
                 return (
                     <button className="btn btn-warning" onClick={() => {
-                        alert("Follow Request Already Pending!");
+                        toast.warning("Follow Request Already Pending!");
                     }}>
                         Pending
                     </button>
@@ -134,10 +135,10 @@ const ProfilePage: React.FC = () => {
                     <button className="btn btn-primary" onClick={async () => {
                         const followRequestRes = await apiInboxFollowRequest(loggedInAuthorId, authorId); 
                         if (followRequestRes === null || followRequestRes.error) {
-                            alert(`Failed to connect to remote host`);
+                            toast.error(`Failed to connect to remote host`);
                         } else { 
                             await updateFollowingState(authorId);
-                            alert(`Follow Request Sent!`);
+                            toast.success(`Follow Request Sent!`);
                         }
                     }}>
                         Follow
@@ -152,11 +153,11 @@ const ProfilePage: React.FC = () => {
         }
 
         if (subscribed) {
-            return <button className="btn btn-secondary">
+            return <button className="btn btn-secondary block-btn">
                 {blocked ? "Unblock" : "Block"}
             </button>;
         } else {
-            return <button className="btn btn-secondary" disabled>
+            return <button className="btn btn-secondary block-btn" disabled>
                 {blocked ? "Unblock" : "Block"}
             </button>;
         }
@@ -179,7 +180,7 @@ const ProfilePage: React.FC = () => {
                     <Col id={styles.avatarContainer}>
                         <img alt="Profile Avatar" src={avatarURL} />
                     </Col>
-                    <Col id={styles.followButton}>
+                    <Col id={styles.profileButtons}>
                         {renderFollowButton()}
                         {renderBlockButton()}
                     </Col>

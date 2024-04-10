@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from 'react-bootstrap';
-import { InboxResponse, PaginatedAPI } from '../../api/types';
 import { getInboxMessages } from '../../api/inbox'; 
 import { getUserId } from '../../utils/auth';
 import { ReactComponent as Allow } from 'bootstrap-icons/icons/check-lg.svg';
 import { ReactComponent as Deny } from 'bootstrap-icons/icons/x-lg.svg';
 import styles from './Inbox.module.css';
-import { apiDeleteFollower, apiPutFollower, apiDeleteFollowRequest } from '../../api/following';
+import { apiPutFollower, apiDeleteFollowRequest } from '../../api/following';
 import { apiClearInbox } from '../../api/inbox';
 import { Author } from '../../api/types';
 

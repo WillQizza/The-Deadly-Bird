@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import styles from './AuthorCard.module.css';
 import { Author } from '../../api/types';
-import { Card } from 'react-bootstrap';
 import { extractAuthorIdFromApi } from '../../api/utils';
 import { useNavigate } from 'react-router-dom';
 

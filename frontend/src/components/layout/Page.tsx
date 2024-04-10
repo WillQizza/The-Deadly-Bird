@@ -14,6 +14,8 @@ import { setUserId } from "../../utils/auth";
 import { apiRequest } from "../../utils/request";
 import { baseURL } from "../../constants";
 import { ReactComponent as InboxIcon } from 'bootstrap-icons/icons/inboxes-fill.svg';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Page = ({ children, selected, overflowScrollOff } : { children: React.ReactNode, selected?: SelectedNavigation, overflowScrollOff?: Boolean }) => {
      
@@ -56,6 +58,11 @@ const Page = ({ children, selected, overflowScrollOff } : { children: React.Reac
                     </div>
                     {/** Page content */}
                     <div className={`${styles.content} ${!overflowScrollOff ? styles.overflowScroll : ''}`}>
+                        <ToastContainer
+                            position="top-right"
+                            theme="dark"
+                            autoClose={2500}
+                        />
                         {children}
                     </div>
                 </div>
