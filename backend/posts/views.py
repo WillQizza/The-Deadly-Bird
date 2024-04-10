@@ -17,10 +17,13 @@ from likes.models import Like
 from identity.models import InboxMessage, BlockedAuthor
 from nodes.util import get_auth_from_host
 from .models import Post, Author, Following, Comment, FollowingFeedPost
+from blue.models import Ad, Subscription
+from blue.serializers import AdSerializer
 from .serializers import CommentSerializer, PostSerializer
 from .util import send_post_to_inboxes
 from .pagination import CommentsPagination, generate_comments_pagination_schema, generate_comments_pagination_query_schema
 import requests
+import random
 import json
 
 PostCreationPayloadSerializer = inline_serializer("PostCreationPayload", fields={
@@ -417,15 +420,30 @@ def post_stream(request: HttpRequest, stream_type: str):
       .exclude(Q(author__in=blocked_authors) | Q(origin_author__in=blocked_authors)) \
       .order_by("-published_date")
       
-
-    if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
+    node_authenticated = hasattr(request, "is_node_authenticated") and request.is_node_authenticated
+    if node_authenticated:
       posts = posts.filter(origin__startswith=SITE_HOST_URL)
 
     # Paginate and return serialized result
     posts_on_page = paginator.paginate_queryset(posts, request)
     serialized_posts = PostSerializer(posts_on_page, many=True)
 
-    return paginator.get_paginated_response(serialized_posts.data)
+    serialized_posts_data = serialized_posts.data
+    if len(serialized_posts_data) > 0 and random.randint(0, 3) == 0 and not node_authenticated:
+      # add an ad somewhere in the feed!
+      print("adding ad to feed")
+      ads = list(Ad.objects.all())
+
+      is_subscribed = Subscription.objects.filter(author_id=request.session["id"]).first() != None
+
+      if len(ads) > 0 and not is_subscribed:
+        print("there are ads we can add!")
+        ad = random.choice(ads)
+        serialized_ad = AdSerializer(ad).data
+        print(serialized_ad)
+        serialized_posts_data.insert(random.randint(1, len(serialized_posts_data)), serialized_ad)
+
+    return paginator.get_paginated_response(serialized_posts_data)
   
   # Following stream
   elif stream_type == 'following' and "id" in request.session:

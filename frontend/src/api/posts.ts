@@ -1,6 +1,6 @@
 import { baseURL } from "../constants";
 import { apiRequest } from "../utils/request";
-import { Post, PostResponse, PostsResponse } from "./types";
+import { Post, PostResponse, PostsResponse, PostsStreamResponse } from "./types";
 import { extractAuthorIdFromApi, extractPostIdFromApi } from "./utils";
 
 /**
@@ -31,7 +31,7 @@ export const apiGetPosts = async (
     type: APIPostStreamTy,
     page: number,
     size: number,
-): Promise<PostsResponse> => {
+): Promise<PostsStreamResponse> => {
     const response = await apiRequest(
         `${baseURL}/api/posts/${type}?page=${page}&size=${size}`
     );    

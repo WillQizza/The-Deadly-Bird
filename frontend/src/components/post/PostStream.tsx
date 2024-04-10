@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import styles from './PostStream.module.css';
 import Post from './Post';
+import Ad from "./Ad";
 import { apiGetAuthorPosts, apiGetPost, apiGetPosts, APIPostStreamTy } from '../../api/posts';
 import { apiGetPostLikes } from '../../api/likes';
 import { getUserId } from '../../utils/auth';
-import { PostsResponse } from '../../api/types';
+import { PostsResponse, PostsStreamResponse } from '../../api/types';
 import { extractAuthorIdFromApi } from '../../api/utils';
 import { Link } from 'react-router-dom';
 
@@ -84,7 +85,7 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
 
     // function to generate posts (and wait until last post is reached to generate more)
     const generatePosts = async (reset?: boolean) => {
-        let response: PostsResponse;
+        let response: PostsResponse|PostsStreamResponse;
         if (props.type === PostStreamTy.Author && props.authorID) {   // Get profile posts
             response = await apiGetAuthorPosts(props.authorID, currentPage.current, pageSize);
         } else if (props.type === PostStreamTy.Public) {    // Get public posts
@@ -118,21 +119,25 @@ const PostStream: React.FC<PostStreamArgs> = (props: PostStreamArgs) => {
         if ('items' in response) {
             const newPosts = (await Promise.all(response.items.map(async (postResponse) => {
                 try {
-                    const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
-                    const isLikedByUs = !!likes.items.find(like => extractAuthorIdFromApi(like.author.id) === getUserId());
-                    return (
-                        <Post
-                            key={`${postResponse.author.id}/${postResponse.id}`}
-                            {...postResponse} 
-                            //@ts-ignore
-                            likes={(likes.items).length}
-                            isLiked={isLikedByUs}
-                            refreshStream={() => {
-                                currentPage.current = 1;
-                                generatePosts(true);
-                            }}
-                        />
-                    );
+                    if (postResponse.type === "post") {
+                        const likes = await apiGetPostLikes(postResponse.author.id, postResponse.id);
+                        const isLikedByUs = !!likes.items.find(like => extractAuthorIdFromApi(like.author.id) === getUserId());
+                        return (
+                            <Post
+                                key={`${postResponse.author.id}/${postResponse.id}`}
+                                {...postResponse} 
+                                //@ts-ignore
+                                likes={(likes.items).length}
+                                isLiked={isLikedByUs}
+                                refreshStream={() => {
+                                    currentPage.current = 1;
+                                    generatePosts(true);
+                                }}
+                            />
+                        );
+                    } else {
+                        return <Ad key={postResponse.id} { ...postResponse } />;
+                    }
                 } catch (error) {
                     failedToLoadPosts.current = failedToLoadPosts.current + 1;
                     console.error(error);

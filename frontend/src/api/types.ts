@@ -49,6 +49,16 @@ export type Post = {
     unlisted: boolean | null //appears in the Inbox get request
 };
 
+export type Ad = {
+    type: "ad",
+    id: string,
+    title: string,
+    description: string,
+    contentType: ContentType,
+    content: string,
+    company: string
+};
+
 export type Comment = {
     type: "comment",
     author: Author,
@@ -89,6 +99,8 @@ export type PostResponse = Post & {
 
 // url: ://service/authors/{AUTHOR_ID}/posts/
 export type PostsResponse = PaginatedAPI<"posts", PostResponse>;
+
+export type PostsStreamResponse = PaginatedAPI<"posts", PostResponse|Ad>;
 
 // url: ://service/authors/{AUTHOR_ID}/posts/{POST_ID}/comments
 export type CommentsResponse = PaginatedAPI<"comments", Comment>;

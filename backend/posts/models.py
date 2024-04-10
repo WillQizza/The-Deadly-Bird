@@ -30,6 +30,9 @@ class Post(models.Model):
   published_date = models.DateTimeField(auto_now_add=True, blank=False, null=False)
   visibility = models.CharField(choices=Visibility.choices, max_length=8, blank=False, null=False)
 
+  def __str__(self) -> str:
+    return f"Post {self.id} - ({self.author.display_name}) [{self.content_type}] [{self.visibility}]"
+
 class Comment(models.Model):
   class ContentType(models.TextChoices):
     MARKDOWN = "text/markdown"
