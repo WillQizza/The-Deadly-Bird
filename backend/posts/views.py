@@ -61,7 +61,7 @@ def posts(request: HttpRequest, author_id: str):
     paginator = Pagination("posts")
 
     # Check if the person has access to friend posts
-    can_see_friends = False
+    can_see_friends = hasattr(request, "is_node_authenticated") and request.is_node_authenticated
     if "id" in request.session:
       can_see_friends = (author_id == request.session["id"]) or \
                           is_friends(author_id, request.session["id"])

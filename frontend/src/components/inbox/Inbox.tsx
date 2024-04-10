@@ -13,7 +13,7 @@ const Inbox = () => {
 
     const [inboxMessages, setInboxMessages] = useState<any[]>([]);
     const [pageNo, setPageNo] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const [pageSize, setPageSize] = useState<number>(100);
     const curAuthorId = getUserId();
     
     /** Gets the user's inbox */

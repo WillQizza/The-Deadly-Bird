@@ -20,7 +20,6 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       continue  # Friend posts should only be sent to the inboxes of friends
 
     if not compare_domains(follower.author.host, SITE_HOST_URL):
-      print(f"PUBLISHING MESSAGE FROM {author_id} OF {post_id} TO {follower.author.id}")
       # Remote follower, we have to publish the post to their inbox
       url = resolve_remote_route(follower.author.host, "inbox", {
           "author_id": follower.author.id
@@ -28,7 +27,9 @@ def send_post_to_inboxes(post_id: str, author_id: str):
       auth = get_auth_from_host(follower.author.host)
 
       payload = InboxPostSerializer(post).data
-            
+
+      print(f"PUBLISHING MESSAGE FROM {follower.target_author.display_name} ({author_id}) OF {post_id} TO {follower.author.display_name} ({follower.author.id}) with url {url} \n{json.dumps(payload)}")
+
       response = requests.post(
         url=url,
         headers={'Content-Type': 'application/json'}, 
