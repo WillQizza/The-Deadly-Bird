@@ -20,6 +20,7 @@ import CommentSection from '../comment/CommentSection';
 import { extractAuthorIdFromApi, extractPostIdFromApi } from '../../api/utils';
 import SubscriptionCheckmark from '../subscription/Checkmark';
 import DeleteDialog from './DeleteDialog';
+import { toast } from 'react-toastify';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -85,6 +86,7 @@ const Post: React.FC<PostOptions> = props => {
     const handleShare = async () => {
         await apiSharePost(props.author.id, props.id);
         props.refreshStream();
+        toast.success("Successfully shared post!");
     };
 
     // Handle comment section and commenting
