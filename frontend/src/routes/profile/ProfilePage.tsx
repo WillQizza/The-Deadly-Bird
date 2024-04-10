@@ -180,15 +180,9 @@ const ProfilePage: React.FC = () => {
             return;
         }
 
-        if (weAreSubscribed) {
-            return <button className="btn btn-secondary block-btn" onClick={onBlock} disabled={inBlockingRequest}>
-                {blocked ? "Unblock" : "Block"}
-            </button>;
-        } else {
-            return <button className="btn btn-secondary block-btn" onClick={onBlock} disabled>
-                {blocked ? "Unblock" : "Block"}
-            </button>;
-        }
+        return <button className="btn btn-secondary block-btn" onClick={onBlock} disabled={inBlockingRequest}>
+            {blocked ? "Unblock" : "Block"}
+        </button>;
     };
     
     /** Profile page */
