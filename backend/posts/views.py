@@ -544,7 +544,11 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
     # Check if the post is a remote post or not
     if not compare_domains(post.origin, SITE_HOST_URL):
       # Remote post
+      print("sending remote comment...")
       remote_author = post.author
+      if post.origin_author != None:
+        remote_author = post.origin_author
+
       url = resolve_remote_route(remote_author.host, "inbox", {
           "author_id": remote_author.id
       })
@@ -558,7 +562,7 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
       payload = CommentSerializer(comment).data
 
       if "y-com" in url:
-        payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": post.author.id, "post_id": post.id }, force_no_slash=True)
+        payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": remote_author.id, "post_id": post.id }, force_no_slash=True)
 
       auth = get_auth_from_host(remote_author.host)
       response = requests.post(

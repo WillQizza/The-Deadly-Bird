@@ -4,7 +4,7 @@ from blue.models import Subscription
 from posts.models import Post, Comment
 from likes.models import Like
 from following.models import Following, FollowingRequest
-from .models import Author, InboxMessage
+from .models import Author, InboxMessage, BlockedAuthor
 from nodes.models import Node
 from deadlybird.util import resolve_remote_route, remove_trailing_slash
 from urllib.parse import urljoin
@@ -63,10 +63,15 @@ class AuthorSerializer(serializers.ModelSerializer):
   
   def to_representation(self, instance):
     data = super().to_representation(instance)
+
+    if "id" in self.context:
+      data["blocked"] = BlockedAuthor.objects.filter(author_id=self.context["id"], blocked_author_id=data["id"]).first() != None
+
     data["id"] = resolve_remote_route(data["host"], "author", kwargs={ "author_id": data["id"] }, force_no_slash=True)
     if "github" in data and data["github"] is not None:
       data["github"] = f"https://github.com/{data['github']}"
     data["host"] = remove_trailing_slash(data["host"]) + "/"
+
     return data
 
   class Meta:

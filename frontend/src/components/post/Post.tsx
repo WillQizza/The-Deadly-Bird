@@ -8,6 +8,7 @@ import { ReactComponent as Heart } from 'bootstrap-icons/icons/heart.svg';
 import { ReactComponent as HeartFilled } from 'bootstrap-icons/icons/heart-fill.svg';
 import { ReactComponent as PencilSquare} from 'bootstrap-icons/icons/pencil-square.svg';
 import { ReactComponent as LinkIcon} from 'bootstrap-icons/icons/link-45deg.svg';
+import { ReactComponent as Trash } from 'bootstrap-icons/icons/trash3.svg';
 import { ReactComponent as Chat } from 'bootstrap-icons/icons/chat.svg';
 import { getUserId } from '../../utils/auth';
 import { apiCreatePostLike } from '../../api/likes';
@@ -18,6 +19,7 @@ import CommentForm from '../comment/CommentForm';
 import CommentSection from '../comment/CommentSection';
 import { extractAuthorIdFromApi, extractPostIdFromApi } from '../../api/utils';
 import SubscriptionCheckmark from '../subscription/Checkmark';
+import DeleteDialog from './DeleteDialog';
 
 type PostOptions = PostTy & {
     likes: number;
@@ -29,6 +31,8 @@ const Post: React.FC<PostOptions> = props => {
     // Handle link button tooltip popup
     const linkButton = useRef(null);
     const [linkTooltipShow, setLinkTooltipShow] = useState(false);
+
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const postAuthor = props.originAuthor || props.author;
 
@@ -102,23 +106,23 @@ const Post: React.FC<PostOptions> = props => {
                 </Col>
             );
         }
-        // else if (props.originAuthor && extractAuthorIdFromApi(props.author.id) === getUserId()) {
-        //     // delete button if they shared the post
-        //     return(
-        //         <>
-        //             <Trash 
-        //                 className={`${styles.postButton} ${styles.postDelete}`}
-        //                 onClick={() => setShowConfirm(true)}
-        //             />
-        //             <DeleteDialog
-        //                 show={showConfirm}
-        //                 setShow={setShowConfirm}
-        //                 postId={props.id}
-        //                 onDelete={props.refreshStream}
-        //             />
-        //         </>
-        //     );
-        // }
+        else if (props.originAuthor && extractAuthorIdFromApi(props.author.id) === getUserId()) {
+            // delete button if they shared the post
+            return(
+                <>
+                    <Trash 
+                        className={`${styles.postButton} ${styles.postDelete}`}
+                        onClick={() => setShowConfirm(true)}
+                    />
+                    <DeleteDialog
+                        show={showConfirm}
+                        setShow={setShowConfirm}
+                        postId={props.id}
+                        onDelete={props.refreshStream}
+                    />
+                </>
+            );
+        }
         else {
             return null;
         }

@@ -29,6 +29,7 @@ const ProfilePage: React.FC = () => {
     const [followState, setFollowState] = useState<FollowState>(FollowState.NOT_FOLLOWING)
     const [subdomain, setSubdomain] = useState("");
     const [subscribed, setSubscribed] = useState(false);
+    const [blocked, setBlocked] = useState(false);
 
     const loggedInAuthorId : string = getUserId()!; 
     const params = useParams();
@@ -70,6 +71,7 @@ const ProfilePage: React.FC = () => {
                 setAuthorId(author.id);
                 setBio(author.bio);
                 setSubscribed(author.subscribed);
+                setBlocked(!!author.blocked);
 
                 if (author.github) {
                     setGithubUsername(author.github.substring("https://github.com/".length));
@@ -94,7 +96,7 @@ const ProfilePage: React.FC = () => {
     }, [params, updateFollowingState, userId]);
 
     /** Function to render the follow button based on following state */
-    const renderButton = () => {
+    const renderFollowButton = () => {
         // Check that the user's profile is not the current user's
         if (userId === loggedInAuthorId) {
             return;
@@ -143,6 +145,22 @@ const ProfilePage: React.FC = () => {
                 );
         }
     };
+
+    const renderBlockButton = () => {
+        if (!userId) {
+            return;
+        }
+
+        if (subscribed) {
+            return <button className="btn btn-secondary">
+                {blocked ? "Unblock" : "Block"}
+            </button>;
+        } else {
+            return <button className="btn btn-secondary" disabled>
+                {blocked ? "Unblock" : "Block"}
+            </button>;
+        }
+    };
     
     /** Profile page */
     return <Page selected="Profile">
@@ -162,7 +180,8 @@ const ProfilePage: React.FC = () => {
                         <img alt="Profile Avatar" src={avatarURL} />
                     </Col>
                     <Col id={styles.followButton}>
-                        {renderButton()}
+                        {renderFollowButton()}
+                        {renderBlockButton()}
                     </Col>
                 </Row>
                 {/** About the user */}

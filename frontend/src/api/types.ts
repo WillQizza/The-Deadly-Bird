@@ -23,6 +23,7 @@ export type Author = {
     email?: string;
     github?: string;
     profileImage?: string;
+    blocked?: boolean;
     subscribed: boolean;
     posts: number;
     following: number;
