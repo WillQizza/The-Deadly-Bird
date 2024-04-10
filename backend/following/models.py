@@ -16,6 +16,9 @@ class Following(models.Model):
                              on_delete=models.CASCADE, 
                              related_name="following_from")
 
+  def __str__(self) -> str:
+      return f"Following - ({self.author.display_name} to {self.target_author.display_name})"
+
 class FollowingRequest(models.Model):
   id = models.CharField(primary_key=True, max_length=255, default=generate_next_id)
   target_author = models.ForeignKey(Author, 
@@ -29,3 +32,5 @@ class FollowingRequest(models.Model):
                              on_delete=models.CASCADE, 
                              related_name="request_from")
 
+  def __str__(self) -> str:
+    return f"FollowingRequest - ({self.author.display_name} to {self.target_author.display_name})"
