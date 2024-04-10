@@ -561,7 +561,7 @@ def handle_comment_inbox(request: HttpRequest):
     }
 
     if "y-com" in url:
-      payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": remote_author.id, "post_id": post_origin_id }, force_no_slash=True)
+      payload["id"] = resolve_remote_route(remote_author.host, "post", kwargs={ "author_id": remote_author.id, "post_id": post_origin_id }, force_no_slash=True)
 
     print("payload to remote")
     print(payload)
