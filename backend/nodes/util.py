@@ -33,7 +33,16 @@ def get_or_create_remote_author_from_api_payload(data: dict[str, any]):
   data = serializer.validated_data
   
   try:
-    return Author.objects.get(id=data["id"])
+    author = Author.objects.get(id=data["id"])
+    if author.profile_picture != data["profile_picture"]:
+      author.profile_picture = data["profile_picture"]
+      author.save()
+    if author.github != data["github"]:
+      author.github = data["github"]
+      author.save()
+    if author.display_name != data["display_name"]:
+      author.display_name = data["display_name"]
+      author.save()
   except Author.DoesNotExist:
    
     try: 

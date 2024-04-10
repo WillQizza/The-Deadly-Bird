@@ -3,17 +3,21 @@ from django.http import HttpRequest
 from rest_framework import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from nodes.models import Node
+from nodes.util import get_auth_from_host, get_or_create_remote_author_from_api_payload
 from .models import Author, InboxMessage, BlockedAuthor
 from deadlybird.permissions import RemoteOrSessionAuthenticated, SessionAuthenticated, IsGetRequest, IsPutRequest, IsPostRequest, IsDeleteRequest
 from deadlybird.serializers import GenericErrorSerializer, GenericSuccessSerializer
-from deadlybird.util import generate_next_id, generate_full_api_url, remove_trailing_slash
+from deadlybird.util import generate_next_id, generate_full_api_url, remove_trailing_slash, resolve_remote_route
 from deadlybird.pagination import Pagination, generate_pagination_schema, generate_pagination_query_schema
 from deadlybird.settings import SITE_HOST_URL
 from likes.serializers import APIDocsLikeSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter, inline_serializer
 from .pagination import InboxPagination, generate_inbox_pagination_query_schema, generate_inbox_pagination_schema
-from .serializers import AuthorSerializer, InboxMessageSerializer 
+from .serializers import AuthorSerializer, InboxMessageSerializer, InboxAuthorSerializer
 from identity.util import get_this_host_url
+import requests
+import json
 
 @extend_schema(
     operation_id="api_authors_retrieve_all",
@@ -29,7 +33,6 @@ def authors(request: HttpRequest):
  
   # Get author queryset ordered by their id
   authors = Author.objects.all().order_by("id")
-
   # Get query parameter filter if exists
   include_host_filter = request.query_params.get('include_host', None)
   exclude_host_filter = request.query_params.get('exclude_host', None)
@@ -41,6 +44,20 @@ def authors(request: HttpRequest):
 
   if hasattr(request, "is_node_authenticated") and request.is_node_authenticated:
     authors = authors.filter(host__icontains=remove_trailing_slash(SITE_HOST_URL))
+  else:
+    # For the sake of group propagation, I present a hacky method to show authors we don't have information on
+    # Only for local requests do we fetch all the users again (avoid infinite loop)
+    for node in Node.objects.all():
+      authors_url = resolve_remote_route(node.host, "authors") + "?size=100"
+      auth = get_auth_from_host(node.host)
+      response = requests.get(url=authors_url, auth=auth).json()
+      for author_json in response["items"]:
+        inbox_author_serializer = InboxAuthorSerializer(data=author_json)
+        if not inbox_author_serializer.is_valid():
+          print(f"Invalid inbox author received: {json.dumps(author_json)}")
+          continue
+        get_or_create_remote_author_from_api_payload(inbox_author_serializer.data)
+      
 
   # Paginate the queryset
   paginator = Pagination("authors")
