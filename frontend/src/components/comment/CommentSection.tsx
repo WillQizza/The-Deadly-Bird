@@ -2,10 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ListGroup, Alert } from "react-bootstrap";
 import Comment from "./Comment";
 import { CommentProps } from "./Comment";
-import { getUserId } from "../../utils/auth";
-import { apiGetCommentLikes } from "../../api/likes";
 import { apiGetComments } from "../../api/comments";
-import { extractAuthorIdFromApi } from "../../api/utils";
 
 interface CommentSectionProps {
     postId: string,

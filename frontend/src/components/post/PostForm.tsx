@@ -1,6 +1,6 @@
 import styles from './PostForm.module.css';
-import { useEffect, useRef, useState } from 'react';
-import { Alert, Button, Form, Modal } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
+import { Alert, Button, Form } from 'react-bootstrap';
 import { baseURL } from '../../constants';
 import { useNavigate } from 'react-router-dom';
 import { getUserId } from '../../utils/auth';
@@ -8,7 +8,6 @@ import { apiRequest } from '../../utils/request';
 import FormTextbox from './FormTextbox';
 import RadioButtonGroup from './RadioButtonGroup';
 import ImageUpload from './ImageUpload';
-import { apiDeletePosts } from '../../api/posts';
 import DeleteDialog from './DeleteDialog';
 import { extractPostIdFromApi } from '../../api/utils';
 

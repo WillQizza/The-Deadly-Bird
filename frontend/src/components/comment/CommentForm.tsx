@@ -2,10 +2,6 @@ import { Button, Form, FloatingLabel, Alert } from "react-bootstrap";
 import styles from "./CommentForm.module.css"
 import { useState } from "react";
 import { ReactComponent as SendIcon} from 'bootstrap-icons/icons/send.svg';
-import { useNavigate } from "react-router-dom";
-import { baseURL } from "../../constants";
-import { apiRequest } from "../../utils/request";
-import { extractAuthorIdFromApi } from "../../api/utils";
 import { apiPostComment } from "../../api/comments";
 
 interface CommentFormProps {
