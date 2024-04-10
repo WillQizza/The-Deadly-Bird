@@ -619,6 +619,9 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         )
 
         if not response.ok:
+          print("Failed to create remote comment")
+          print(url)
+          print(json.dumps(payload))
           return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
 
 
