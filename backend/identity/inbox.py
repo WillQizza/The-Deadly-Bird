@@ -528,7 +528,7 @@ def handle_comment_inbox(request: HttpRequest):
   
   post_id, arg, comment_id = serializer.data["id"].split("/")[-3:]
 
-  print("sending comment")
+  print("received inbox comment")
   print(serializer.data)
   
   # Temporary hack in case scenario of /posts/id instead of /posts/id/comments/id 
@@ -538,42 +538,15 @@ def handle_comment_inbox(request: HttpRequest):
     
   post = Post.objects.get(id=post_id)
 
-  if not compare_domains(post.origin, SITE_HOST_URL):
+  if not compare_domains(post.source, SITE_HOST_URL):
     # Remote post. Redirect to proper remote host
-    print("comment to remote node")
-    remote_author = post.author
-    if post.origin_author != None:
-      remote_author = post.origin_author
-    url = resolve_remote_route(remote_author.host, "inbox", {
-        "author_id": remote_author.id
-    })
-    auth = get_auth_from_host(remote_author.host)
-
-    post_origin_id = post.origin.split("/")[-1]
-
-    payload = {
-      "type": serializer.data["type"],
-      "id": f'{resolve_remote_route(remote_author.host, "comments", kwargs={ "author_id": remote_author.id, "post_id": post_origin_id })}/{comment_id}',
-      "author": serializer.data["author"],
-      "comment": serializer.data["comment"],
-      "contentType": serializer.data["contentType"],
-      "published": serializer.data["published"]
-    }
-
-    if "y-com" in url:
-      payload["id"] = resolve_remote_route(remote_author.host, "post", kwargs={ "author_id": remote_author.id, "post_id": post_origin_id }, force_no_slash=True)
-
-    print("payload to remote")
-    print(payload)
-
-    response = requests.post(
-      url=url,
-      headers={'Content-Type': 'application/json'}, 
-      data=json.dumps(payload), 
-      auth=auth
-    )
-    return Response(response.json(), status=response.status_code)
-    
+    print(f"source not matching from comment my site is {SITE_HOST_URL} and source is {post.source}")
+    return Response({
+      "error": True,
+      "message": "Incoming comment does not belong to a post from this node."
+    }, status=400)    
+  
+  print("domain matches")
 
   author = get_or_create_remote_author_from_api_payload(serializer.data["author"])
   comment = Comment.objects.create(
@@ -585,9 +558,7 @@ def handle_comment_inbox(request: HttpRequest):
   )
 
   local_author = post.author
-  if post.origin_author != None:
-    local_author = post.origin_author
-
+  print("created inbox ")
   InboxMessage.objects.create(
     author=local_author,
     content_id=comment.id,

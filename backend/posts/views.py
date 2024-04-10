@@ -497,15 +497,15 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
   if request.method == "GET":
     # Get the comments on the post
 
-    if not compare_domains(post.origin, SITE_HOST_URL):
+    if not compare_domains(post.source, SITE_HOST_URL):
       # Remote post. get comments from remote
-      origin_aid, _, origin_pid = post.origin.split("/")[-3:]
-      url = resolve_remote_route(get_host_from_api_url(post.origin), "comments", {
-          "author_id": origin_aid,
-          "post_id": origin_pid
+      source_aid, _, source_pid = post.source.split("/")[-3:]
+      url = resolve_remote_route(get_host_from_api_url(post.source), "comments", {
+          "author_id": source_aid,
+          "post_id": source_pid
       })
 
-      auth = get_auth_from_host(get_host_from_api_url(post.origin))
+      auth = get_auth_from_host(get_host_from_api_url(post.source))
 
       res = requests.get(url=url, auth=auth, params=request.GET.dict())
       return Response(res.json(), status=res.status_code)
@@ -543,15 +543,12 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
     author = get_object_or_404(Author, id=request.session["id"])
 
     # Check if the post is a remote post or not
-    if not compare_domains(post.origin, SITE_HOST_URL):
+    if not compare_domains(post.source, SITE_HOST_URL):
       # Remote post
       print("sending remote comment...")
-      remote_author = post.author
-      if post.origin_author != None:
-        remote_author = post.origin_author
 
-      url = resolve_remote_route(remote_author.host, "inbox", {
-          "author_id": remote_author.id
+      url = resolve_remote_route(post.author.host, "inbox", {
+          "author_id": post.author.id
       })
 
       comment = Comment.objects.create(
@@ -564,9 +561,9 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
       comment.delete()  # Delete dummy comment object
 
       if "y-com" in url:
-        payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": remote_author.id, "post_id": post.id }, force_no_slash=True)
+        payload["id"] = resolve_remote_route(post.author.host, "post", kwargs={ "author_id": post.author.id, "post_id": post.id }, force_no_slash=True)
 
-      auth = get_auth_from_host(remote_author.host)
+      auth = get_auth_from_host(post.author.host)
       response = requests.post(
         url=url,
         headers={'Content-Type': 'application/json'}, 
@@ -581,54 +578,18 @@ def comments(request: HttpRequest, author_id: str, post_id: str):
         print(json.dumps(payload))
         return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
     else:
-
-      # Send inbox message to post's owner
-      if compare_domains(post.author.host, SITE_HOST_URL):
-        # Local post
-        comment = Comment.objects.create(
-          post=post,
-          author=author,
-          content_type=request.POST["contentType"],
-          content=request.POST["comment"]
-        )
-        InboxMessage.objects.create(
-            author=comment.post.author,
-            content_id=comment.id,
-            content_type=InboxMessage.ContentType.COMMENT
-        )
-      else:
-        # Remote post
-        comment = Comment.objects.create(
-          post=post,
-          author=author,
-          content_type=request.POST["contentType"],
-          content=request.POST["comment"]
-        )
-        payload = CommentSerializer(comment).data
-
-        # The original author did not originate from our node... What's the source for this post?
-        # Find the quickest post to get to the origin
-        earliest_non_remote_post = Post.objects.all().filter(origin=post.origin).order_by("published_date").first()
-        source_author = earliest_non_remote_post.author
-        
-        url = resolve_remote_route(source_author.host, "inbox", {
-          "author_id": source_author.id
-        })
-
-        auth = get_auth_from_host(source_author.host)
-        response = requests.post(
-          url=url,
-          headers={'Content-Type': 'application/json'}, 
-          data=json.dumps(payload), 
-          auth=auth
-        )
-
-        if not response.ok:
-          print("Failed to create local comment")
-          print(url)
-          print(json.dumps(payload))
-          return Response({"error": True, "message": "Failed to create comment"}, status=response.status_code)
-
+      # Local post being created
+      comment = Comment.objects.create(
+        post=post,
+        author=author,
+        content_type=request.POST["contentType"],
+        content=request.POST["comment"]
+      )
+      InboxMessage.objects.create(
+          author=comment.post.author,
+          content_id=comment.id,
+          content_type=InboxMessage.ContentType.COMMENT
+      )
 
     return Response({
       "error": False,

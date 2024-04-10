@@ -49,10 +49,10 @@ def comment_likes(request: HttpRequest, author_id: str, post_id: str, comment_id
     
 
     # If this is a remote author post, then just redirect.
-    if not compare_domains(get_host_from_api_url(author_post.origin), SITE_HOST_URL):
+    if not compare_domains(get_host_from_api_url(author_post.source), SITE_HOST_URL):
         # Fetch from origin node
         author_id, _, post_id = author_post.origin.split("/")[-3:]
-        url = resolve_remote_route(get_host_from_api_url(author_post.origin), "comment_likes", {
+        url = resolve_remote_route(get_host_from_api_url(author_post.source), "comment_likes", {
             "author_id": author_id,
             "post_id": post_id,
             "comment_id": comment_id
