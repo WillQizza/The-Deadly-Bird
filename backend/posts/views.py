@@ -61,7 +61,8 @@ def posts(request: HttpRequest, author_id: str):
     paginator = Pagination("posts")
 
     # Check if the person has access to friend posts
-    can_see_friends = hasattr(request, "is_node_authenticated") and request.is_node_authenticated
+    node_authenticated = hasattr(request, "is_node_authenticated") and request.is_node_authenticated
+    can_see_friends = node_authenticated
     if "id" in request.session:
       can_see_friends = (author_id == request.session["id"]) or \
                           is_friends(author_id, request.session["id"])
@@ -70,7 +71,7 @@ def posts(request: HttpRequest, author_id: str):
     if can_see_friends:
       posts = Post.objects.all().filter(author=author_id)
 
-      can_see_unlisted = author_id == request.session["id"]
+      can_see_unlisted = (not node_authenticated) and (author_id == request.session["id"])
       if not can_see_unlisted:
         posts = posts.exclude(visibility=Post.Visibility.UNLISTED) \
       
