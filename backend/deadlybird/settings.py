@@ -33,7 +33,7 @@ DEBUG = True
 TESTING = sys.argv[1:2] == ['test']
 
 ALLOWED_HOSTS = [
-  'https://thedeadlybird.willqi.dev',
+  'thedeadlybird.willqi.dev',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',
