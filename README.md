@@ -1,21 +1,19 @@
-CMPUT404-project-socialdistribution
+The Deadly Bird
 ===================================
 
-Links
-============
+A distributed social media platform similiar to Mastodon.
 
 - <a href="https://www.figma.com/file/0yC4iSm1go8vglzSXZPfhy/the-deadly-bird?type=design&node-id=0%3A1&mode=design&t=mczNMkpmOdCOt6Ki-1">Figma</a>
-- <a href="https://thedeadlybird-123769211974.herokuapp.com/">Heroku</a>
+- <a href="https://thedeadlybird.willqi.dev">Demo Site (User Content Restricted!)</a>
 
-Build
+Running
 ============
-Run the app locally for development:
+Run the app locally:
 ```shell
-docker build -t deadly-bird .      
-docker run -p 8000:8000 deadly-bird
+docker run -p 8000:8000 registry.willqi.dev/public-thedeadlybird:1
 ```
 
-While unrecommended, if you need to run this application without Docker:
+Run the app without Docker:
 ```shell
 cd frontend
 npm install
@@ -24,16 +22,6 @@ cd ../backend
 pip install -r requirements.txt
 python manage.py migrate
 python manage.py runserver
-```
-
-Deployment
-============
-To deploy the application via heroku:
-```shell
-heroku apps:create thedeadlybird    # This should only be run once to create the app
-heroku container:login
-heroku container:push web -a thedeadlybird
-heroku container:release web -a thedeadlybird
 ```
 
 Contributing

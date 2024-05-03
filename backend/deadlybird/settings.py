@@ -33,10 +33,7 @@ DEBUG = True
 TESTING = sys.argv[1:2] == ['test']
 
 ALLOWED_HOSTS = [
-  'thedeadlybird-123769211974.herokuapp.com',
-  'deadly-bird-justin-ce5a27ea0b51.herokuapp.com',
-  'depresso-espresso-7e0a859d2d18.herokuapp.com',
-  'web-wizards-roop-06e9f4b1fec9.herokuapp.com',
+  'https://thedeadlybird.willqi.dev',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',
@@ -46,10 +43,7 @@ ALLOWED_HOSTS = [
   'host.docker.internal'
 ]
 CSRF_TRUSTED_ORIGINS = [
-  'https://thedeadlybird-123769211974.herokuapp.com',
-  'https://deadly-bird-justin-ce5a27ea0b51.herokuapp.com',
-  'https://depresso-espresso-7e0a859d2d18.herokuapp.com',
-  'https://web-wizards-roop-06e9f4b1fec9.herokuapp.com',
+  'https://thedeadlybird.willqi.dev',
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:8000',
@@ -119,34 +113,25 @@ WSGI_APPLICATION = 'deadlybird.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-IS_HEROKU_APP = "DYNO" in os.environ and not "CI" in os.environ
-
-if IS_HEROKU_APP:
+IS_DOCKER_APP = "DOCKER" in os.environ
+if IS_DOCKER_APP:
+    print("[Docker Detected]")
+    if not os.path.exists(BASE_DIR / "data"):
+        os.makedirs(BASE_DIR / "data")
     DATABASES = {
-        "default": dj_database_url.config(
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=True
-        )
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "data" / "db.sqlite3",
+        }
     }
 else:
-    IS_DOCKER_APP = "DOCKER" in os.environ
-    if IS_DOCKER_APP:
-        print("[Docker Detected]")
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": BASE_DIR / "data" / "db.sqlite3",
-            }
+    # Not docker
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
-    else:
-        # Not docker
-        DATABASES = {
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": BASE_DIR / "db.sqlite3",
-            }
-        }
+    }
 
 
 # Password validation
