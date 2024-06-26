@@ -9,7 +9,7 @@ colorama==0.4.6
 dj-database-url==2.1.0
 Django==5.0.3
 django-cors-headers==4.3.1
-djangorestframework==3.14.0
+djangorestframework==3.15.2
 drf-spectacular==0.27.1
 exceptiongroup==1.2.0
 execnet==2.0.2
@@ -39,6 +39,6 @@ typing_extensions==4.9.0
 tzdata==2023.4
 tzlocal==5.2
 uritemplate==4.1.1
-urllib3==2.2.1
+urllib3==2.2.2
 whitenoise==6.6.0
 yarl==1.9.4
