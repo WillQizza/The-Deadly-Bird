@@ -4,7 +4,6 @@ The Deadly Bird
 A distributed social media platform similiar to Mastodon.
 
 - <a href="https://www.figma.com/file/0yC4iSm1go8vglzSXZPfhy/the-deadly-bird?type=design&node-id=0%3A1&mode=design&t=mczNMkpmOdCOt6Ki-1">Figma</a>
-- <a href="https://thedeadlybird.willqi.dev">Demo Site (User Content Restricted!)</a>
 
 Running
 ============
