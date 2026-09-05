@@ -1,33 +1,44 @@
-name: Docker Registry Deployment
 on:
   push:
-    branches: [main]
+    branches:
+      - master
   workflow_dispatch:
 
-concurrency:
-  group: "docker"
-  cancel-in-progress: false
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  deploy:
+  publish:
     runs-on: ubuntu-latest
-    environment:
-      name: docker
     steps:
-      - name: Setup QEMU
+      - uses: actions/checkout@v6
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+          
+      - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Setup Docker Buildx
+        with:
+          platforms: arm64
+
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to Registry
-        uses: docker/login-action@v3
-        with:
-          registry: registry.willqi.dev
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-      - name: Build & Push
-        uses: docker/build-push-action@v5
-        with:
-          push: true
-          tags: registry.willqi.dev/public-thedeadlybird:1
-          build-args: |
-            DOCKER=1
+
+      - name: Build and push
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --provenance=false \
+            --cache-from type=registry,ref=public.ecr.aws/l7y2e7z7/thedeadlybird:buildcache \
+            --cache-to type=registry,ref=public.ecr.aws/l7y2e7z7/thedeadlybird:buildcache,mode=max,image-manifest=true,oci-mediatypes=true,ignore-error=true \
+            -t public.ecr.aws/l7y2e7z7/thedeadlybird:latest \
+            --push \
+            .
