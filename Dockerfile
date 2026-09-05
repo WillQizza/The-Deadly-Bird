@@ -10,15 +10,13 @@
 #   PORT:       8000            Auto Assigned 
 #   DEBUG:      True            False
 
-# Get Node 20 and pnpm
+# Get Node 22
 FROM node:22 AS frontend
 
 # Install Node.js dependencies
-RUN corepack enable pnpm
 WORKDIR /app/frontend
-COPY frontend/*.json .
-RUN pnpm approve-builds --all
-RUN pnpm install
+COPY frontend/*.json ./
+RUN npm ci
 
 # Receive args from compose file, default to port 8000 for prod.
 ARG LIVE_HOST_URL "http://localhost:8000"
@@ -31,7 +29,7 @@ ENV PUBLIC_URL ${LIVE_HOST_URL}
 COPY ./frontend/ /app/frontend/
 RUN mkdir -p /app/backend/react/static
 RUN mkdir -p /app/backend/react/templates
-RUN pnpm run build
+RUN npm run build
 
 FROM python:3 AS backend
 ENV PORT 8000
