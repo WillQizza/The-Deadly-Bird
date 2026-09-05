@@ -17,6 +17,7 @@ FROM node:22 AS frontend
 RUN corepack enable pnpm
 WORKDIR /app/frontend
 COPY frontend/*.json .
+RUN pnpm approve-builds --all
 RUN pnpm install
 
 # Receive args from compose file, default to port 8000 for prod.
